@@ -49,12 +49,13 @@ export default function Services() {
             id="services"
             ref={sectionRef}
             className="relative bg-[#fafafa] text-gray-900 py-24"
+            aria-labelledby="services-heading"
         >
             <div className="max-w-[1600px] ml-0 px-6 md:px-8 lg:pl-12">
                 <div className="grid grid-cols-1 lg:grid-cols-[200px_0.35fr_0.65fr] gap-8 lg:gap-16 items-start">
                     {/* Left Sidebar Navigation - Far Left */}
                     <div className="hidden lg:block sticky top-24 -ml-8 pl-8">
-                        <nav className="flex flex-col gap-2">
+                        <nav className="flex flex-col gap-2" aria-label="Services navigation">
                             <a
                                 href="#reputation"
                                 onClick={(e) => {
@@ -100,7 +101,7 @@ export default function Services() {
                     <div className="flex flex-col">
                         {/* Sticky Header */}
                         <div className="sticky top-24 z-10 bg-[#fafafa]">
-                            <h2 className="font-bold leading-[1.1] mb-2 text-gray-900" style={{ fontSize: 'clamp(1.2rem, 2.5vw, var(--text-h3))' }}>
+                            <h2 id="services-heading" className="font-bold leading-[1.1] mb-2 text-gray-900" style={{ fontSize: 'clamp(1.25rem, 2.5vw, var(--text-h2))' }}>
                                 Our services extend the<br />entire customer journey.
                             </h2>
                             <div className="w-full">

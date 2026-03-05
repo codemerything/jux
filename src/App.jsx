@@ -5,6 +5,7 @@ import Marquee from './components/sections/Marquee';
 import Services from './components/sections/Services';
 import LaptopServices from './components/sections/LaptopServices';
 import CTA from './components/sections/CTA';
+import ServicesMenu from './components/sections/ServicesMenu';
 
 function App() {
     return (
@@ -27,6 +28,7 @@ function App() {
 
                 <Services />
                 <LaptopServices />
+                <ServicesMenu />
                 <CTA />
             </main>
 

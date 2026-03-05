@@ -28,7 +28,8 @@ export default function LaptopServices() {
     const currentService = laptopServices[activeService];
 
     return (
-        <section id="laptop-services" className="relative bg-[#f5f5f0] py-24 overflow-visible">
+        <section id="laptop-services" className="relative bg-[#f5f5f0] py-24 overflow-visible" aria-labelledby="laptop-services-heading">
+            <h2 id="laptop-services-heading" className="sr-only">How we work</h2>
             <div className="max-w-[1400px] mx-auto px-8">
                 <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-16 items-start">
 

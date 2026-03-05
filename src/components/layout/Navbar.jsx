@@ -65,9 +65,9 @@ export default function Navbar() {
                                             <div className="bg-gray-900 rounded-xl p-5 flex gap-10 shadow-2xl min-w-[280px] border border-white/10">
                                                 {link.dropdown.map((section, sIdx) => (
                                                     <div key={sIdx}>
-                                                        <h4 className="text-[10px] font-semibold uppercase tracking-wider text-white/40 mb-2.5">
+                                                        <span className="text-[10px] font-semibold uppercase tracking-wider text-white/40 mb-2.5 block">
                                                             {section.section}
-                                                        </h4>
+                                                        </span>
                                                         <div className="space-y-2">
                                                             {section.items.map((item, iIdx) => (
                                                                 <a

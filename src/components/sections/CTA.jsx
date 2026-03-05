@@ -39,10 +39,10 @@ export default function CTA() {
     const [openIndex, setOpenIndex] = useState(null);
 
     return (
-        <section className="relative bg-[#fafafa] py-24">
+        <section className="relative bg-[#fafafa] py-24" aria-labelledby="cta-heading">
             <div className="max-w-[1400px] mx-auto px-8">
                 <div className="max-w-2xl mx-auto text-left">
-                    <h2 className="font-bold text-gray-900 leading-tight mb-12" style={{ fontSize: 'var(--text-h2)' }}>
+                    <h2 id="cta-heading" className="font-bold text-gray-900 leading-tight mb-12" style={{ fontSize: 'var(--text-h2)' }}>
                         Questions we hear
                         <span className="block font-bold text-gray-900 leading-tight" style={{ fontSize: 'var(--text-h2)' }}>
                             most often.
@@ -73,26 +73,6 @@ export default function CTA() {
                             </div>
                         ))}
                     </div>
-
-                    {/* Pricing anchor + scarcity signal */}
-                    <div className="bg-gray-900 rounded-2xl px-8 py-8 mb-8">
-                        <p className="text-white/50 uppercase tracking-[0.2em] font-semibold mb-2" style={{ fontSize: 'var(--text-xs)' }}>Projects start at</p>
-                        <p className="text-white font-extrabold leading-none mb-1" style={{ fontSize: 'var(--text-h2)' }}>$10,000</p>
-                        <p className="text-white/50 mt-3 mb-6 max-w-sm leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>
-                            We take on a small number of projects at a time. If you're ready to talk, the first conversation is free.
-                        </p>
-                        <a
-                            href="#contact"
-                            className="inline-flex items-center gap-2 bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg"
-                            style={{ fontSize: 'var(--text-sm)' }}
-                        >
-                            Start a Project
-                        </a>
-                    </div>
-
-                    <p className="text-gray-400 text-center" style={{ fontSize: 'var(--text-xs)' }}>
-                        No commitment. No pitch. Just a conversation.
-                    </p>
                 </div>
             </div>
         </section>

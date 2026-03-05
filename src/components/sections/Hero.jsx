@@ -4,7 +4,7 @@ import { PulseDot } from '../ui/Button';
 export default function Hero() {
     return (
         <section className="relative flex items-center overflow-hidden bg-black pt-16 pb-20">
-            <div className="relative z-10 flex flex-col items-start justify-center text-left px-8 w-full max-w-4xl mx-auto">
+            <div className="relative z-10 flex flex-col items-start justify-center text-left px-8 w-full max-w-4xl mx-auto" style={{ maxWidth: '56rem' }}>
                 <motion.h1
                     className="font-extrabold leading-[1.05] tracking-tight mb-5 text-white"
                     style={{ fontSize: 'clamp(2rem, 5vw, var(--text-h1))' }}
@@ -17,13 +17,13 @@ export default function Hero() {
                     <span className="text-accent">We build both.</span>
                 </motion.h1>
                 <motion.p
-                    className="text-gray-400 max-w-[480px] mb-8 leading-relaxed text-left"
-                    style={{ fontSize: 'var(--text-sm)' }}
+                    className="text-gray-300 font-medium max-w-[580px] mb-8 leading-relaxed text-left"
+                    style={{ fontSize: 'var(--text-base)' }}
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.55, delay: 0.13, ease: 'easeOut' }}
                 >
-                    3D visualization, animation, and software development for DTC brands that sell on sight.
+                    The gap between a product and a purchase is almost always visual. We close it — through 3D, motion, and the digital experiences built around them.
                 </motion.p>
                 <motion.div
                     className="flex items-center gap-3 flex-wrap justify-start"
