@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 
-const marqueeImages = [
+const ringCards = [
     'https://picsum.photos/seed/1/300/400',
     'https://picsum.photos/seed/2/300/400',
     'https://picsum.photos/seed/3/300/400',
@@ -11,45 +12,296 @@ const marqueeImages = [
     'https://picsum.photos/seed/8/300/400',
     'https://picsum.photos/seed/9/300/400',
     'https://picsum.photos/seed/10/300/400',
-    'https://picsum.photos/seed/11/300/400',
-    'https://picsum.photos/seed/12/300/400',
 ];
 
-const WIDTH_OPTIONS = [200, 220, 260, 280, 320, 340];
+const TAU = Math.PI * 2;
+const VIEWPORTS = {
+    mobile: {
+        cardCount: 7,
+        cardWidth: 150,
+        cardHeight: 209,
+        orbitRadiusX: 186,
+        orbitRadiusY: 42,
+        angleJitterMain: 0.016,
+        angleJitterSecondary: 0.006,
+        angleJitterTertiary: 0.004,
+        radiusJitterMain: 6,
+        radiusJitterSecondary: 3,
+        liftJitter: 4.5,
+        tiltJitterMain: 0.9,
+        tiltJitterSecondary: 0.35,
+        sideSpread: 6,
+        yOffset: 22,
+        depthLift: 4,
+        scaleBase: 0.86,
+        scaleRange: 0.12,
+        frontPullbackScale: 0.018,
+        rotateAmplitude: 8,
+        rotateBackTilt: -1.2,
+        fullOpacityThreshold: 0.7,
+        opacityMin: 0.58,
+        blurMax: 0.6,
+        shadowBase: 0.14,
+        shadowRange: 0.1,
+        shadowPullback: 0.03,
+        stageHeight: 330,
+        stageMaxWidth: 560,
+        cardTop: '49%',
+        guideTop: '58%',
+        guideWidth: 430,
+        guideHeight: 156,
+        glowWidth: '84%',
+        glowHeight: 44,
+        glowBottom: 30,
+        overlayHeight: '48%',
+        overlayWidth: '182%',
+        overlayGradient:
+            'radial-gradient(176% 88% at 50% 112%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.98) 23%, rgba(255,255,255,0.78) 39%, rgba(255,255,255,0.38) 52%, rgba(255,255,255,0.08) 62%, rgba(255,255,255,0) 71%)',
+        speed: 0.000084,
+    },
+    tablet: {
+        cardCount: 8,
+        cardWidth: 214,
+        cardHeight: 298,
+        orbitRadiusX: 340,
+        orbitRadiusY: 70,
+        angleJitterMain: 0.017,
+        angleJitterSecondary: 0.0065,
+        angleJitterTertiary: 0.0045,
+        radiusJitterMain: 10,
+        radiusJitterSecondary: 5,
+        liftJitter: 6,
+        tiltJitterMain: 1.1,
+        tiltJitterSecondary: 0.45,
+        sideSpread: 9,
+        yOffset: 23,
+        depthLift: 6,
+        scaleBase: 0.83,
+        scaleRange: 0.17,
+        frontPullbackScale: 0.025,
+        rotateAmplitude: 10,
+        rotateBackTilt: -1.5,
+        fullOpacityThreshold: 0.68,
+        opacityMin: 0.48,
+        blurMax: 0.9,
+        shadowBase: 0.16,
+        shadowRange: 0.14,
+        shadowPullback: 0.04,
+        stageHeight: 520,
+        stageMaxWidth: 980,
+        cardTop: '47%',
+        guideTop: '53%',
+        guideWidth: 920,
+        guideHeight: 260,
+        glowWidth: '76%',
+        glowHeight: 56,
+        glowBottom: 42,
+        overlayHeight: '56%',
+        overlayWidth: '156%',
+        overlayGradient:
+            'radial-gradient(180% 96% at 50% 112%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.99) 24%, rgba(255,255,255,0.84) 41%, rgba(255,255,255,0.5) 55%, rgba(255,255,255,0.16) 66%, rgba(255,255,255,0) 76%)',
+        speed: 0.000112,
+    },
+    desktop: {
+        cardCount: 10,
+        cardWidth: 286,
+        cardHeight: 398,
+        orbitRadiusX: 510,
+        orbitRadiusY: 102,
+        angleJitterMain: 0.018,
+        angleJitterSecondary: 0.007,
+        angleJitterTertiary: 0.005,
+        radiusJitterMain: 14,
+        radiusJitterSecondary: 7,
+        liftJitter: 8,
+        tiltJitterMain: 1.5,
+        tiltJitterSecondary: 0.6,
+        sideSpread: 12,
+        yOffset: 24,
+        depthLift: 8,
+        scaleBase: 0.8,
+        scaleRange: 0.2,
+        frontPullbackScale: 0.035,
+        rotateAmplitude: 12,
+        rotateBackTilt: -1.8,
+        fullOpacityThreshold: 0.66,
+        opacityMin: 0.4,
+        blurMax: 1.15,
+        shadowBase: 0.18,
+        shadowRange: 0.18,
+        shadowPullback: 0.05,
+        stageHeight: 700,
+        stageMaxWidth: 1680,
+        cardTop: '46%',
+        guideTop: '49%',
+        guideWidth: 1380,
+        guideHeight: 384,
+        glowWidth: '70%',
+        glowHeight: 64,
+        glowBottom: 48,
+        overlayHeight: '64%',
+        overlayWidth: '144%',
+        overlayGradient:
+            'radial-gradient(182% 102% at 50% 112%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.99) 24%, rgba(255,255,255,0.88) 40%, rgba(255,255,255,0.56) 53%, rgba(255,255,255,0.2) 63%, rgba(255,255,255,0) 72%)',
+        speed: 0.00014,
+    },
+};
 
-const MarqueeRow = ({ reverse = false, widths }) => (
-    <div className={`flex ${reverse ? 'animate-marquee-reverse' : 'animate-marquee'}`}>
-        {marqueeImages.map((src, i) => (
-            <div
-                key={`a-${i}`}
-                className="flex-shrink-0 h-[360px] mx-3 rounded-lg overflow-hidden"
-                style={{ width: widths[i] }}
-            >
-                <img src={src} alt="" className="w-full h-full object-cover" />
-            </div>
-        ))}
-        {marqueeImages.map((src, i) => (
-            <div
-                key={`b-${i}`}
-                className="flex-shrink-0 h-[360px] mx-3 rounded-lg overflow-hidden"
-                style={{ width: widths[i] }}
-            >
-                <img src={src} alt="" className="w-full h-full object-cover" />
-            </div>
-        ))}
-    </div>
-);
+function getViewportConfig(width) {
+    if (width < 768) {
+        return VIEWPORTS.mobile;
+    }
 
-export default function Marquee() {
-    const widths = useMemo(
-        () => marqueeImages.map(() => WIDTH_OPTIONS[Math.floor(Math.random() * WIDTH_OPTIONS.length)]),
-        []
-    );
+    if (width < 1024) {
+        return VIEWPORTS.tablet;
+    }
+
+    return VIEWPORTS.desktop;
+}
+
+function OrbitCard({ src, index, total, rotation, config }) {
+    const seed = index / total;
+    const baseAngle = rotation + seed * TAU;
+    const angleOffset =
+        Math.sin(seed * TAU * 1.75 + 0.35) * config.angleJitterMain +
+        Math.sin(seed * TAU * 3.1 - 0.8) * config.angleJitterSecondary +
+        Math.cos(seed * TAU * 2.35 + 0.5) * config.angleJitterTertiary;
+    const radiusOffset =
+        Math.sin(seed * TAU * 1.4 - 0.4) * config.radiusJitterMain +
+        Math.cos(seed * TAU * 2.2 + 0.9) * config.radiusJitterSecondary;
+    const liftOffset = Math.sin(seed * TAU * 2.1 + 0.6) * config.liftJitter;
+    const tiltOffset =
+        Math.sin(seed * TAU * 1.8 - 0.2) * config.tiltJitterMain +
+        Math.cos(seed * TAU * 3.2 + 0.4) * config.tiltJitterSecondary;
+    const angle = baseAngle + angleOffset;
+    const depth = (Math.cos(angle) + 1) / 2;
+    const frontFocus = Math.max(0, Math.cos(angle));
+    const frontPullback = Math.pow(frontFocus, 4);
+    const sideSpread = Math.pow(Math.abs(Math.sin(angle)), 1.04) * config.sideSpread;
+    const x = Math.sin(angle) * (config.orbitRadiusX + radiusOffset + sideSpread);
+    const y =
+        -Math.cos(angle) * (config.orbitRadiusY + liftOffset * 0.3) +
+        config.yOffset +
+        depth * config.depthLift +
+        liftOffset * 0.35;
+    const scale = config.scaleBase + depth * config.scaleRange - frontPullback * config.frontPullbackScale;
+    const rotate = Math.sin(angle) * config.rotateAmplitude + Math.cos(angle) * config.rotateBackTilt + tiltOffset;
+    const frontOpacity =
+        depth > config.fullOpacityThreshold
+            ? 1
+            : config.opacityMin + (depth / config.fullOpacityThreshold) * (1 - config.opacityMin);
+    const opacity = Math.min(1, frontOpacity);
+    const blur = (1 - depth) * config.blurMax;
+    const shadowOpacity = config.shadowBase + depth * config.shadowRange - frontPullback * config.shadowPullback;
+    const zIndex = Math.round(depth * 100);
 
     return (
-        <section className="relative bg-black py-8 overflow-hidden flex flex-col gap-4">
-            <MarqueeRow widths={widths} />
-            <MarqueeRow reverse widths={widths} />
+        <motion.div
+            className="absolute left-1/2 overflow-hidden rounded-[1.4rem] border border-white/10 bg-white/5"
+            style={{
+                top: config.cardTop,
+                width: `${config.cardWidth}px`,
+                height: `${config.cardHeight}px`,
+                zIndex,
+                opacity,
+                filter: `blur(${blur}px)`,
+                boxShadow: `0 22px 60px rgba(0,0,0,${shadowOpacity})`,
+                transform: `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${rotate}deg)`,
+                transformOrigin: 'center center',
+            }}
+        >
+            <img src={src} alt="" className="h-full w-full object-cover" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_18%,transparent_44%,transparent_100%)]" />
+        </motion.div>
+    );
+}
+
+export default function Marquee({ className = '' }) {
+    const [rotation, setRotation] = useState(0);
+    const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1440 : window.innerWidth));
+    const frameRef = useRef(null);
+    const lastTimeRef = useRef(null);
+    const config = getViewportConfig(viewportWidth);
+    const cards = ringCards.slice(0, config.cardCount);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setViewportWidth(window.innerWidth);
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    useEffect(() => {
+        lastTimeRef.current = null;
+
+        const animate = now => {
+            if (lastTimeRef.current === null) {
+                lastTimeRef.current = now;
+            }
+
+            const delta = now - lastTimeRef.current;
+            lastTimeRef.current = now;
+
+            setRotation(previous => (previous + delta * config.speed) % TAU);
+            frameRef.current = window.requestAnimationFrame(animate);
+        };
+
+        frameRef.current = window.requestAnimationFrame(animate);
+
+        return () => {
+            if (frameRef.current !== null) {
+                window.cancelAnimationFrame(frameRef.current);
+            }
+        };
+    }, [config.speed]);
+
+    return (
+        <section className={`relative overflow-hidden ${className}`}>
+            <div
+                className="relative mx-auto w-full overflow-hidden px-4 sm:px-6 lg:px-0"
+                style={{ height: `${config.stageHeight}px`, maxWidth: `${config.stageMaxWidth}px` }}
+            >
+                <div
+                    className="pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2 rounded-full bg-white/5 blur-3xl"
+                    style={{
+                        bottom: `${config.glowBottom}px`,
+                        width: config.glowWidth,
+                        height: `${config.glowHeight}px`,
+                    }}
+                />
+                <div
+                    className="pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/5 opacity-16"
+                    style={{
+                        top: config.guideTop,
+                        width: `${config.guideWidth}px`,
+                        height: `${config.guideHeight}px`,
+                    }}
+                />
+                {cards.map((src, index) => (
+                    <OrbitCard
+                        key={src}
+                        src={src}
+                        index={index}
+                        total={cards.length}
+                        rotation={rotation}
+                        config={config}
+                    />
+                ))}
+            </div>
+            <div
+                className="pointer-events-none absolute bottom-0 left-1/2 z-[200] -translate-x-1/2"
+                style={{
+                    height: config.overlayHeight,
+                    width: config.overlayWidth,
+                    background: config.overlayGradient,
+                }}
+            />
         </section>
     );
 }

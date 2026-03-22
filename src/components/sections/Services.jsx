@@ -42,56 +42,15 @@ export default function Services() {
         };
     }, []);
 
-    const [activeNavItem, setActiveNavItem] = useState('Our Services');
-
     return (
         <section
             id="services"
             ref={sectionRef}
-            className="relative bg-[#fafafa] text-gray-900 py-24"
+            className="relative bg-[#ffffff] text-gray-900 py-24"
             aria-labelledby="services-heading"
         >
-            <div className="max-w-[1600px] ml-0 px-6 md:px-8 lg:pl-12">
-                <div className="grid grid-cols-1 lg:grid-cols-[200px_0.35fr_0.65fr] gap-8 lg:gap-16 items-start">
-                    {/* Left Sidebar Navigation - Far Left */}
-                    <div className="hidden lg:block sticky top-24 -ml-8 pl-8">
-                        <nav className="flex flex-col gap-2" aria-label="Services navigation">
-                            <a
-                                href="#reputation"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    setActiveNavItem('Our Reputation');
-                                }}
-                                className={`font-medium transition-colors leading-tight ${activeNavItem === 'Our Reputation' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                                style={{ fontSize: 'var(--text-xs)' }}
-                            >
-                                Our Reputation
-                            </a>
-                            <a
-                                href="#services"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    setActiveNavItem('Our Services');
-                                }}
-                                className={`font-medium transition-colors leading-tight ${activeNavItem === 'Our Services' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                                style={{ fontSize: 'var(--text-xs)' }}
-                            >
-                                Our Services
-                            </a>
-                            <a
-                                href="#model"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    setActiveNavItem('Our Model');
-                                }}
-                                className={`font-medium transition-colors leading-tight ${activeNavItem === 'Our Model' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
-                                style={{ fontSize: 'var(--text-xs)' }}
-                            >
-                                Our Model
-                            </a>
-                        </nav>
-                    </div>
-
+            <div className="mx-auto max-w-[1600px] px-6 md:px-8 lg:px-12">
+                <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-start gap-8 lg:grid-cols-[460px_minmax(0,1fr)] lg:gap-12 lg:translate-x-10 xl:translate-x-16">
                     {/* Phone Mockup */}
                     <div className="hidden lg:block sticky top-24">
                         <PhoneMockup activeService={activeService} />
@@ -100,35 +59,20 @@ export default function Services() {
                     {/* Content Column */}
                     <div className="flex flex-col">
                         {/* Sticky Header */}
-                        <div className="sticky top-24 z-10 bg-[#fafafa]">
-                            <h2 id="services-heading" className="font-bold leading-[1.1] mb-2 text-gray-900" style={{ fontSize: 'clamp(1.25rem, 2.5vw, var(--text-h2))' }}>
+                        <div className="sticky top-0 z-10 -mt-24 bg-[#ffffff] pt-24">
+                            <h2
+                                id="services-heading"
+                                className="mb-4 font-medium leading-[1.06] tracking-[-0.04em] text-gray-900"
+                                style={{ fontSize: 'clamp(1.25rem, 2.5vw, var(--text-h2))' }}
+                            >
                                 Our services extend the<br />entire customer journey.
                             </h2>
-                            <div className="w-full">
-                                <svg
-                                    viewBox="0 0 584 10"
-                                    preserveAspectRatio="none"
-                                    className="w-full h-[10px]"
-                                    style={{ opacity: 0.4 }}
-                                >
-                                    {/* Small circle at left */}
-                                    <circle
-                                        cx="5"
-                                        cy="5"
-                                        r="4"
-                                        fill="currentColor"
-                                    />
-                                    {/* Horizontal line */}
-                                    <line
-                                        x1="9"
-                                        y1="5"
-                                        x2="584"
-                                        y2="5"
-                                        stroke="currentColor"
-                                        strokeWidth="1"
-                                    />
-                                </svg>
-                            </div>
+                            <div
+                                className="mb-6 h-px w-full"
+                                style={{
+                                    background: 'linear-gradient(90deg, rgba(156,163,175,0.9) 0%, rgba(156,163,175,0.5) 45%, rgba(156,163,175,0.15) 75%, rgba(156,163,175,0) 100%)',
+                                }}
+                            />
                         </div>
 
                         <div className="services-content">
@@ -268,51 +212,37 @@ function WidgetCard({ service, screenStyle }) {
 }
 
 const ServiceCard = React.forwardRef(({ service, isActive, isFirst }, ref) => {
-    const [opacity, setOpacity] = React.useState(0.15);
+    const [opacity, setOpacity] = React.useState(0.24);
     const cardRef = React.useRef(null);
 
     React.useEffect(() => {
         const card = cardRef.current;
         if (!card) return;
 
-        // Calculate line position: header top (96px) + heading height + margin bottom
-        // The line is right after the heading with mb-8
         const headerTop = 96; // top-24 = 96px (sticky header position)
         const headingHeight = 80; // Approximate heading height
         const headingMarginBottom = 32; // mb-8 = 32px
         const linePosition = headerTop + headingHeight + headingMarginBottom;
-        const fadeStartZone = 200; // Start fading before reaching the line (more gradual)
-        const fadeEndZone = 150; // Complete fade zone after line
+        const inactiveOpacity = 0.24;
+        const passedLineStartingOpacity = 0.82;
+        const fadeEndZone = 260;
+        const minimumPassedOpacity = 0.08;
 
         const updateOpacity = () => {
             const rect = card.getBoundingClientRect();
             const cardTop = rect.top;
-
-            // Calculate distance from line
             const distanceFromLine = cardTop - linePosition;
 
-            // If card is approaching or past the line, start gradual fade
-            if (distanceFromLine <= fadeStartZone) {
-                if (distanceFromLine <= -fadeEndZone) {
-                    // Card is well past the line - completely faded
-                    setOpacity(0);
-                } else if (distanceFromLine <= 0) {
-                    // Card is at or past the line - fade out gradually
-                    const fadeProgress = Math.abs(distanceFromLine) / fadeEndZone;
-                    setOpacity(Math.max(0, 1 - fadeProgress));
-                } else {
-                    // Card is approaching the line - start subtle fade
-                    const fadeProgress = 1 - (distanceFromLine / fadeStartZone);
-                    const baseOpacity = isActive ? 1 : 0.15;
-                    setOpacity(Math.max(0.15, baseOpacity * (1 - fadeProgress * 0.3)));
-                }
-            } else if (isActive) {
-                // Active card well below line is fully visible
-                setOpacity(1);
-            } else {
-                // Inactive card well below line is dimmed (shadow effect)
-                setOpacity(0.15);
+            if (distanceFromLine <= 0) {
+                const fadeProgress = Math.min(1, Math.abs(distanceFromLine) / fadeEndZone);
+                const startingOpacity = isActive ? 1 : passedLineStartingOpacity;
+                const nextOpacity = startingOpacity - fadeProgress * (startingOpacity - minimumPassedOpacity);
+
+                setOpacity(Math.max(minimumPassedOpacity, nextOpacity));
+                return;
             }
+
+            setOpacity(isActive ? 1 : inactiveOpacity);
         };
 
         window.addEventListener('scroll', updateOpacity, { passive: true });
@@ -350,36 +280,55 @@ ServiceCard.displayName = 'ServiceCard';
 function CardContent({ service }) {
     return (
         <>
-            <h3 className="font-bold mb-4 text-gray-900 leading-tight" style={{ fontSize: 'var(--text-h4)' }}>
+            <h3
+                className="mb-4 font-medium leading-[1.08] tracking-[-0.03em] text-gray-900"
+                style={{ fontSize: 'var(--text-h4)' }}
+            >
                 {service.title}
             </h3>
-            <p className="leading-relaxed text-gray-600 max-w-[480px] mb-6" style={{ fontSize: 'var(--text-sm)' }}>
+            <p
+                className="mb-6 max-w-[500px] leading-[1.8] text-gray-500"
+                style={{ fontSize: 'var(--text-sm)' }}
+            >
                 {service.description}
             </p>
             <div className="flex items-center gap-6 mb-8">
                 <span className="text-gray-600" style={{ fontSize: 'var(--text-sm)' }}>
-                    Starts at <strong className="text-gray-900 font-semibold">{service.price}</strong>
+                    Starts at <strong className="font-medium text-gray-900">{service.price}</strong>
                 </span>
                 <div className="h-4 w-px bg-gray-300" aria-hidden="true" />
-                <a href="#" className="font-medium px-5 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors text-gray-900" style={{ fontSize: 'var(--text-xs)' }}>
+                <a
+                    href="#"
+                    className="rounded-full border border-gray-200 px-4 py-2 font-medium text-gray-700 transition-colors hover:border-gray-300 hover:text-gray-900"
+                    style={{ fontSize: 'var(--text-xs)' }}
+                >
                     Learn More
                 </a>
             </div>
             {service.testimonial && (
-                <div className="bg-gray-200 rounded-xl p-5 max-w-[480px] border border-gray-300">
+                <div className="max-w-[480px] rounded-[1.35rem] border border-gray-200 bg-[#f4f4f1] p-5">
                     <div className="flex gap-3 mb-3">
-                        <span className="text-gray-900 leading-none font-black" style={{ fontSize: 'var(--text-h5)' }}>"</span>
-                        <p className="font-semibold text-gray-900 leading-snug" style={{ fontSize: 'var(--text-sm)' }}>{service.testimonial.quote}</p>
+                        <span className="leading-none font-medium text-gray-500" style={{ fontSize: 'var(--text-h5)' }}>"</span>
+                        <p
+                            className="font-medium leading-[1.65] tracking-[-0.01em] text-gray-800"
+                            style={{ fontSize: 'var(--text-sm)' }}
+                        >
+                            {service.testimonial.quote}
+                        </p>
                     </div>
-                    <div className="flex items-center gap-3 mt-4 pt-3 border-t border-gray-300">
+                    <div className="mt-4 flex items-center gap-3 border-t border-gray-200 pt-3">
                         <img
                             src={`https://i.pravatar.cc/80?u=${service.id}`}
                             alt=""
                             className="w-10 h-10 rounded-full object-cover shrink-0"
                         />
                         <div>
-                            <div className="font-semibold text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>{service.testimonial.author}</div>
-                            <div className="text-gray-600" style={{ fontSize: 'var(--text-xs)' }}>{service.testimonial.title}</div>
+                            <div className="font-medium tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
+                                {service.testimonial.author}
+                            </div>
+                            <div className="text-gray-500" style={{ fontSize: 'var(--text-xs)' }}>
+                                {service.testimonial.title}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -3,7 +3,7 @@ import { PulseDot } from '../ui/Button';
 
 export default function Hero() {
     return (
-        <section className="relative flex items-center overflow-hidden bg-black pt-16 pb-20">
+        <section className="relative flex items-center overflow-hidden pt-48 pb-14 sm:pt-56 sm:pb-20">
             <div className="relative z-10 flex flex-col items-start justify-center text-left px-8 w-full max-w-4xl mx-auto" style={{ maxWidth: '56rem' }}>
                 <motion.h1
                     className="font-extrabold leading-[1.05] tracking-tight mb-5 text-white"
@@ -49,10 +49,6 @@ export default function Hero() {
                 </motion.div>
             </div>
 
-            {/* Brand Indicator */}
-            <div className="absolute bottom-6 right-8 text-[10px] font-extrabold text-gray-600 tracking-widest">
-                JUX
-            </div>
         </section>
     );
 }
