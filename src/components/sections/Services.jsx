@@ -5,14 +5,15 @@ export default function Services() {
     const [activeService, setActiveService] = useState(1);
     const cardsRef = useRef([]);
     const sectionRef = useRef(null);
+    const headerRef = useRef(null);
+    const ruleRef = useRef(null);
 
     useEffect(() => {
         const cards = cardsRef.current.filter(Boolean);
         if (!cards.length) return;
 
-        const focalPoint = window.innerHeight * 0.45; // Match center of sticky phone
-
         const checkActiveCard = () => {
+            const focalPoint = window.innerHeight * 0.72;
             let activeCard = null;
             let minDistance = Infinity;
 
@@ -59,7 +60,7 @@ export default function Services() {
                     {/* Content Column */}
                     <div className="flex flex-col">
                         {/* Sticky Header */}
-                        <div className="sticky top-0 z-10 -mt-24 bg-[#ffffff] pt-24">
+                        <div ref={headerRef} className="sticky top-0 z-10 -mt-24 bg-[#ffffff] pt-24">
                             <h2
                                 id="services-heading"
                                 className="mb-4 font-medium leading-[1.06] tracking-[-0.04em] text-gray-900"
@@ -68,6 +69,7 @@ export default function Services() {
                                 Our services extend the<br />entire customer journey.
                             </h2>
                             <div
+                                ref={ruleRef}
                                 className="mb-6 h-px w-full"
                                 style={{
                                     background: 'linear-gradient(90deg, rgba(156,163,175,0.9) 0%, rgba(156,163,175,0.5) 45%, rgba(156,163,175,0.15) 75%, rgba(156,163,175,0) 100%)',
@@ -77,15 +79,19 @@ export default function Services() {
 
                         <div className="services-content">
                             {/* Cards List - Normal Document Flow */}
-                            <div className="flex flex-col gap-[15vh] pb-20">
+                            <div className="flex flex-col gap-[15vh] pb-56">
                                 {phoneServices.map((service, index) => (
                                     <ServiceCard
                                         key={service.id}
                                         ref={(el) => (cardsRef.current[index] = el)}
                                         service={service}
                                         index={index}
+                                        activeServiceId={activeService}
                                         isActive={activeService === service.id}
                                         isFirst={index === 0}
+                                        isLast={index === phoneServices.length - 1}
+                                        headerRef={headerRef}
+                                        ruleRef={ruleRef}
                                     />
                                 ))}
                             </div>
@@ -211,7 +217,7 @@ function WidgetCard({ service, screenStyle }) {
     );
 }
 
-const ServiceCard = React.forwardRef(({ service, isActive, isFirst }, ref) => {
+const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFirst, isLast, headerRef, ruleRef }, ref) => {
     const [opacity, setOpacity] = React.useState(0.24);
     const cardRef = React.useRef(null);
 
@@ -219,26 +225,46 @@ const ServiceCard = React.forwardRef(({ service, isActive, isFirst }, ref) => {
         const card = cardRef.current;
         if (!card) return;
 
-        const headerTop = 96; // top-24 = 96px (sticky header position)
-        const headingHeight = 80; // Approximate heading height
-        const headingMarginBottom = 32; // mb-8 = 32px
-        const linePosition = headerTop + headingHeight + headingMarginBottom;
-        const inactiveOpacity = 0.24;
-        const passedLineStartingOpacity = 0.82;
-        const fadeEndZone = 260;
-        const minimumPassedOpacity = 0.08;
+        const inactiveOpacity = 0.34;
+        const upcomingHiddenOpacity = 0.16;
+        const fadeEndZone = 420;
+        const minimumPassedOpacity = 0.22;
+        const revealStart = window.innerHeight * 0.9;
+        const revealEnd = window.innerHeight * 0.74;
+        const fadeTriggerOffset = 10;
+        const fadeStartDelay = 36;
 
         const updateOpacity = () => {
             const rect = card.getBoundingClientRect();
             const cardTop = rect.top;
+            const isPastActive = service.id < activeServiceId;
+            const headerStuck = headerRef?.current
+                ? headerRef.current.getBoundingClientRect().top <= 0.5
+                : false;
+            const linePosition = ruleRef?.current
+                ? ruleRef.current.getBoundingClientRect().bottom + fadeTriggerOffset - fadeStartDelay
+                : 208;
             const distanceFromLine = cardTop - linePosition;
 
-            if (distanceFromLine <= 0) {
+            if (headerStuck && distanceFromLine <= 0) {
                 const fadeProgress = Math.min(1, Math.abs(distanceFromLine) / fadeEndZone);
-                const startingOpacity = isActive ? 1 : passedLineStartingOpacity;
+                const startingOpacity = isActive || isPastActive ? 1 : inactiveOpacity;
                 const nextOpacity = startingOpacity - fadeProgress * (startingOpacity - minimumPassedOpacity);
 
                 setOpacity(Math.max(minimumPassedOpacity, nextOpacity));
+                return;
+            }
+
+            if (isPastActive) {
+                setOpacity(1);
+                return;
+            }
+
+            if (!isActive) {
+                const revealProgress = Math.max(0, Math.min(1, (revealStart - cardTop) / (revealStart - revealEnd)));
+                const nextOpacity = upcomingHiddenOpacity + revealProgress * (inactiveOpacity - upcomingHiddenOpacity);
+
+                setOpacity(nextOpacity);
                 return;
             }
 
@@ -251,7 +277,7 @@ const ServiceCard = React.forwardRef(({ service, isActive, isFirst }, ref) => {
         return () => {
             window.removeEventListener('scroll', updateOpacity);
         };
-    }, [isActive]);
+    }, [activeServiceId, headerRef, isActive, ruleRef, service.id]);
 
     return (
         <div
@@ -264,7 +290,7 @@ const ServiceCard = React.forwardRef(({ service, isActive, isFirst }, ref) => {
                 }
             }}
             data-service={service.id}
-            className={`service-card transition-opacity duration-300 ease-out ${isFirst ? 'pt-12' : ''}`}
+            className={`service-card transition-opacity duration-300 ease-out ${isFirst ? 'pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
             style={{
                 opacity: opacity,
                 transform: isActive ? 'translateY(0)' : 'translateY(5px)',

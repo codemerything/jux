@@ -39,7 +39,7 @@ export default function Navbar() {
         let frameId = null;
 
         const syncCompactState = () => {
-            const desktop = window.matchMedia('(min-width: 1024px)').matches;
+            const desktop = window.matchMedia('(min-width: 1280px)').matches;
             const nextCompact = desktop && window.scrollY > 180;
 
             setIsCompact(current => (current === nextCompact ? current : nextCompact));
@@ -139,10 +139,10 @@ export default function Navbar() {
     const activeDropdown = openDropdown !== null ? headerLinks[openDropdown] : null;
     const compactPreviewOpen = isCompact && isCompactHovered;
     const contentRightPadding = !isCompact
-        ? 'lg:pr-[8.75rem] xl:pr-[9.25rem]'
+        ? 'xl:pr-[8.75rem] 2xl:pr-[9.25rem]'
         : compactPreviewOpen
-            ? 'lg:pr-[8.75rem] xl:pr-[9.25rem]'
-            : 'lg:pr-[7rem] xl:pr-[7.5rem]';
+            ? 'xl:pr-[8.75rem] 2xl:pr-[9.25rem]'
+            : 'xl:pr-[7rem] 2xl:pr-[7.5rem]';
     const contentGap = isCompact && !compactPreviewOpen ? 'gap-3' : 'gap-2.5';
     const shellWidth = !isCompact ? '100%' : compactPreviewOpen ? COMPACT_PREVIEW_WIDTH : COMPACT_WIDTH;
 
@@ -209,16 +209,11 @@ export default function Navbar() {
                         }}
                     >
                         <div className={`flex min-h-9 items-center ${contentGap} ${contentRightPadding}`}>
-                            <a href="#" className="flex shrink-0 items-baseline">
+                            <a href="#" className="shrink-0">
                                 <span className="text-2xl font-black leading-none tracking-tight text-white">
                                     Jux Studio
                                 </span>
-                                <span
-                                    className={`inline-block overflow-hidden text-sm font-bold text-accent transition-[width,margin,opacity] duration-200 ${(isCompact && !compactPreviewOpen)
-                                        ? 'ml-0 w-0 opacity-0'
-                                        : 'ml-1 w-[0.625rem] opacity-100'
-                                        }`}
-                                >
+                                <span className="hidden">
                                     ®
                                 </span>
                             </a>
@@ -230,7 +225,7 @@ export default function Navbar() {
                                         initial={{ opacity: 0, x: 18 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: 24, transition: { duration: 0.2 } }}
-                                        className="pointer-events-none absolute inset-x-0 top-0 hidden h-full items-center lg:flex"
+                                        className="pointer-events-none absolute inset-x-0 top-0 hidden h-full items-center xl:flex"
                                     >
                                         <div className="mx-auto flex w-full max-w-4xl items-center px-3 sm:px-4 md:px-6">
                                             <div className="pointer-events-auto flex items-center gap-1.5">
@@ -276,7 +271,7 @@ export default function Navbar() {
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: 16, transition: { duration: 0.22, ease: 'easeOut' } }}
                                         transition={{ duration: 0.24, ease: 'easeOut' }}
-                                        className="hidden items-center gap-1.5 lg:flex"
+                                        className="hidden items-center gap-1.5 xl:flex"
                                     >
                                         {headerLinks.map((link, index) => (
                                             <div
@@ -316,7 +311,7 @@ export default function Navbar() {
                             {!isCompact && <div className="flex-1" />}
 
                             <button
-                                className="flex flex-col gap-1.5 p-1.5 lg:hidden"
+                                className="flex flex-col gap-1.5 p-1.5 xl:hidden"
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                                 aria-label="Toggle menu"
                             >
@@ -328,14 +323,14 @@ export default function Navbar() {
 
                         <a
                             href="#contact"
-                            className="absolute right-3 top-1/2 hidden h-9 -translate-y-1/2 items-center gap-1.5 rounded-lg bg-white px-4 text-[13px] font-semibold text-black transition-transform duration-300 hover:scale-105 lg:inline-flex sm:right-4"
+                            className="absolute right-3 top-1/2 hidden h-9 -translate-y-1/2 items-center gap-1.5 rounded-lg bg-white px-4 text-[13px] font-semibold text-black transition-transform duration-300 hover:scale-105 xl:inline-flex sm:right-4"
                         >
                             <PulseDot />
                             Book a Call
                         </a>
 
                         {isMobileMenuOpen && (
-                            <div className="mt-3 border-t border-white/10 pt-3 lg:hidden">
+                            <div className="mt-3 border-t border-white/10 pt-3 xl:hidden">
                                 <div className="space-y-2.5">
                                     {headerLinks.map((link, index) => (
                                         <a
@@ -368,7 +363,7 @@ export default function Navbar() {
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: -8, scale: 0.98, transition: { duration: 0.18 } }}
                                 transition={{ duration: 0.22, ease: 'easeOut' }}
-                                className="absolute top-full z-50 hidden pt-2 lg:block"
+                                className="absolute top-full z-50 hidden pt-2 xl:block"
                                 style={{
                                     left: dropdownLeft,
                                 }}

@@ -74,7 +74,7 @@ export default function LaptopServices() {
                     </div>
 
                     {/* Right: Sticky Glass Laptop */}
-                    <div className="hidden lg:flex sticky top-1/2 -translate-y-1/2 h-[80vh] items-center justify-end z-10 order-1 lg:order-2">
+                    <div className="hidden lg:flex sticky top-24 justify-end z-10 order-1 lg:order-2">
                         <div className="relative">
                             {/* Laptop Body */}
                             <div className="relative w-[500px]">

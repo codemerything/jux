@@ -15,6 +15,8 @@ const ringCards = [
 ];
 
 const TAU = Math.PI * 2;
+const OVERLAY_NOISE_TEXTURE =
+    `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E")`;
 const VIEWPORTS = {
     mobile: {
         cardCount: 7,
@@ -44,19 +46,20 @@ const VIEWPORTS = {
         shadowBase: 0.14,
         shadowRange: 0.1,
         shadowPullback: 0.03,
-        stageHeight: 330,
+        stageHeight: 390,
         stageMaxWidth: 560,
-        cardTop: '49%',
-        guideTop: '58%',
+        cardTop: '42%',
+        guideTop: '50%',
         guideWidth: 430,
         guideHeight: 156,
         glowWidth: '84%',
         glowHeight: 44,
-        glowBottom: 30,
-        overlayHeight: '48%',
+        glowBottom: 54,
+        overlayHeight: '61%',
+        overlayBaseFillHeight: '26%',
         overlayWidth: '182%',
         overlayGradient:
-            'radial-gradient(176% 88% at 50% 112%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.98) 23%, rgba(255,255,255,0.78) 39%, rgba(255,255,255,0.38) 52%, rgba(255,255,255,0.08) 62%, rgba(255,255,255,0) 71%)',
+            'radial-gradient(176% 88% at 50% 108%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.99) 23%, rgba(255,255,255,0.9) 39%, rgba(255,255,255,0.58) 52%, rgba(255,255,255,0.24) 62%, rgba(255,255,255,0) 72%)',
         speed: 0.000084,
     },
     tablet: {
@@ -87,19 +90,20 @@ const VIEWPORTS = {
         shadowBase: 0.16,
         shadowRange: 0.14,
         shadowPullback: 0.04,
-        stageHeight: 520,
+        stageHeight: 620,
         stageMaxWidth: 980,
-        cardTop: '47%',
-        guideTop: '53%',
+        cardTop: '40%',
+        guideTop: '45%',
         guideWidth: 920,
         guideHeight: 260,
         glowWidth: '76%',
         glowHeight: 56,
-        glowBottom: 42,
-        overlayHeight: '56%',
+        glowBottom: 72,
+        overlayHeight: '66%',
+        overlayBaseFillHeight: '22%',
         overlayWidth: '156%',
         overlayGradient:
-            'radial-gradient(180% 96% at 50% 112%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.99) 24%, rgba(255,255,255,0.84) 41%, rgba(255,255,255,0.5) 55%, rgba(255,255,255,0.16) 66%, rgba(255,255,255,0) 76%)',
+            'radial-gradient(180% 96% at 50% 108%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.99) 23%, rgba(255,255,255,0.92) 40%, rgba(255,255,255,0.62) 54%, rgba(255,255,255,0.24) 64%, rgba(255,255,255,0) 76%)',
         speed: 0.000112,
     },
     desktop: {
@@ -130,19 +134,20 @@ const VIEWPORTS = {
         shadowBase: 0.18,
         shadowRange: 0.18,
         shadowPullback: 0.05,
-        stageHeight: 700,
+        stageHeight: 840,
         stageMaxWidth: 1680,
-        cardTop: '46%',
-        guideTop: '49%',
+        cardTop: '37%',
+        guideTop: '41%',
         guideWidth: 1380,
         guideHeight: 384,
         glowWidth: '70%',
         glowHeight: 64,
-        glowBottom: 48,
-        overlayHeight: '64%',
+        glowBottom: 96,
+        overlayHeight: '73%',
+        overlayBaseFillHeight: '19%',
         overlayWidth: '144%',
         overlayGradient:
-            'radial-gradient(182% 102% at 50% 112%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.99) 24%, rgba(255,255,255,0.88) 40%, rgba(255,255,255,0.56) 53%, rgba(255,255,255,0.2) 63%, rgba(255,255,255,0) 72%)',
+            'radial-gradient(182% 102% at 50% 107%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.995) 24%, rgba(255,255,255,0.92) 40%, rgba(255,255,255,0.64) 53%, rgba(255,255,255,0.24) 63%, rgba(255,255,255,0) 73%)',
         speed: 0.00014,
     },
 };
@@ -295,13 +300,35 @@ export default function Marquee({ className = '' }) {
                 ))}
             </div>
             <div
-                className="pointer-events-none absolute bottom-0 left-1/2 z-[200] -translate-x-1/2"
+                className="pointer-events-none absolute bottom-0 left-1/2 z-[200] -translate-x-1/2 overflow-hidden"
                 style={{
                     height: config.overlayHeight,
                     width: config.overlayWidth,
-                    background: config.overlayGradient,
                 }}
-            />
+            >
+                <div
+                    className="absolute inset-x-0 bottom-0"
+                    style={{
+                        height: config.overlayBaseFillHeight,
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.9) 55%, rgba(255,255,255,1) 100%)',
+                    }}
+                />
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        background: config.overlayGradient,
+                    }}
+                />
+                <div
+                    className="absolute inset-0 opacity-[0.12]"
+                    style={{
+                        backgroundImage: OVERLAY_NOISE_TEXTURE,
+                        backgroundRepeat: 'repeat',
+                        backgroundSize: '180px 180px',
+                        mixBlendMode: 'multiply',
+                    }}
+                />
+            </div>
         </section>
     );
 }
