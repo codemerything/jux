@@ -31,7 +31,7 @@ export default function Services() {
         if (!cards.length) return;
 
         const checkActiveCard = () => {
-            const triggerLine = window.innerHeight * 0.8;
+            const triggerLine = window.innerHeight * 0.62;
             let nextActiveService = parseInt(cards[0].dataset.service, 10);
 
             cards.forEach((card) => {
@@ -91,7 +91,7 @@ export default function Services() {
 
                         <div className="services-content">
                             {/* Cards List - Normal Document Flow */}
-                            <div className="flex flex-col gap-[15vh] pb-56">
+                            <div className="flex flex-col gap-[20vh] pb-64">
                                 {phoneServices.map((service, index) => (
                                     <ServiceCard
                                         key={service.id}
