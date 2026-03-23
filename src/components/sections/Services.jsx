@@ -1,6 +1,24 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { phoneServices } from '../../data/services';
 
+const phoneSlideImages = Object.entries(
+    import.meta.glob('../../../heroImages/phoneslides/*.{jpg,jpeg,png,webp,avif}', {
+        eager: true,
+        import: 'default',
+    })
+)
+    .sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath))
+    .map(([, src]) => src);
+
+const phoneSlideVideos = Object.entries(
+    import.meta.glob('../../../heroImages/phoneslides/*.{mp4,webm,mov}', {
+        eager: true,
+        import: 'default',
+    })
+)
+    .sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath))
+    .map(([, src]) => src);
+
 export default function Services() {
     const [activeService, setActiveService] = useState(1);
     const cardsRef = useRef([]);
@@ -13,25 +31,19 @@ export default function Services() {
         if (!cards.length) return;
 
         const checkActiveCard = () => {
-            const focalPoint = window.innerHeight * 0.72;
-            let activeCard = null;
-            let minDistance = Infinity;
+            const triggerLine = window.innerHeight * 0.8;
+            let nextActiveService = parseInt(cards[0].dataset.service, 10);
 
             cards.forEach((card) => {
-                const rect = card.getBoundingClientRect();
-                const cardTrigger = rect.top;
-                const distance = Math.abs(cardTrigger - focalPoint);
+                const cardTop = card.getBoundingClientRect().top;
+                const serviceNum = parseInt(card.dataset.service, 10);
 
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    activeCard = card;
+                if (cardTop <= triggerLine) {
+                    nextActiveService = serviceNum;
                 }
             });
 
-            if (activeCard) {
-                const serviceNum = parseInt(activeCard.dataset.service);
-                setActiveService((prev) => (prev !== serviceNum ? serviceNum : prev));
-            }
+            setActiveService((prev) => (prev !== nextActiveService ? nextActiveService : prev));
         };
 
         // Check on scroll
@@ -105,11 +117,50 @@ export default function Services() {
 
 // Gradient backgrounds for each service screen
 const serviceScreenStyles = [
-    { background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
-    { background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
-    { background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
-    { background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' },
+    { image: phoneSlideImages[0] ?? null },
+    { video: phoneSlideVideos[0] ?? null },
+    { video: phoneSlideVideos[1] ?? null },
+    { image: phoneSlideImages[1] ?? null, fitWidthTop: true },
 ];
+
+const phoneServiceUtilityCards = {
+    1: {
+        primary: ['Single SKU', 'Multi-SKU', 'Multi-angle'],
+        programs: [
+            { label: 'C4D', tint: 'bg-[#1f2937] text-white' },
+            { label: 'Redshift', tint: 'bg-[#7c2d12] text-white' },
+            { label: 'PS', tint: 'bg-[#172554] text-[#93c5fd]' },
+            { label: 'Ai', tint: 'bg-[#431407] text-[#fdba74]' },
+        ],
+    },
+    2: {
+        primary: ['Hero reels', 'Social loops', 'Paid media'],
+        programs: [
+            { label: 'AE', tint: 'bg-[#312e81] text-[#c4b5fd]' },
+            { label: 'PR', tint: 'bg-[#3b0764] text-[#f0abfc]' },
+            { label: 'C4D', tint: 'bg-[#1f2937] text-white' },
+            { label: 'Spline', tint: 'bg-[#0f172a] text-[#93c5fd]' },
+        ],
+    },
+    3: {
+        primary: ['Colorways', 'Bundle sets', 'Multi-pack'],
+        programs: [
+            { label: 'PS', tint: 'bg-[#172554] text-[#93c5fd]' },
+            { label: 'Ai', tint: 'bg-[#431407] text-[#fdba74]' },
+            { label: 'C4D', tint: 'bg-[#1f2937] text-white' },
+            { label: 'Bridge', tint: 'bg-[#111827] text-[#d1d5db]' },
+        ],
+    },
+    4: {
+        primary: ['AR / VR', '3D viewer', 'Configurator'],
+        programs: [
+            { label: 'Figma', tint: 'bg-[#111827] text-white' },
+            { label: 'React', tint: 'bg-[#083344] text-[#67e8f9]' },
+            { label: 'Shopify', tint: 'bg-[#14532d] text-[#86efac]' },
+            { label: 'Three', tint: 'bg-[#0f172a] text-[#e2e8f0]' },
+        ],
+    },
+};
 
 function PhoneMockup({ activeService }) {
     // Screen area within phone.png (1349×2048), measured via pixel scan:
@@ -162,31 +213,76 @@ function PhoneMockup({ activeService }) {
 }
 
 function PhoneScreen({ service, screenStyle, isActive }) {
+    const hasImageBackground = Boolean(screenStyle.image);
+    const hasVideoBackground = Boolean(screenStyle.video);
+    const hasMediaBackground = hasImageBackground || hasVideoBackground;
+    const fitWidthTop = Boolean(screenStyle.fitWidthTop);
+    const videoRef = useRef(null);
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (!video || !hasVideoBackground) {
+            return;
+        }
+
+        if (isActive) {
+            const playPromise = video.play();
+            if (playPromise?.catch) {
+                playPromise.catch(() => {});
+            }
+            return;
+        }
+
+        video.pause();
+    }, [hasVideoBackground, isActive]);
+
     return (
         <div
             className={`absolute inset-0 flex flex-col items-center justify-center text-center transition-all duration-700 ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
                 }`}
-            style={screenStyle}
+            style={hasMediaBackground ? undefined : screenStyle}
         >
+            {hasImageBackground && (
+                <img
+                    src={screenStyle.image}
+                    alt=""
+                    className={fitWidthTop
+                        ? 'absolute left-0 top-0 w-full h-auto'
+                        : 'absolute inset-0 h-full w-full object-cover object-center'}
+                />
+            )}
+            {hasVideoBackground && (
+                <video
+                    ref={videoRef}
+                    src={screenStyle.video}
+                    className="absolute inset-0 h-full w-full object-cover object-center"
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                />
+            )}
             {/* Decorative content inside the phone screen */}
-            <div className="flex flex-col items-center gap-3 px-6">
-                <div className="text-[9px] uppercase tracking-[0.2em] text-white/70 font-semibold">
-                    {service.displayLabel}
+            {!hasMediaBackground && (
+                <div className="relative z-10 flex flex-col items-center gap-3 px-6">
+                    <div className="text-[9px] uppercase tracking-[0.2em] text-white/70 font-semibold">
+                        {service.displayLabel}
+                    </div>
+                    <div className="text-[44px] font-extrabold text-white leading-none drop-shadow-lg">
+                        {service.stat}
+                    </div>
+                    <div className="text-[11px] text-white/60 font-medium">
+                        {service.statLabel}
+                    </div>
+                    {/* Decorative bar */}
+                    <div className="w-24 h-[3px] bg-white/30 rounded-full mt-2">
+                        <div
+                            className="h-full bg-white rounded-full transition-all duration-700"
+                            style={{ width: isActive ? '100%' : '0%' }}
+                        />
+                    </div>
                 </div>
-                <div className="text-[44px] font-extrabold text-white leading-none drop-shadow-lg">
-                    {service.stat}
-                </div>
-                <div className="text-[11px] text-white/60 font-medium">
-                    {service.statLabel}
-                </div>
-                {/* Decorative bar */}
-                <div className="w-24 h-[3px] bg-white/30 rounded-full mt-2">
-                    <div
-                        className="h-full bg-white rounded-full transition-all duration-700"
-                        style={{ width: isActive ? '100%' : '0%' }}
-                    />
-                </div>
-            </div>
+            )}
         </div>
     );
 }
@@ -232,7 +328,7 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
         const revealStart = window.innerHeight * 0.9;
         const revealEnd = window.innerHeight * 0.74;
         const fadeTriggerOffset = 10;
-        const fadeStartDelay = 36;
+        const fadeStartDelay = 120;
 
         const updateOpacity = () => {
             const rect = card.getBoundingClientRect();
@@ -304,6 +400,8 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
 ServiceCard.displayName = 'ServiceCard';
 
 function CardContent({ service }) {
+    const utilityCard = phoneServiceUtilityCards[service.id];
+
     return (
         <>
             <h3
@@ -318,44 +416,29 @@ function CardContent({ service }) {
             >
                 {service.description}
             </p>
-            <div className="flex items-center gap-6 mb-8">
-                <span className="text-gray-600" style={{ fontSize: 'var(--text-sm)' }}>
-                    Starts at <strong className="font-medium text-gray-900">{service.price}</strong>
-                </span>
-                <div className="h-4 w-px bg-gray-300" aria-hidden="true" />
-                <a
-                    href="#"
-                    className="rounded-full border border-gray-200 px-4 py-2 font-medium text-gray-700 transition-colors hover:border-gray-300 hover:text-gray-900"
-                    style={{ fontSize: 'var(--text-xs)' }}
-                >
-                    Learn More
-                </a>
-            </div>
-            {service.testimonial && (
+            {utilityCard && (
                 <div className="max-w-[480px] rounded-[1.35rem] border border-gray-200 bg-[#f4f4f1] p-5">
-                    <div className="flex gap-3 mb-3">
-                        <span className="leading-none font-medium text-gray-500" style={{ fontSize: 'var(--text-h5)' }}>"</span>
-                        <p
-                            className="font-medium leading-[1.65] tracking-[-0.01em] text-gray-800"
-                            style={{ fontSize: 'var(--text-sm)' }}
-                        >
-                            {service.testimonial.quote}
-                        </p>
+                    <div className="flex flex-wrap gap-2">
+                        {utilityCard.primary.map((keyword) => (
+                            <span
+                                key={keyword}
+                                className="rounded-full border border-gray-200 bg-white px-3 py-1.5 font-medium text-gray-800"
+                                style={{ fontSize: 'var(--text-xs)' }}
+                            >
+                                {keyword}
+                            </span>
+                        ))}
                     </div>
-                    <div className="mt-4 flex items-center gap-3 border-t border-gray-200 pt-3">
-                        <img
-                            src={`https://i.pravatar.cc/80?u=${service.id}`}
-                            alt=""
-                            className="w-10 h-10 rounded-full object-cover shrink-0"
-                        />
-                        <div>
-                            <div className="font-medium tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
-                                {service.testimonial.author}
-                            </div>
-                            <div className="text-gray-500" style={{ fontSize: 'var(--text-xs)' }}>
-                                {service.testimonial.title}
-                            </div>
-                        </div>
+                    <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-4">
+                        {utilityCard.programs.map((program) => (
+                            <span
+                                key={program.label}
+                                className={`inline-flex h-9 min-w-9 items-center justify-center rounded-xl px-2.5 font-semibold tracking-[-0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] ${program.tint}`}
+                                style={{ fontSize: '11px' }}
+                            >
+                                {program.label}
+                            </span>
+                        ))}
                     </div>
                 </div>
             )}

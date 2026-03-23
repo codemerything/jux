@@ -1,46 +1,110 @@
 import { useState, useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { laptopServices } from '../../data/services';
+import UnicornScene from '../ui/UnicornScene';
+
+const laptopWideSlides = Object.fromEntries(
+    Object.entries(
+    import.meta.glob('../../../heroImages/wideslides/*.{png,jpg,jpeg,webp,avif,mp4,webm,mov}', {
+        eager: true,
+        import: 'default',
+    })
+)
+        .map(([path, src]) => {
+            const fileName = path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? path;
+            return [fileName, src];
+        })
+);
+
+const laptopServiceCallouts = {
+    1: {
+        title: 'Stop breaking the stack every time content changes.',
+        detail: 'We build the publishing and asset flow so launches, updates, and experiments stop creating technical debt.',
+    },
+    2: {
+        title: 'You know the work is off, but not why yet.',
+        detail: 'This is the strategy pass that turns scattered feedback into a clear visual direction, system, and execution plan.',
+    },
+    3: {
+        title: 'Let customers interact before they commit.',
+        detail: 'Use 3D, configurators, and guided product views to answer questions earlier and raise buying confidence.',
+    },
+    4: {
+        title: 'Make every brand touchpoint feel like the same company.',
+        detail: 'We turn visual decisions into a repeatable system so site, campaigns, decks, and launches stay aligned.',
+    },
+};
 
 export default function LaptopServices() {
     const [activeService, setActiveService] = useState(0);
     const cardRefs = useRef([]);
 
     useEffect(() => {
-        const observers = cardRefs.current.map((ref, index) => {
-            if (!ref) return null;
+        let frameId = null;
 
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting) {
-                        setActiveService(index);
-                    }
-                },
-                { rootMargin: '-40% 0px -40% 0px', threshold: 0 }
-            );
+        const syncActiveCard = () => {
+            const cards = cardRefs.current.filter(Boolean);
+            if (!cards.length) {
+                frameId = null;
+                return;
+            }
 
-            observer.observe(ref);
-            return observer;
-        });
+            const triggerLine = 96;
+            let nextActive = 0;
+            let minDistance = Infinity;
 
-        return () => observers.forEach(obs => obs?.disconnect());
+            cards.forEach((card, index) => {
+                const distance = Math.abs(card.getBoundingClientRect().top - triggerLine);
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nextActive = index;
+                }
+            });
+
+            setActiveService(current => (current === nextActive ? current : nextActive));
+            frameId = null;
+        };
+
+        const requestSync = () => {
+            if (frameId !== null) {
+                return;
+            }
+
+            frameId = window.requestAnimationFrame(syncActiveCard);
+        };
+
+        requestSync();
+        window.addEventListener('scroll', requestSync, { passive: true });
+        window.addEventListener('resize', requestSync);
+
+        return () => {
+            window.removeEventListener('scroll', requestSync);
+            window.removeEventListener('resize', requestSync);
+
+            if (frameId !== null) {
+                window.cancelAnimationFrame(frameId);
+            }
+        };
     }, []);
 
     const currentService = laptopServices[activeService];
+    const slideKey = `laptop-slide-${activeService}`;
 
     return (
         <section id="laptop-services" className="relative bg-[#f5f5f0] py-24 overflow-visible" aria-labelledby="laptop-services-heading">
             <h2 id="laptop-services-heading" className="sr-only">How we work</h2>
             <div className="max-w-[1400px] mx-auto px-8">
-                <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-16 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-12 items-start">
 
                     {/* Left: Scrolling Content */}
                     <div className="relative z-10 order-2 lg:order-1">
-                        <div className="space-y-8">
+                        <div className="space-y-8 pb-40">
                             {laptopServices.map((service, index) => (
                                 <div
                                     key={service.id}
                                     ref={el => cardRefs.current[index] = el}
-                                    className={`p-8 rounded-2xl border transition-all duration-500 ${activeService === index
+                                    className={`rounded-2xl border p-8 transition-all duration-500 ${index === laptopServices.length - 1 ? 'pb-16' : ''} ${activeService === index
                                         ? 'bg-white border-gray-200 shadow-lg'
                                         : 'bg-transparent border-gray-100'
                                         }`}
@@ -48,24 +112,16 @@ export default function LaptopServices() {
                                     <h3 className="font-bold mb-4 text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>{service.title}</h3>
                                     <p className="text-gray-500 mb-6 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>{service.description}</p>
 
-                                    <div className="flex items-center justify-between mb-6">
-                                        <span className="text-gray-400 uppercase tracking-wider font-medium" style={{ fontSize: 'var(--text-xs)' }}>
-                                            {service.price}
-                                        </span>
-                                        <a href="#contact" className="font-semibold text-accent hover:underline" style={{ fontSize: 'var(--text-sm)' }}>
-                                            Get a Quote
-                                        </a>
-                                    </div>
+                                    <div className="mb-6 h-[21px]" aria-hidden="true" />
 
-                                    {service.testimonial && (
+                                    {laptopServiceCallouts[service.id] && (
                                         <div className="pt-6 border-t border-gray-100">
-                                            <p className="text-gray-600 mb-4 italic" style={{ fontSize: 'var(--text-sm)' }}>
-                                                "{service.testimonial.quote}"
+                                            <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
+                                                {laptopServiceCallouts[service.id].title}
                                             </p>
-                                            <div>
-                                                <span className="font-semibold text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>{service.testimonial.author}</span>
-                                                <span className="text-gray-500 ml-2" style={{ fontSize: 'var(--text-xs)' }}>{service.testimonial.title}</span>
-                                            </div>
+                                            <p className="max-w-[560px] leading-[1.5] text-gray-500" style={{ fontSize: 'var(--text-xs)' }}>
+                                                {laptopServiceCallouts[service.id].detail}
+                                            </p>
                                         </div>
                                     )}
                                 </div>
@@ -74,71 +130,69 @@ export default function LaptopServices() {
                     </div>
 
                     {/* Right: Sticky Glass Laptop */}
-                    <div className="hidden lg:flex sticky top-24 justify-end z-10 order-1 lg:order-2">
-                        <div className="relative">
-                            {/* Laptop Body */}
-                            <div className="relative w-[500px]">
-                                {/* Screen */}
-                                <div className="relative bg-gray-800 rounded-t-xl p-3 border border-gray-700 aspect-16/10">
-                                    {/* Camera notch */}
-                                    <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-gray-600" />
+                    <div className="hidden lg:flex sticky top-24 justify-center z-10 order-1 lg:order-2">
+                        <div className="relative w-full flex justify-center">
+                            <div className="relative w-[500px] rounded-[12px] border border-[#d8d5cc] bg-[#ece9e1] p-[5px] shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
+                                <div className="relative aspect-[16/10] overflow-hidden rounded-[8px] bg-white">
+                                    <div className="absolute inset-0 bg-linear-to-br from-white/18 to-transparent pointer-events-none z-10" />
 
-                                    {/* Screen glass overlay */}
-                                    <div className="absolute inset-3 bg-linear-to-br from-white/10 to-transparent rounded-lg pointer-events-none z-10" />
+                                    <div className="relative h-full w-full overflow-hidden bg-white">
+                                        <AnimatePresence mode="sync">
+                                            <motion.div
+                                                key={slideKey}
+                                                className="absolute inset-0 flex h-full w-full items-center justify-center overflow-hidden"
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                                            >
+                                                {activeService === 0 && laptopWideSlides.wideslide1 ? (
+                                                    <img
+                                                        src={laptopWideSlides.wideslide1}
+                                                        alt=""
+                                                        className="h-auto w-full self-start"
+                                                    />
+                                                ) : activeService === 1 && laptopWideSlides.wideslide2 ? (
+                                                    <img
+                                                        src={laptopWideSlides.wideslide2}
+                                                        alt=""
+                                                        className="h-full w-auto max-w-none"
+                                                    />
+                                                ) : activeService === 2 ? (
+                                                    <div className="relative h-full w-full overflow-hidden bg-[#002440]">
+                                                        <UnicornScene
+                                                            filePath="/unicorn/laptop-creative-direction.json"
+                                                            className="absolute inset-0"
+                                                            scale={0.9}
+                                                            dpi={1.25}
+                                                            fps={60}
+                                                            lazyLoad={false}
+                                                            altText="Interactive aquatic shader inside the interactive product experiences laptop slide"
+                                                            ariaLabel="Decorative Unicorn Studio shader inside the interactive product experiences laptop slide"
+                                                            ariaHidden
+                                                        />
+                                                    </div>
+                                                ) : activeService === 3 && laptopWideSlides.wideslide4 ? (
+                                                    <img
+                                                        src={laptopWideSlides.wideslide4}
+                                                        alt=""
+                                                        className="h-auto w-full self-start"
+                                                    />
+                                                ) : (
+                                                    <div className="text-center p-8 transition-all duration-500">
+                                                        <div className="font-bold tracking-[0.2em] text-accent mb-4" style={{ fontSize: 'var(--text-xs)' }}>
+                                                            {currentService.displayLabel}
+                                                        </div>
 
-                                    {/* Screen content */}
-                                    <div className="w-full h-full bg-white rounded-lg flex items-center justify-center overflow-hidden">
-                                        <div className="text-center p-8 transition-all duration-500">
-                                            <div className="font-bold tracking-[0.2em] text-accent mb-4" style={{ fontSize: 'var(--text-xs)' }}>
-                                                {currentService.displayLabel}
-                                            </div>
-
-                                            {activeService === 0 && (
-                                                <div className="flex justify-center gap-4 mb-4">
-                                                    {[1, 2, 3].map(i => (
-                                                        <div key={i} className="w-4 h-4 rounded-full bg-accent animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
-                                                    ))}
-                                                </div>
-                                            )}
-
-                                            {activeService === 1 && (
-                                                <div className="flex justify-center gap-3 mb-4">
-                                                    <div className="w-8 h-8 rounded-lg" style={{ background: '#6366f1' }} />
-                                                    <div className="w-8 h-8 rounded-lg" style={{ background: '#a855f7' }} />
-                                                    <div className="w-8 h-8 rounded-lg" style={{ background: '#f43f5e' }} />
-                                                </div>
-                                            )}
-
-                                            {activeService === 2 && (
-                                                <div className="space-y-2 mb-4 max-w-[200px] mx-auto">
-                                                    <div className="h-2 bg-gray-200 rounded animate-pulse" />
-                                                    <div className="h-2 bg-gray-100 rounded animate-pulse w-3/4" />
-                                                    <div className="h-2 bg-gray-50 rounded animate-pulse w-1/2" />
-                                                </div>
-                                            )}
-
-                                            {activeService === 3 && (
-                                                <div className="flex justify-center items-end gap-2 h-16 mb-4">
-                                                    <div className="w-6 bg-linear-to-t from-accent to-purple-400 rounded-t" style={{ height: '40%' }} />
-                                                    <div className="w-6 bg-linear-to-t from-accent to-purple-400 rounded-t" style={{ height: '70%' }} />
-                                                    <div className="w-6 bg-linear-to-t from-accent to-purple-400 rounded-t" style={{ height: '100%' }} />
-                                                </div>
-                                            )}
-
-                                            <div className="text-gray-500" style={{ fontSize: 'var(--text-sm)' }}>
-                                                {currentService.displayContent}
-                                            </div>
-                                        </div>
+                                                        <div className="text-gray-500" style={{ fontSize: 'var(--text-sm)' }}>
+                                                            {currentService.displayContent}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        </AnimatePresence>
                                     </div>
                                 </div>
-
-                                {/* Laptop Base */}
-                                <div className="relative h-3 bg-linear-to-b from-gray-700 to-gray-800 rounded-b-xl">
-                                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-gray-600 rounded-b-lg" />
-                                </div>
-
-                                {/* Reflection */}
-                                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[110%] h-1 bg-linear-to-r from-transparent via-gray-300/30 to-transparent rounded-full" />
                             </div>
                         </div>
                     </div>

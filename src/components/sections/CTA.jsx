@@ -3,11 +3,11 @@ import { useState } from 'react';
 const faqItems = [
     {
         question: "What does a project typically cost?",
-        answer: "Projects start at $10,000. That reflects the scope of what we build — not just renders, but the visual infrastructure your brand runs on. We work with a small number of brands at a time, so the work gets our full attention. The first call is free. No pitch, no deck — just a conversation.",
+        answer: "Projects start at $10,000. That reflects the scope of what we build, not just renders, but the visual infrastructure your brand runs on. We work with a small number of brands at a time, so the work gets our full attention. The first call is free. No pitch, no deck, just a conversation.",
     },
     {
         question: "Do you work with brands that already have a creative team?",
-        answer: "Yes. Most of our clients have in-house creative. We handle what's hard to do internally — high-fidelity 3D, motion, and custom development — without disrupting your process. We've worked alongside brand teams at every stage.",
+        answer: "Yes. Most of our clients have in-house creative. We handle what's hard to do internally, high-fidelity 3D, motion, and custom development, without disrupting your process. We've worked alongside brand teams at every stage.",
     },
     {
         question: "What do you need from us to get started?",
@@ -19,19 +19,19 @@ const faqItems = [
     },
     {
         question: "How long does a project take?",
-        answer: "Rendering projects typically run 2–4 weeks from briefing to delivery. Your launch is happening either way — the question is whether you go in with the right visuals. We'll give you a realistic timeline after the first call, not a number designed to win the pitch.",
+        answer: "Rendering projects typically run 2–4 weeks from briefing to delivery. Your launch is happening either way, and the question is whether you go in with the right visuals. We'll give you a realistic timeline after the first call, not a number designed to win the pitch.",
     },
     {
         question: "An AI can build a page in an hour. Why would I pay for development?",
-        answer: "It can. What it can't do is make your product look like it belongs in a Sephora, a Goop editorial, or a premium retail shelf. AI tools produce generic. They have no taste, no DTC category knowledge, no understanding of how a 30ml serum should feel on a page vs. a supplement stack. We build pages where the 3D assets, the layout, the performance, and the brand system are designed together by the same team. The difference isn't the code — it's the coherence.",
+        answer: "It can. What it can't do is make your product look like it belongs in a Sephora, a Goop editorial, or a premium retail shelf. AI tools produce generic. They have no taste, no DTC category knowledge, no understanding of how a 30ml serum should feel on a page vs. a supplement stack. We build pages where the 3D assets, the layout, the performance, and the brand system are designed together by the same team. The difference isn't the code, it's the coherence.",
     },
     {
         question: "What file formats do you deliver?",
-        answer: "Whatever you need: PNG, WebP, MP4, WEBM, GLB for 3D viewers, and more. Assets come organized, named, and ready to use — not a zip file full of mystery layers.",
+        answer: "Whatever you need: PNG, WebP, MP4, WEBM, GLB for 3D viewers, and more. Assets come organized, named, and ready to use, not a zip file full of mystery layers.",
     },
     {
         question: "How many brands do you take on at once?",
-        answer: "A small number at a time — deliberately. The DTC brands reaching out right now are in beauty, skincare, cannabis, and supplements. If you're in a similar space and want a slot, now is the right time to reach out.",
+        answer: "A small number at a time, deliberately. The DTC brands reaching out right now are in beauty, skincare, cannabis, and supplements. If you're in a similar space and want a slot, now is the right time to reach out.",
     },
 ];
 

@@ -68,7 +68,7 @@ export default function Arcade() {
             style={{ background: 'transparent' }}
         >
             <div className="flex-1 flex flex-col max-w-[1400px] w-full mx-auto px-8 py-8">
-                {/* Header row — compact */}
+                {/* Header row, compact */}
                 <motion.div
                     className="flex items-end justify-between mb-4 shrink-0"
                     initial={{ opacity: 0, y: 20 }}
@@ -107,7 +107,7 @@ export default function Arcade() {
                     </div>
                 </motion.div>
 
-                {/* Game title row — compact */}
+                {/* Game title row, compact */}
                 <div className="mb-3 shrink-0 relative overflow-hidden" style={{ minHeight: '2.8rem' }}>
                     <AnimatePresence mode="wait" custom={direction}>
                         <motion.div
@@ -128,7 +128,7 @@ export default function Arcade() {
                     </AnimatePresence>
                 </div>
 
-                {/* Game iframe — takes all remaining space */}
+                {/* Game iframe, takes all remaining space */}
                 <motion.div
                     className="relative flex-1 min-h-0"
                     initial={{ opacity: 0, y: 30 }}
@@ -149,7 +149,7 @@ export default function Arcade() {
                             >
                                 <iframe
                                     src={currentGame.url}
-                                    title={`${currentGame.name} — Jux Arcade`}
+                                    title={`${currentGame.name} - Jux Arcade`}
                                     className="w-full h-full"
                                     style={{ border: 'none' }}
                                     allow="fullscreen; autoplay"
@@ -160,7 +160,7 @@ export default function Arcade() {
                     </div>
                 </motion.div>
 
-                {/* Bottom bar — compact */}
+                {/* Bottom bar, compact */}
                 <div className="flex items-center justify-between mt-3 shrink-0">
                     {/* Dot indicators */}
                     <div className="flex items-center gap-2">

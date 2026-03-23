@@ -1,18 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
-const ringCards = [
-    'https://picsum.photos/seed/1/300/400',
-    'https://picsum.photos/seed/2/300/400',
-    'https://picsum.photos/seed/3/300/400',
-    'https://picsum.photos/seed/4/300/400',
-    'https://picsum.photos/seed/5/300/400',
-    'https://picsum.photos/seed/6/300/400',
-    'https://picsum.photos/seed/7/300/400',
-    'https://picsum.photos/seed/8/300/400',
-    'https://picsum.photos/seed/9/300/400',
-    'https://picsum.photos/seed/10/300/400',
-];
+const ringCards = Object.entries(
+    import.meta.glob('../../../heroImages/*.{webp,png,jpg,jpeg,avif}', {
+        eager: true,
+        import: 'default',
+    })
+)
+    .sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath))
+    .map(([, src]) => src);
 
 const TAU = Math.PI * 2;
 const OVERLAY_NOISE_TEXTURE =
@@ -46,10 +42,10 @@ const VIEWPORTS = {
         shadowBase: 0.14,
         shadowRange: 0.1,
         shadowPullback: 0.03,
-        stageHeight: 390,
+        stageHeight: 340,
         stageMaxWidth: 560,
-        cardTop: '42%',
-        guideTop: '50%',
+        cardTop: '48%',
+        guideTop: '56%',
         guideWidth: 430,
         guideHeight: 156,
         glowWidth: '84%',
@@ -59,7 +55,7 @@ const VIEWPORTS = {
         overlayBaseFillHeight: '26%',
         overlayWidth: '182%',
         overlayGradient:
-            'radial-gradient(176% 88% at 50% 108%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.99) 23%, rgba(255,255,255,0.9) 39%, rgba(255,255,255,0.58) 52%, rgba(255,255,255,0.24) 62%, rgba(255,255,255,0) 72%)',
+            'radial-gradient(176% 88% at 50% 108%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.99) 23%, rgba(0,0,0,0.9) 39%, rgba(0,0,0,0.58) 52%, rgba(0,0,0,0.24) 62%, rgba(0,0,0,0) 72%)',
         speed: 0.000084,
     },
     tablet: {
@@ -90,10 +86,10 @@ const VIEWPORTS = {
         shadowBase: 0.16,
         shadowRange: 0.14,
         shadowPullback: 0.04,
-        stageHeight: 620,
+        stageHeight: 540,
         stageMaxWidth: 980,
-        cardTop: '40%',
-        guideTop: '45%',
+        cardTop: '46%',
+        guideTop: '51%',
         guideWidth: 920,
         guideHeight: 260,
         glowWidth: '76%',
@@ -103,7 +99,7 @@ const VIEWPORTS = {
         overlayBaseFillHeight: '22%',
         overlayWidth: '156%',
         overlayGradient:
-            'radial-gradient(180% 96% at 50% 108%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.99) 23%, rgba(255,255,255,0.92) 40%, rgba(255,255,255,0.62) 54%, rgba(255,255,255,0.24) 64%, rgba(255,255,255,0) 76%)',
+            'radial-gradient(180% 96% at 50% 108%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.99) 23%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.62) 54%, rgba(0,0,0,0.24) 64%, rgba(0,0,0,0) 76%)',
         speed: 0.000112,
     },
     desktop: {
@@ -134,10 +130,10 @@ const VIEWPORTS = {
         shadowBase: 0.18,
         shadowRange: 0.18,
         shadowPullback: 0.05,
-        stageHeight: 840,
+        stageHeight: 720,
         stageMaxWidth: 1680,
-        cardTop: '37%',
-        guideTop: '41%',
+        cardTop: '43%',
+        guideTop: '47%',
         guideWidth: 1380,
         guideHeight: 384,
         glowWidth: '70%',
@@ -147,7 +143,7 @@ const VIEWPORTS = {
         overlayBaseFillHeight: '19%',
         overlayWidth: '144%',
         overlayGradient:
-            'radial-gradient(182% 102% at 50% 107%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.995) 24%, rgba(255,255,255,0.92) 40%, rgba(255,255,255,0.64) 53%, rgba(255,255,255,0.24) 63%, rgba(255,255,255,0) 73%)',
+            'radial-gradient(182% 102% at 50% 107%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.995) 24%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.64) 53%, rgba(0,0,0,0.24) 63%, rgba(0,0,0,0) 73%)',
         speed: 0.00014,
     },
 };
@@ -191,6 +187,7 @@ function OrbitCard({ src, index, total, rotation, config }) {
         liftOffset * 0.35;
     const scale = config.scaleBase + depth * config.scaleRange - frontPullback * config.frontPullbackScale;
     const rotate = Math.sin(angle) * config.rotateAmplitude + Math.cos(angle) * config.rotateBackTilt + tiltOffset;
+    const hoverTilt = Math.max(-1.35, Math.min(1.35, rotate * 0.12));
     const frontOpacity =
         depth > config.fullOpacityThreshold
             ? 1
@@ -201,8 +198,8 @@ function OrbitCard({ src, index, total, rotation, config }) {
     const zIndex = Math.round(depth * 100);
 
     return (
-        <motion.div
-            className="absolute left-1/2 overflow-hidden rounded-[1.4rem] border border-white/10 bg-white/5"
+        <div
+            className="absolute left-1/2"
             style={{
                 top: config.cardTop,
                 width: `${config.cardWidth}px`,
@@ -210,14 +207,30 @@ function OrbitCard({ src, index, total, rotation, config }) {
                 zIndex,
                 opacity,
                 filter: `blur(${blur}px)`,
-                boxShadow: `0 22px 60px rgba(0,0,0,${shadowOpacity})`,
                 transform: `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${rotate}deg)`,
                 transformOrigin: 'center center',
             }}
         >
-            <img src={src} alt="" className="h-full w-full object-cover" />
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_18%,transparent_44%,transparent_100%)]" />
-        </motion.div>
+            <motion.div
+                className="relative isolate h-full w-full overflow-hidden rounded-[1.4rem] border border-white/10 bg-transparent"
+                whileHover={{
+                    y: -18,
+                    rotate: hoverTilt,
+                    scale: 1.014,
+                }}
+                transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                    boxShadow: `0 36px 96px rgba(0,0,0,${Math.min(0.52, shadowOpacity + 0.08)}), 0 14px 34px rgba(0,0,0,${Math.max(
+                        0.16,
+                        shadowOpacity * 0.62
+                    )})`,
+                }}
+            >
+                <div className="absolute inset-0 bg-black/80" />
+                <img src={src} alt="" className="relative z-10 h-full w-full object-cover" />
+                <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_18%,transparent_44%,transparent_100%)]" />
+            </motion.div>
+        </div>
     );
 }
 
@@ -267,7 +280,12 @@ export default function Marquee({ className = '' }) {
     }, [config.speed]);
 
     return (
-        <section className={`relative overflow-hidden ${className}`}>
+        <motion.section
+            className={`relative overflow-hidden ${className}`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.35, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        >
             <div
                 className="relative mx-auto w-full overflow-hidden px-4 sm:px-6 lg:px-0"
                 style={{ height: `${config.stageHeight}px`, maxWidth: `${config.stageMaxWidth}px` }}
@@ -310,7 +328,7 @@ export default function Marquee({ className = '' }) {
                     className="absolute inset-x-0 bottom-0"
                     style={{
                         height: config.overlayBaseFillHeight,
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.9) 55%, rgba(255,255,255,1) 100%)',
+                        background: 'linear-gradient(180deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.9) 55%, rgba(0,0,0,1) 100%)',
                     }}
                 />
                 <div
@@ -329,6 +347,6 @@ export default function Marquee({ className = '' }) {
                     }}
                 />
             </div>
-        </section>
+        </motion.section>
     );
 }

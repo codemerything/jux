@@ -3,7 +3,7 @@ export const phoneServices = [
     {
         id: 1,
         title: '3D Product Rendering',
-        description: 'The image your launch page, investor deck, and retail buyer all need — built from a single file. No photoshoot. No retakes. No location scouts.',
+        description: 'The image your launch page, investor deck, and retail buyer all need, built from a single file. No photoshoot. No retakes. No location scouts.',
         price: 'Project basis',
         stat: '0',
         statLabel: 'Reshoots Required',
@@ -31,7 +31,7 @@ export const phoneServices = [
     {
         id: 3,
         title: 'Packshot Sets',
-        description: 'Every angle, every SKU, every colorway — consistent, clean, ready. When you reformulate or repackage, we update the files. Not the shoot.',
+        description: 'Every angle, every SKU, every colorway, consistent, clean, ready. When you reformulate or repackage, we update the files. Not the shoot.',
         price: 'Project basis',
         stat: '∞',
         statLabel: 'SKU Variations',
@@ -76,7 +76,7 @@ export const laptopServices = [
     {
         id: 2,
         title: 'Creative Direction',
-        description: 'Don\'t have a brief? Good. Tell us what\'s not working. We\'ll figure out the rest — from visual concept to final execution.',
+        description: 'Don\'t have a brief? Good. Tell us what\'s not working. We\'ll figure out the rest, from visual concept to final execution.',
         price: 'Project basis',
         displayLabel: 'CREATIVE DIRECTION',
         displayContent: 'Concept → Execution',
@@ -93,16 +93,24 @@ export const laptopServices = [
         price: 'Project basis',
         displayLabel: 'INTERACTIVE',
         displayContent: 'Explore in 3D',
-        testimonial: null
+        testimonial: {
+            quote: 'The 3D viewer turned our product page into something customers actually explored instead of skimmed.',
+            author: 'Nina Park',
+            title: 'Ecommerce Lead, Northline'
+        }
     },
     {
         id: 4,
         title: 'Brand Visual Systems',
-        description: 'A consistent visual language across every format — product pages, ads, emails, retail decks. Built once. Used everywhere.',
+        description: 'A consistent visual language across every format, product pages, ads, emails, and retail decks. Built once. Used everywhere.',
         price: 'Project basis',
         displayLabel: 'VISUAL SYSTEM',
         displayContent: 'Assets: Ready',
-        testimonial: null
+        testimonial: {
+            quote: 'For the first time, our campaigns, decks, and site all felt like they came from the same brand.',
+            author: 'Elena Brooks',
+            title: 'Marketing Director, Vale Studio'
+        }
     }
 ];
 
@@ -155,7 +163,7 @@ export const modelFeatures = [
     },
     {
         title: 'Built to update',
-        description: 'When you reformulate, rebrand, or launch a new SKU — files update, not shoots.',
+        description: 'When you reformulate, rebrand, or launch a new SKU, files update, not shoots.',
         icon: 'refresh'
     },
     {

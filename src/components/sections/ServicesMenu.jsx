@@ -15,7 +15,7 @@ const groups = {
         {
             category: 'Visual',
             name: 'Packshot Sets',
-            description: 'Every SKU, consistent. Update files — not shoots.',
+            description: 'Every SKU, consistent. Update files, not shoots.',
             price: 'from $3,500',
             tag: null,
         },
@@ -66,13 +66,6 @@ const groups = {
     ],
 };
 
-const stats = [
-    { value: '< 3 wks', label: 'Avg. delivery' },
-    { value: '0', label: 'Reshoots after 3D' },
-    { value: '60fps', label: 'Motion standard' },
-    { value: '≤ 4', label: 'Active projects' },
-];
-
 export default function ServicesMenu() {
     const [activeTab, setActiveTab] = useState('Visual');
     const [activeService, setActiveService] = useState(null);
@@ -80,7 +73,7 @@ export default function ServicesMenu() {
 
     // Track pointer-start position to distinguish a scratch-drag from a tap
     const pointerStart = useRef(null);
-    const DRAG_THRESHOLD = 6; // px — anything larger is a drag, not a click
+    const DRAG_THRESHOLD = 6; // px; anything larger is a drag, not a click
 
     return (
         <>
@@ -132,7 +125,7 @@ export default function ServicesMenu() {
                             className="text-white/40 max-w-xs leading-relaxed sm:text-right"
                             style={{ fontSize: 'var(--text-sm)' }}
                         >
-                            Most projects combine services. Prices are starting points — scope shapes the final number.
+                            Most projects combine services. Prices are starting points, and scope shapes the final number.
                         </p>
                     </div>
 
@@ -169,7 +162,7 @@ export default function ServicesMenu() {
                                         transition-all duration-200
                                         cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                                 >
-                                    {/* Tag — hidden if null */}
+                                    {/* Tag, hidden if null */}
                                     {s.tag && (
                                         <span
                                             className="absolute top-5 right-5 bg-accent/15 text-accent font-semibold px-2.5 py-0.5 rounded-full"
@@ -215,30 +208,10 @@ export default function ServicesMenu() {
                         </motion.div>
                     </AnimatePresence>
 
-                    {/* ── Stats strip ── */}
-                    <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/6 rounded-2xl overflow-hidden">
-                        {stats.map((s) => (
-                            <div key={s.label} className="bg-[#0d0d0d] px-6 py-5 text-center">
-                                <p
-                                    className="font-extrabold text-white mb-1"
-                                    style={{ fontSize: 'var(--text-h3)' }}
-                                >
-                                    {s.value}
-                                </p>
-                                <p
-                                    className="text-white/40 uppercase tracking-widest font-semibold"
-                                    style={{ fontSize: 'var(--text-xs)' }}
-                                >
-                                    {s.label}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-
                     {/* ── Footer CTA ── */}
                     <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
                         <p className="text-white/40 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>
-                            Tell us what you're building — we'll tell you what it takes.
+                            Tell us what you're building, and we'll tell you what it takes.
                         </p>
                         <a
                             href="#contact"

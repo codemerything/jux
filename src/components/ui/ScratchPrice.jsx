@@ -99,7 +99,7 @@ export default function ScratchPrice({ price }) {
 
     return (
         <div className="relative inline-flex items-center">
-            {/* Price sits underneath — large and white so it's clearly readable once scratched */}
+            {/* Price sits underneath, large and white so it's clearly readable once scratched */}
             <span
                 className="font-extrabold text-white"
                 style={{ fontSize: 'var(--text-h5)' }}

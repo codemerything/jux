@@ -30,7 +30,7 @@
     --font-sans: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-display: 'Prata', Georgia, serif;
 
-    /* Type Scale — Minor Third (×1.200), base 1rem */
+    /* Type Scale, Minor Third (×1.200), base 1rem */
     --text-h1: 2.986rem;
     --text-h2: 2.488rem;
     --text-h3: 2.074rem;
@@ -140,7 +140,7 @@ body {
 }
 
 /* ===================================
-   TYPE SCALE — Minor Third (1.200)
+   TYPE SCALE, Minor Third (1.200)
    =================================== */
 h1 {
     font-size: var(--text-h1);

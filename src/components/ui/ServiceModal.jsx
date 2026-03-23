@@ -29,7 +29,7 @@ const processData = {
         ],
     },
     'Packshot Sets': {
-        tagline: 'Every SKU, consistent. Update files — not shoots.',
+        tagline: 'Every SKU, consistent. Update files, not shoots.',
         timeline: '3–4 weeks',
         steps: [
             {
@@ -50,7 +50,7 @@ const processData = {
             {
                 num: '04',
                 title: 'Living delivery',
-                desc: 'When you reformulate, repackage, or add an SKU — we update the files. Not the shoot.',
+                desc: 'When you reformulate, repackage, or add an SKU, we update the files. Not the shoot.',
             },
         ],
     },
@@ -76,7 +76,7 @@ const processData = {
             {
                 num: '04',
                 title: 'Multi-format export',
-                desc: 'MP4, WEBM, and GIF — sized for web, social, email, and anything else in your stack.',
+                desc: 'MP4, WEBM, and GIF, sized for web, social, email, and anything else in your stack.',
             },
         ],
     },
@@ -113,7 +113,7 @@ const processData = {
             {
                 num: '01',
                 title: '3D model prep',
-                desc: 'Existing renders or we build from scratch — optimized for WebGL, not render farms.',
+                desc: 'Existing renders or we build from scratch, optimized for WebGL, not render farms.',
             },
             {
                 num: '02',
@@ -139,7 +139,7 @@ const processData = {
             {
                 num: '01',
                 title: 'Architecture',
-                desc: 'We map the full build — data flow, integrations, and component structure — before writing a line of code.',
+                desc: 'We map the full build, data flow, integrations, and component structure before writing a line of code.',
             },
             {
                 num: '02',
@@ -165,12 +165,12 @@ const processData = {
             {
                 num: '01',
                 title: 'Brand audit',
-                desc: 'We assess everything you have — what works, what conflicts, and what is missing entirely.',
+                desc: 'We assess everything you have, what works, what conflicts, and what is missing entirely.',
             },
             {
                 num: '02',
                 title: 'System design',
-                desc: 'Core visual tokens: color, typography, spacing, motion, and iconography — built to scale.',
+                desc: 'Core visual tokens: color, typography, spacing, motion, and iconography, built to scale.',
             },
             {
                 num: '03',

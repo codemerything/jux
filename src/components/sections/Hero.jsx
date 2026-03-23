@@ -3,7 +3,7 @@ import { PulseDot } from '../ui/Button';
 
 export default function Hero() {
     return (
-        <section className="relative flex items-center overflow-hidden pt-48 pb-14 sm:pt-56 sm:pb-20">
+        <section className="relative flex items-center overflow-hidden pt-48 pb-8 sm:pt-56 sm:pb-12">
             <div className="relative z-10 flex flex-col items-start justify-center text-left px-8 w-full max-w-4xl mx-auto" style={{ maxWidth: '56rem' }}>
                 <motion.h1
                     className="font-extrabold leading-[1.05] tracking-tight mb-5 text-white"
@@ -23,7 +23,7 @@ export default function Hero() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.55, delay: 0.13, ease: 'easeOut' }}
                 >
-                    The gap between a product and a purchase is almost always visual. We close it — through 3D, motion, and the digital experiences built around them.
+                    The gap between a product and a purchase is almost always visual. We close it through 3D, motion, and the digital experiences built around them.
                 </motion.p>
                 <motion.div
                     className="flex items-center gap-3 flex-wrap justify-start"
