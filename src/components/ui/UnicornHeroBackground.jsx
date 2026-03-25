@@ -12,11 +12,6 @@ export default function UnicornHeroBackground() {
             altText="Interactive hero background animation"
             ariaLabel="Decorative animated shader behind the hero section"
             ariaHidden
-            interactivity={{
-                mouse: {
-                    disableMobile: false,
-                },
-            }}
         />
     );
 }
