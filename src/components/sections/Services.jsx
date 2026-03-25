@@ -49,7 +49,6 @@ const subscribeViewportChanges = (callback) => {
 
 export default function Services() {
     const [activeService, setActiveService] = useState(1);
-    const [mobileFooterProgress, setMobileFooterProgress] = useState(0);
     const [mobileViewportHeight, setMobileViewportHeight] = useState(() => getViewportHeight());
     const cardsRef = useRef([]);
     const sectionRef = useRef(null);
@@ -57,8 +56,6 @@ export default function Services() {
     const ruleRef = useRef(null);
     const lastScrollYRef = useRef(0);
     const lastServiceChangeScrollYRef = useRef(0);
-    const mobileFooterStartOffset = -0.5;
-    const mobileFooterEndOffsetVh = -0.08;
 
     useEffect(() => {
         let frameId = null;
@@ -102,8 +99,8 @@ export default function Services() {
         const checkActiveCard = () => {
             const viewportHeight = getViewportHeight();
             const mobileTriggerLine = ruleRef.current
-                ? ruleRef.current.getBoundingClientRect().bottom + 76
-                : viewportHeight * 0.5;
+                ? ruleRef.current.getBoundingClientRect().bottom + 44
+                : viewportHeight * 0.42;
             const triggerLine = window.innerWidth < 768
                 ? mobileTriggerLine
                 : window.innerHeight * 0.62;
@@ -126,7 +123,7 @@ export default function Services() {
                     return nextActiveService;
                 }
 
-                const mobileStepTravel = viewportHeight * 0.24;
+                const mobileStepTravel = viewportHeight * 0.18;
                 const travelSinceLastChange = Math.abs(window.scrollY - lastServiceChangeScrollYRef.current);
 
                 if (travelSinceLastChange < mobileStepTravel) {
@@ -160,57 +157,6 @@ export default function Services() {
     }, []);
 
     useEffect(() => {
-        let frameId = null;
-
-        const syncMobileFooterProgress = () => {
-            const section = sectionRef.current;
-
-            if (!section) {
-                frameId = null;
-                return;
-            }
-
-            if (window.innerWidth >= 768) {
-                setMobileFooterProgress(1);
-                frameId = null;
-                return;
-            }
-
-            const viewportHeight = getViewportHeight();
-            const sectionTop = section.getBoundingClientRect().top;
-            const animationStart = viewportHeight;
-            const animationEnd = viewportHeight * mobileFooterEndOffsetVh;
-            const nextProgress = Math.max(0, Math.min(1, (animationStart - sectionTop) / (animationStart - animationEnd)));
-
-            setMobileFooterProgress((current) => (
-                Math.abs(current - nextProgress) < 0.01 ? current : nextProgress
-            ));
-            frameId = null;
-        };
-
-        const requestSync = () => {
-            if (frameId !== null) {
-                return;
-            }
-
-            frameId = window.requestAnimationFrame(syncMobileFooterProgress);
-        };
-
-        requestSync();
-        window.addEventListener('scroll', requestSync, { passive: true });
-        const unsubscribeViewportChanges = subscribeViewportChanges(requestSync);
-
-        return () => {
-            window.removeEventListener('scroll', requestSync);
-            unsubscribeViewportChanges();
-
-            if (frameId !== null) {
-                window.cancelAnimationFrame(frameId);
-            }
-        };
-    }, []);
-
-    useEffect(() => {
         const root = document.documentElement;
         const previousSnapType = root.style.scrollSnapType;
         const previousScrollPaddingTop = root.style.scrollPaddingTop;
@@ -236,8 +182,8 @@ export default function Services() {
 
             const stickyHeaderHeight = headerRef.current?.offsetHeight ?? 0;
             const snapPadding = stickyHeaderHeight > 0
-                ? Math.round(stickyHeaderHeight + 28)
-                : Math.round(viewportHeight * 0.34);
+                ? Math.round(stickyHeaderHeight + 10)
+                : Math.round(viewportHeight * 0.26);
 
             root.style.scrollSnapType = 'y proximity';
             root.style.scrollPaddingTop = `${snapPadding}px`;
@@ -257,9 +203,6 @@ export default function Services() {
 
     const mobilePhoneSpacerHeight = mobileViewportHeight * 0.42;
     const mobilePhoneStickyTop = mobileViewportHeight * 0.4;
-    const mobilePhoneTranslateY = (
-        1 - (mobileFooterStartOffset + (mobileFooterProgress * (1 - mobileFooterStartOffset)))
-    ) * mobileViewportHeight * 0.62;
     const mobilePhoneViewportHeight = mobileViewportHeight * 0.6;
 
     return (
@@ -328,18 +271,16 @@ export default function Services() {
                     className="sticky"
                     style={{
                         top: `${mobilePhoneStickyTop}px`,
-                        transform: `translateY(${mobilePhoneTranslateY}px)`,
-                        willChange: 'transform',
                     }}
                 >
                     <div
                         className="relative overflow-hidden rounded-t-[1.9rem] bg-[#fff]"
                         style={{ height: `${mobilePhoneViewportHeight}px` }}
                     >
-                        <div className="absolute left-1/2 top-[40px] -translate-x-[20%]">
+                        <div className="absolute left-1/2 top-[90px] -translate-x-[20%]">
                             <div
                                 className="w-[25.8rem] max-w-none"
-                                style={{ transform: 'rotate(16deg) scale(1)', transformOrigin: 'top center' }}
+                                style={{ transform: 'rotate(16deg) scale(1.1)', transformOrigin: 'top center' }}
                             >
                                 <PhoneMockup activeService={activeService} className="w-full" />
                             </div>
@@ -633,7 +574,7 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
                 opacity: opacity,
                 transform: isActive ? 'translateY(0)' : 'translateY(5px)',
                 scrollSnapAlign: 'start',
-                scrollSnapStop: 'always',
+                scrollSnapStop: 'normal',
             }}
         >
             <CardContent service={service} />
