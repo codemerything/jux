@@ -21,17 +21,22 @@ const phoneSlideVideos = Object.entries(
 
 export default function Services() {
     const [activeService, setActiveService] = useState(1);
+    const [mobileFooterProgress, setMobileFooterProgress] = useState(0);
     const cardsRef = useRef([]);
     const sectionRef = useRef(null);
     const headerRef = useRef(null);
     const ruleRef = useRef(null);
+    const mobileFooterStartOffset = -0.5;
+    const mobileFooterEndOffsetVh = -0.08;
 
     useEffect(() => {
         const cards = cardsRef.current.filter(Boolean);
         if (!cards.length) return;
 
         const checkActiveCard = () => {
-            const triggerLine = window.innerHeight * 0.62;
+            const triggerLine = window.innerWidth < 768
+                ? window.innerHeight * 0.5
+                : window.innerHeight * 0.62;
             let nextActiveService = parseInt(cards[0].dataset.service, 10);
 
             cards.forEach((card) => {
@@ -55,6 +60,56 @@ export default function Services() {
         };
     }, []);
 
+    useEffect(() => {
+        let frameId = null;
+
+        const syncMobileFooterProgress = () => {
+            const section = sectionRef.current;
+
+            if (!section) {
+                frameId = null;
+                return;
+            }
+
+            if (window.innerWidth >= 768) {
+                setMobileFooterProgress(1);
+                frameId = null;
+                return;
+            }
+
+            const sectionTop = section.getBoundingClientRect().top;
+            const animationStart = window.innerHeight;
+            const animationEnd = window.innerHeight * mobileFooterEndOffsetVh;
+            const nextProgress = Math.max(0, Math.min(1, (animationStart - sectionTop) / (animationStart - animationEnd)));
+
+            setMobileFooterProgress((current) => (
+                Math.abs(current - nextProgress) < 0.01 ? current : nextProgress
+            ));
+            frameId = null;
+        };
+
+        const requestSync = () => {
+            if (frameId !== null) {
+                return;
+            }
+
+            frameId = window.requestAnimationFrame(syncMobileFooterProgress);
+        };
+
+        requestSync();
+        window.addEventListener('scroll', requestSync, { passive: true });
+        window.addEventListener('resize', requestSync);
+
+        return () => {
+            window.removeEventListener('scroll', requestSync);
+            window.removeEventListener('resize', requestSync);
+
+            if (frameId !== null) {
+                window.cancelAnimationFrame(frameId);
+            }
+        };
+    }, []);
+
     return (
         <section
             id="services"
@@ -70,9 +125,9 @@ export default function Services() {
                     </div>
 
                     {/* Content Column */}
-                    <div className="flex flex-col">
+                    <div className="relative z-0 flex flex-col">
                         {/* Sticky Header */}
-                        <div ref={headerRef} className="sticky top-0 z-10 -mt-24 bg-[#ffffff] pt-24">
+                        <div ref={headerRef} className="sticky top-0 z-30 -mt-24 bg-[#ffffff] pt-24">
                             <h2
                                 id="services-heading"
                                 className="mb-4 font-medium leading-[1.06] tracking-[-0.04em] text-gray-900"
@@ -106,6 +161,31 @@ export default function Services() {
                                         ruleRef={ruleRef}
                                     />
                                 ))}
+                                <div
+                                    aria-hidden="true"
+                                    className="pointer-events-none h-[42svh] md:hidden"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 top-0 bottom-0 z-20 md:hidden" aria-hidden="true">
+                <div
+                    className="sticky"
+                    style={{
+                        top: '40svh',
+                        transform: `translateY(${(1 - (mobileFooterStartOffset + (mobileFooterProgress * (1 - mobileFooterStartOffset)))) * 62}svh)`,
+                        willChange: 'transform',
+                    }}
+                >
+                    <div className="relative h-[60svh] overflow-hidden rounded-t-[1.9rem] bg-[#fff]">
+                        <div className="absolute left-1/2 top-[40px] -translate-x-[20%]">
+                            <div
+                                className="w-[25.8rem] max-w-none"
+                                style={{ transform: 'rotate(16deg) scale(1)', transformOrigin: 'top center' }}
+                            >
+                                <PhoneMockup activeService={activeService} className="w-full" />
                             </div>
                         </div>
                     </div>
@@ -162,28 +242,31 @@ const phoneServiceUtilityCards = {
     },
 };
 
-function PhoneMockup({ activeService }) {
+function PhoneMockup({ activeService, className = '' }) {
     // Screen area within phone.png (1349×2048), measured via pixel scan:
     // left=18px (1.33%), right margin=521px (38.62%), top=26px (1.27%), bottom margin=372px (18.16%)
     // Screen dimensions: 810×1650px within 1349×2048 image
     return (
-        <div className="relative" style={{ width: '523px', height: '794px' }}>
+        <div
+            className={className ? `relative ${className}` : 'relative'}
+            style={className ? { aspectRatio: '523 / 794' } : { width: '523px', height: '794px' }}
+        >
             {/* Layer 1 (bottom): Phone body image */}
             <img
                 src="/phone.png"
                 alt="Phone body"
-                className="relative z-0 w-full h-auto"
+                className="relative z-0 h-full w-full"
             />
 
             {/* Layer 2 (middle): Screen content - 287x621 gradient */}
             <div
                 className="absolute overflow-hidden z-10"
                 style={{
-                    width: '287px',
-                    height: '621px',
-                    top: '20px',
-                    left: '21px',
-                    borderRadius: '40px',
+                    width: '54.88%',
+                    height: '78.21%',
+                    top: '2.52%',
+                    left: '4.02%',
+                    borderRadius: 'clamp(1.5rem, 7vw, 2.5rem)',
                 }}
             >
                 {phoneServices.map((service, index) => (
@@ -202,10 +285,10 @@ function PhoneMockup({ activeService }) {
                 alt="Dynamic Island"
                 className="absolute z-20 pointer-events-none"
                 style={{
-                    width: '103px',
-                    height: '607px',
-                    top: '27px',
-                    left: '113px',
+                    width: '19.69%',
+                    height: '76.45%',
+                    top: '3.4%',
+                    left: '21.61%',
                 }}
             />
         </div>
@@ -417,7 +500,7 @@ function CardContent({ service }) {
                 {service.description}
             </p>
             {utilityCard && (
-                <div className="max-w-[480px] rounded-[1.35rem] border border-gray-200 bg-[#f4f4f1] p-5">
+                <div className="hidden max-w-[480px] rounded-[1.35rem] border border-gray-200 bg-[#f4f4f1] p-5 md:block">
                     <div className="flex flex-wrap gap-2">
                         {utilityCard.primary.map((keyword) => (
                             <span
