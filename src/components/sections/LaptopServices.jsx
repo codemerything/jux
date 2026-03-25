@@ -35,8 +35,24 @@ const laptopServiceCallouts = {
     },
 };
 
+const mobilePreviewSlides = {
+    1: {
+        key: 'wideslide1',
+        position: 'top',
+    },
+    2: {
+        key: 'wideslide2',
+        position: 'center',
+    },
+    4: {
+        key: 'wideslide4',
+        position: 'top',
+    },
+};
+
 export default function LaptopServices() {
     const [activeService, setActiveService] = useState(0);
+    const [mobilePreviewServiceId, setMobilePreviewServiceId] = useState(null);
     const cardRefs = useRef([]);
 
     useEffect(() => {
@@ -88,8 +104,34 @@ export default function LaptopServices() {
         };
     }, []);
 
+    useEffect(() => {
+        const syncMobilePreviewState = () => {
+            if (window.innerWidth >= 1024) {
+                setMobilePreviewServiceId(null);
+            }
+        };
+
+        syncMobilePreviewState();
+        window.addEventListener('resize', syncMobilePreviewState);
+
+        return () => {
+            window.removeEventListener('resize', syncMobilePreviewState);
+        };
+    }, []);
+
     const currentService = laptopServices[activeService];
     const slideKey = `laptop-slide-${activeService}`;
+    const toggleMobilePreview = serviceId => {
+        if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+            return;
+        }
+
+        if (!mobilePreviewSlides[serviceId]) {
+            return;
+        }
+
+        setMobilePreviewServiceId(current => (current === serviceId ? null : serviceId));
+    };
 
     return (
         <section id="laptop-services" className="relative bg-[#f5f5f0] py-24 overflow-visible" aria-labelledby="laptop-services-heading">
@@ -104,25 +146,69 @@ export default function LaptopServices() {
                                 <div
                                     key={service.id}
                                     ref={el => cardRefs.current[index] = el}
+                                    onClick={() => toggleMobilePreview(service.id)}
                                     className={`rounded-2xl border p-8 transition-all duration-500 ${index === laptopServices.length - 1 ? 'pb-16' : ''} ${activeService === index
                                         ? 'bg-white border-gray-200 shadow-lg'
                                         : 'bg-transparent border-gray-100'
-                                        }`}
+                                        } ${mobilePreviewSlides[service.id] ? 'cursor-pointer lg:cursor-default' : ''}`}
                                 >
                                     <h3 className="font-bold mb-4 text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>{service.title}</h3>
                                     <p className="text-gray-500 mb-6 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>{service.description}</p>
 
-                                    <div className="mb-6 h-[21px]" aria-hidden="true" />
+                                    {mobilePreviewSlides[service.id] ? (
+                                        <div className="space-y-0">
+                                            <div
+                                                className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${
+                                                    mobilePreviewServiceId === service.id ? 'max-h-0 opacity-0' : 'max-h-[220px] opacity-100'
+                                                }`}
+                                            >
+                                                <div className="mb-6 h-[21px]" aria-hidden="true" />
 
-                                    {laptopServiceCallouts[service.id] && (
-                                        <div className="pt-6 border-t border-gray-100">
-                                            <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
-                                                {laptopServiceCallouts[service.id].title}
-                                            </p>
-                                            <p className="max-w-[560px] leading-[1.5] text-gray-500" style={{ fontSize: 'var(--text-xs)' }}>
-                                                {laptopServiceCallouts[service.id].detail}
-                                            </p>
+                                                {laptopServiceCallouts[service.id] && (
+                                                    <div className="pt-6 border-t border-gray-100">
+                                                        <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
+                                                            {laptopServiceCallouts[service.id].title}
+                                                        </p>
+                                                        <p className="max-w-[560px] leading-[1.5] text-gray-500" style={{ fontSize: 'var(--text-xs)' }}>
+                                                            {laptopServiceCallouts[service.id].detail}
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div
+                                                className={`overflow-hidden transition-[max-height,opacity,margin] duration-300 ease-out ${
+                                                    mobilePreviewServiceId === service.id && laptopWideSlides[mobilePreviewSlides[service.id].key]
+                                                        ? 'mt-2 max-h-[320px] opacity-100'
+                                                        : 'mt-0 max-h-0 opacity-0'
+                                                }`}
+                                            >
+                                                <div className="overflow-hidden rounded-[12px] border border-gray-200 bg-white">
+                                                    <div
+                                                        className="aspect-[16/10] bg-white bg-cover bg-top bg-no-repeat"
+                                                        style={{
+                                                            backgroundImage: `url(${laptopWideSlides[mobilePreviewSlides[service.id].key]})`,
+                                                            backgroundPosition: mobilePreviewSlides[service.id].position,
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
+                                    ) : (
+                                        <>
+                                            <div className="mb-6 h-[21px]" aria-hidden="true" />
+
+                                            {laptopServiceCallouts[service.id] && (
+                                                <div className="pt-6 border-t border-gray-100">
+                                                    <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
+                                                        {laptopServiceCallouts[service.id].title}
+                                                    </p>
+                                                    <p className="max-w-[560px] leading-[1.5] text-gray-500" style={{ fontSize: 'var(--text-xs)' }}>
+                                                        {laptopServiceCallouts[service.id].detail}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             ))}
