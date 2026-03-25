@@ -19,6 +19,17 @@ const phoneSlideVideos = Object.entries(
     .sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath))
     .map(([, src]) => src);
 
+const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
+
+const getStaggeredProgress = (progress, delay = 0) => (
+    clamp((progress - delay) / Math.max(0.0001, 1 - delay))
+);
+
+const getRevealStyle = (progress, distance = 28) => ({
+    opacity: progress,
+    transform: `translateY(${(1 - progress) * distance}px)`,
+});
+
 const getViewportHeight = () => {
     if (typeof window === 'undefined') {
         return 0;
@@ -45,6 +56,65 @@ const subscribeViewportChanges = (callback) => {
     };
 };
 
+const useMobileRevealProgress = (targetRef, { start = 0.72, end = 0.42 } = {}) => {
+    const [progress, setProgress] = useState(() => (
+        typeof window === 'undefined' || window.innerWidth >= 768 ? 1 : 0
+    ));
+
+    useEffect(() => {
+        let frameId = null;
+
+        const syncProgress = () => {
+            frameId = null;
+
+            if (typeof window === 'undefined' || window.innerWidth >= 768) {
+                setProgress(1);
+                return;
+            }
+
+            const element = targetRef.current;
+            if (!element) {
+                setProgress(0);
+                return;
+            }
+
+            const viewportHeight = getViewportHeight();
+            const startLine = viewportHeight * start;
+            const endLine = viewportHeight * end;
+            const nextProgress = clamp(
+                (startLine - element.getBoundingClientRect().top) / (startLine - endLine)
+            );
+
+            setProgress((current) => (
+                Math.abs(current - nextProgress) < 0.01 ? current : nextProgress
+            ));
+        };
+
+        const requestSync = () => {
+            if (frameId !== null) {
+                return;
+            }
+
+            frameId = window.requestAnimationFrame(syncProgress);
+        };
+
+        requestSync();
+        window.addEventListener('scroll', requestSync, { passive: true });
+        const unsubscribeViewportChanges = subscribeViewportChanges(requestSync);
+
+        return () => {
+            window.removeEventListener('scroll', requestSync);
+            unsubscribeViewportChanges();
+
+            if (frameId !== null) {
+                window.cancelAnimationFrame(frameId);
+            }
+        };
+    }, [end, start, targetRef]);
+
+    return progress;
+};
+
 export default function Services() {
     const [activeService, setActiveService] = useState(1);
     const cardsRef = useRef([]);
@@ -54,6 +124,10 @@ export default function Services() {
     const lastScrollYRef = useRef(0);
     const lastServiceChangeScrollYRef = useRef(0);
     const lastServiceId = phoneServices[phoneServices.length - 1]?.id ?? 1;
+    const headerRevealProgress = useMobileRevealProgress(headerRef, { start: 0.58, end: 0.18 });
+    const headerLineOneProgress = getStaggeredProgress(headerRevealProgress, 0);
+    const headerLineTwoProgress = getStaggeredProgress(headerRevealProgress, 0.18);
+    const headerRuleProgress = getStaggeredProgress(headerRevealProgress, 0.32);
 
     useEffect(() => {
         const cards = cardsRef.current.filter(Boolean);
@@ -65,8 +139,8 @@ export default function Services() {
         const checkActiveCard = () => {
             const viewportHeight = getViewportHeight();
             const mobileTriggerLine = ruleRef.current
-                ? ruleRef.current.getBoundingClientRect().bottom + 44
-                : viewportHeight * 0.42;
+                ? Math.max(ruleRef.current.getBoundingClientRect().bottom + 44, viewportHeight * 0.56)
+                : viewportHeight * 0.56;
             const triggerLine = window.innerWidth < 768
                 ? mobileTriggerLine
                 : window.innerHeight * 0.62;
@@ -89,7 +163,7 @@ export default function Services() {
                     return nextActiveService;
                 }
 
-                const mobileStepTravel = viewportHeight * 0.18;
+                const mobileStepTravel = viewportHeight * 0.12;
                 const travelSinceLastChange = Math.abs(window.scrollY - lastServiceChangeScrollYRef.current);
 
                 if (travelSinceLastChange < mobileStepTravel) {
@@ -151,12 +225,24 @@ export default function Services() {
                                 className="mb-4 font-medium leading-[1.06] tracking-[-0.04em] text-gray-900"
                                 style={{ fontSize: 'clamp(1.25rem, 2.5vw, var(--text-h2))' }}
                             >
-                                Our services extend the<br />entire customer journey.
+                                <span
+                                    className="block transition-[opacity,transform] duration-300 ease-out"
+                                    style={getRevealStyle(headerLineOneProgress, 32)}
+                                >
+                                    Our services extend the
+                                </span>
+                                <span
+                                    className="block transition-[opacity,transform] duration-300 ease-out"
+                                    style={getRevealStyle(headerLineTwoProgress, 32)}
+                                >
+                                    entire customer journey.
+                                </span>
                             </h2>
                             <div
                                 ref={ruleRef}
-                                className="mb-6 h-px w-full"
+                                className="mb-6 h-px w-full transition-[opacity,transform] duration-300 ease-out"
                                 style={{
+                                    ...getRevealStyle(headerRuleProgress, 20),
                                     background: 'linear-gradient(90deg, rgba(156,163,175,0.9) 0%, rgba(156,163,175,0.5) 45%, rgba(156,163,175,0.15) 75%, rgba(156,163,175,0) 100%)',
                                 }}
                             />
@@ -197,7 +283,7 @@ export default function Services() {
                     }}
                 >
                     <div
-                        className="relative overflow-hidden rounded-t-[1.9rem] bg-[#fff]"
+                        className="relative overflow-hidden rounded-t-[1.9rem] bg-transparent"
                         style={{
                             height: mobilePhoneViewportHeight,
                             transform: 'translateZ(0)',
@@ -283,7 +369,7 @@ function PhoneMockup({ activeService, className = '' }) {
             <img
                 src="/phone.png"
                 alt="Phone body"
-                className="relative z-0 h-full w-full"
+                className="relative z-0 h-full w-full rounded-[60px]"
             />
 
             {/* Layer 2 (middle): Screen content - 287x621 gradient */}
@@ -429,6 +515,7 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
         typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.24
     ));
     const cardRef = React.useRef(null);
+    const revealProgress = useMobileRevealProgress(cardRef, { start: 0.62, end: 0.34 });
 
     React.useEffect(() => {
         const card = cardRef.current;
@@ -515,32 +602,38 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
                 scrollSnapStop: 'normal',
             }}
         >
-            <CardContent service={service} />
+            <CardContent service={service} revealProgress={revealProgress} />
         </div>
     );
 });
 
 ServiceCard.displayName = 'ServiceCard';
 
-function CardContent({ service }) {
+function CardContent({ service, revealProgress }) {
     const utilityCard = phoneServiceUtilityCards[service.id];
+    const titleProgress = getStaggeredProgress(revealProgress, 0);
+    const descriptionProgress = getStaggeredProgress(revealProgress, 0.16);
+    const utilityProgress = getStaggeredProgress(revealProgress, 0.32);
 
     return (
         <>
             <h3
-                className="mb-4 font-medium leading-[1.08] tracking-[-0.03em] text-gray-900"
-                style={{ fontSize: 'var(--text-h4)' }}
+                className="mb-4 font-medium leading-[1.08] tracking-[-0.03em] text-gray-900 transition-[opacity,transform] duration-300 ease-out"
+                style={{ ...getRevealStyle(titleProgress, 28), fontSize: 'var(--text-h4)' }}
             >
                 {service.title}
             </h3>
             <p
-                className="mb-6 max-w-[500px] leading-[1.8] text-gray-500"
-                style={{ fontSize: 'var(--text-sm)' }}
+                className="mb-6 max-w-[500px] leading-[1.8] text-gray-500 transition-[opacity,transform] duration-300 ease-out"
+                style={{ ...getRevealStyle(descriptionProgress, 22), fontSize: 'var(--text-sm)' }}
             >
                 {service.description}
             </p>
             {utilityCard && (
-                <div className="hidden max-w-[480px] rounded-[1.35rem] border border-gray-200 bg-[#f4f4f1] p-5 md:block">
+                <div
+                    className="hidden max-w-[480px] rounded-[1.35rem] border border-gray-200 bg-[#f4f4f1] p-5 transition-[opacity,transform] duration-300 ease-out md:block"
+                    style={getRevealStyle(utilityProgress, 18)}
+                >
                     <div className="flex flex-wrap gap-2">
                         {utilityCard.primary.map((keyword) => (
                             <span

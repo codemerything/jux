@@ -1,6 +1,6 @@
 export default function Footer() {
     return (
-        <footer id="contact" className="bg-[#0d0d0d] border-t border-white/5 py-5">
+        <footer id="contact" className="bg-transparent border-t border-white/5 py-5">
             <div className="max-w-[1400px] mx-auto px-8 flex items-center justify-between gap-8 flex-wrap">
 
                 {/* Left: Copyright */}
