@@ -266,14 +266,23 @@ export default function Services() {
                                     entire customer journey.
                                 </span>
                             </h2>
-                            <div
-                                ref={ruleRef}
-                                className="mb-6 h-px w-full transition-[opacity,transform] duration-300 ease-out"
-                                style={{
-                                    ...getRevealStyle(headerRuleProgress, 20),
-                                    background: 'linear-gradient(90deg, rgba(156,163,175,0.9) 0%, rgba(156,163,175,0.5) 45%, rgba(156,163,175,0.15) 75%, rgba(156,163,175,0) 100%)',
-                                }}
-                            />
+                            <div className="relative">
+                                <div
+                                    ref={ruleRef}
+                                    className="relative z-10 h-px w-full transition-[opacity,transform] duration-300 ease-out"
+                                    style={{
+                                        ...getRevealStyle(headerRuleProgress, 20),
+                                        background: 'linear-gradient(90deg, rgba(156,163,175,0.9) 0%, rgba(156,163,175,0.5) 45%, rgba(156,163,175,0.15) 75%, rgba(156,163,175,0) 100%)',
+                                    }}
+                                />
+                                <div
+                                    className="pointer-events-none absolute inset-x-0 top-full h-10"
+                                    aria-hidden="true"
+                                    style={{
+                                        background: 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.72) 34%, rgba(255,255,255,0.32) 68%, rgba(255,255,255,0) 100%)',
+                                    }}
+                                />
+                            </div>
                         </div>
 
                         <div className="services-content">

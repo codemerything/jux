@@ -50,6 +50,24 @@ const mobilePreviewSlides = {
     },
 };
 
+function MobilePreviewBadge({ expanded = false }) {
+    return (
+        <div className="inline-flex items-center gap-2 rounded-full border border-sky-200/90 bg-sky-50 px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-sky-700 lg:hidden">
+            <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
+                <path
+                    d="M1.75 10s3.05-5 8.25-5 8.25 5 8.25 5-3.05 5-8.25 5-8.25-5-8.25-5Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+                <circle cx="10" cy="10" r="2.35" fill="currentColor" />
+            </svg>
+            <span>{expanded ? 'Tap to hide' : 'Tap to preview'}</span>
+        </div>
+    );
+}
+
 export default function LaptopServices() {
     const [activeService, setActiveService] = useState(0);
     const [mobilePreviewServiceId, setMobilePreviewServiceId] = useState(null);
@@ -156,21 +174,28 @@ export default function LaptopServices() {
                                 >
                                     <div className="px-8 pt-8">
                                         <h3 className="font-bold mb-4 text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>{service.title}</h3>
-                                        <p className="text-gray-500 mb-6 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>{service.description}</p>
+                                        <p
+                                            className={`text-gray-500 leading-relaxed ${mobilePreviewSlides[service.id] ? 'mb-0' : 'mb-6'}`}
+                                            style={{ fontSize: 'var(--text-sm)' }}
+                                        >
+                                            {service.description}
+                                        </p>
                                     </div>
 
                                     {mobilePreviewSlides[service.id] ? (
                                         <div className="space-y-0">
                                             <div
-                                                className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out ${
-                                                    mobilePreviewServiceId === service.id ? 'max-h-0 opacity-0' : 'max-h-[220px] opacity-100'
+                                                className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-out ${
+                                                    mobilePreviewServiceId === service.id ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
                                                 }`}
                                             >
-                                                <div className="px-8 pb-8">
-                                                    <div className="mb-6 h-[21px]" aria-hidden="true" />
+                                                <div className="min-h-0 px-8 pb-8">
+                                                    <div className="flex h-[84px] items-center justify-center">
+                                                        <MobilePreviewBadge expanded={mobilePreviewServiceId === service.id} />
+                                                    </div>
 
                                                     {laptopServiceCallouts[service.id] && (
-                                                        <div className="pt-6 border-t border-gray-100">
+                                                        <div className="border-t border-gray-100 pt-6">
                                                             <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
                                                                 {laptopServiceCallouts[service.id].title}
                                                             </p>
@@ -183,13 +208,13 @@ export default function LaptopServices() {
                                             </div>
 
                                             <div
-                                                className={`overflow-hidden transition-[max-height,opacity,margin] duration-300 ease-out ${
+                                                className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin] duration-300 ease-out ${
                                                     mobilePreviewServiceId === service.id && laptopWideSlides[mobilePreviewSlides[service.id].key]
-                                                        ? 'mt-2 max-h-[320px] opacity-100'
-                                                        : 'mt-0 max-h-0 opacity-0'
+                                                        ? 'mt-2 grid-rows-[1fr] opacity-100'
+                                                        : 'mt-0 grid-rows-[0fr] opacity-0'
                                                 }`}
                                             >
-                                                <div className="px-2 pb-2">
+                                                <div className="min-h-0 px-2 pb-2">
                                                     <div className="overflow-hidden rounded-[12px] border border-gray-200 bg-white">
                                                         <div
                                                             className="aspect-[16/10] bg-white bg-cover bg-top bg-no-repeat"
