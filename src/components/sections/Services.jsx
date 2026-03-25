@@ -56,6 +56,7 @@ export default function Services() {
     const ruleRef = useRef(null);
     const lastScrollYRef = useRef(0);
     const lastServiceChangeScrollYRef = useRef(0);
+    const lastServiceId = phoneServices[phoneServices.length - 1]?.id ?? 1;
 
     useEffect(() => {
         let frameId = null;
@@ -156,52 +157,9 @@ export default function Services() {
         };
     }, []);
 
-    useEffect(() => {
-        const root = document.documentElement;
-        const previousSnapType = root.style.scrollSnapType;
-        const previousScrollPaddingTop = root.style.scrollPaddingTop;
-
-        const syncMobileSnap = () => {
-            const section = sectionRef.current;
-
-            if (window.innerWidth >= 768 || !section) {
-                root.style.scrollSnapType = previousSnapType;
-                root.style.scrollPaddingTop = previousScrollPaddingTop;
-                return;
-            }
-
-            const sectionRect = section.getBoundingClientRect();
-            const viewportHeight = getViewportHeight();
-            const sectionIsActive = sectionRect.top < viewportHeight && sectionRect.bottom > 0;
-
-            if (!sectionIsActive) {
-                root.style.scrollSnapType = previousSnapType;
-                root.style.scrollPaddingTop = previousScrollPaddingTop;
-                return;
-            }
-
-            const stickyHeaderHeight = headerRef.current?.offsetHeight ?? 0;
-            const snapPadding = stickyHeaderHeight > 0
-                ? Math.round(stickyHeaderHeight + 10)
-                : Math.round(viewportHeight * 0.26);
-
-            root.style.scrollSnapType = 'y proximity';
-            root.style.scrollPaddingTop = `${snapPadding}px`;
-        };
-
-        syncMobileSnap();
-        window.addEventListener('scroll', syncMobileSnap, { passive: true });
-        const unsubscribeViewportChanges = subscribeViewportChanges(syncMobileSnap);
-
-        return () => {
-            window.removeEventListener('scroll', syncMobileSnap);
-            unsubscribeViewportChanges();
-            root.style.scrollSnapType = previousSnapType;
-            root.style.scrollPaddingTop = previousScrollPaddingTop;
-        };
-    }, []);
-
-    const mobilePhoneSpacerHeight = mobileViewportHeight * 0.42;
+    const mobilePhoneSpacerHeight = activeService === lastServiceId
+        ? Math.max(mobileViewportHeight * 0.08, 72)
+        : mobileViewportHeight * 0.42;
     const mobilePhoneStickyTop = mobileViewportHeight * 0.4;
     const mobilePhoneViewportHeight = mobileViewportHeight * 0.6;
 
@@ -258,7 +216,7 @@ export default function Services() {
                                 ))}
                                 <div
                                     aria-hidden="true"
-                                    className="pointer-events-none md:hidden"
+                                    className="pointer-events-none transition-[height] duration-300 md:hidden"
                                     style={{ height: `${mobilePhoneSpacerHeight}px` }}
                                 />
                             </div>
@@ -494,7 +452,9 @@ function WidgetCard({ service, screenStyle }) {
 }
 
 const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFirst, isLast, headerRef, ruleRef }, ref) => {
-    const [opacity, setOpacity] = React.useState(0.24);
+    const [opacity, setOpacity] = React.useState(() => (
+        typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.24
+    ));
     const cardRef = React.useRef(null);
 
     React.useEffect(() => {
@@ -509,6 +469,11 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
         const fadeStartDelay = 120;
 
         const updateOpacity = () => {
+            if (window.innerWidth < 768) {
+                setOpacity(1);
+                return;
+            }
+
             const viewportHeight = getViewportHeight();
             const revealStart = viewportHeight * 0.9;
             const revealEnd = viewportHeight * 0.74;
