@@ -19,23 +19,93 @@ const phoneSlideVideos = Object.entries(
     .sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath))
     .map(([, src]) => src);
 
+const getViewportHeight = () => {
+    if (typeof window === 'undefined') {
+        return 0;
+    }
+
+    return window.visualViewport?.height ?? window.innerHeight;
+};
+
+const subscribeViewportChanges = (callback) => {
+    if (typeof window === 'undefined') {
+        return () => {};
+    }
+
+    window.addEventListener('resize', callback);
+    window.addEventListener('orientationchange', callback);
+
+    const viewport = window.visualViewport;
+    viewport?.addEventListener('resize', callback);
+    viewport?.addEventListener('scroll', callback);
+
+    return () => {
+        window.removeEventListener('resize', callback);
+        window.removeEventListener('orientationchange', callback);
+        viewport?.removeEventListener('resize', callback);
+        viewport?.removeEventListener('scroll', callback);
+    };
+};
+
 export default function Services() {
     const [activeService, setActiveService] = useState(1);
     const [mobileFooterProgress, setMobileFooterProgress] = useState(0);
+    const [mobileViewportHeight, setMobileViewportHeight] = useState(() => getViewportHeight());
     const cardsRef = useRef([]);
     const sectionRef = useRef(null);
     const headerRef = useRef(null);
     const ruleRef = useRef(null);
+    const lastScrollYRef = useRef(0);
+    const lastServiceChangeScrollYRef = useRef(0);
     const mobileFooterStartOffset = -0.5;
     const mobileFooterEndOffsetVh = -0.08;
+
+    useEffect(() => {
+        let frameId = null;
+
+        const syncViewportHeight = () => {
+            frameId = null;
+
+            const nextViewportHeight = getViewportHeight();
+            setMobileViewportHeight((current) => (
+                Math.abs(current - nextViewportHeight) < 1 ? current : nextViewportHeight
+            ));
+        };
+
+        const requestSync = () => {
+            if (frameId !== null) {
+                return;
+            }
+
+            frameId = window.requestAnimationFrame(syncViewportHeight);
+        };
+
+        requestSync();
+        const unsubscribeViewportChanges = subscribeViewportChanges(requestSync);
+
+        return () => {
+            unsubscribeViewportChanges();
+
+            if (frameId !== null) {
+                window.cancelAnimationFrame(frameId);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         const cards = cardsRef.current.filter(Boolean);
         if (!cards.length) return;
 
+        lastScrollYRef.current = window.scrollY;
+        lastServiceChangeScrollYRef.current = window.scrollY;
+
         const checkActiveCard = () => {
+            const viewportHeight = getViewportHeight();
+            const mobileTriggerLine = ruleRef.current
+                ? ruleRef.current.getBoundingClientRect().bottom + 76
+                : viewportHeight * 0.5;
             const triggerLine = window.innerWidth < 768
-                ? window.innerHeight * 0.5
+                ? mobileTriggerLine
                 : window.innerHeight * 0.62;
             let nextActiveService = parseInt(cards[0].dataset.service, 10);
 
@@ -48,15 +118,44 @@ export default function Services() {
                 }
             });
 
-            setActiveService((prev) => (prev !== nextActiveService ? nextActiveService : prev));
+            const scrollingDown = window.scrollY >= lastScrollYRef.current;
+            lastScrollYRef.current = window.scrollY;
+
+            setActiveService((prev) => {
+                if (window.innerWidth >= 768 || prev === nextActiveService) {
+                    return nextActiveService;
+                }
+
+                const mobileStepTravel = viewportHeight * 0.24;
+                const travelSinceLastChange = Math.abs(window.scrollY - lastServiceChangeScrollYRef.current);
+
+                if (travelSinceLastChange < mobileStepTravel) {
+                    return prev;
+                }
+
+                if (scrollingDown && nextActiveService > prev + 1) {
+                    lastServiceChangeScrollYRef.current = window.scrollY;
+                    return prev + 1;
+                }
+
+                if (!scrollingDown && nextActiveService < prev - 1) {
+                    lastServiceChangeScrollYRef.current = window.scrollY;
+                    return prev - 1;
+                }
+
+                lastServiceChangeScrollYRef.current = window.scrollY;
+                return nextActiveService;
+            });
         };
 
         // Check on scroll
         window.addEventListener('scroll', checkActiveCard, { passive: true });
+        const unsubscribeViewportChanges = subscribeViewportChanges(checkActiveCard);
         checkActiveCard(); // Initial check
 
         return () => {
             window.removeEventListener('scroll', checkActiveCard);
+            unsubscribeViewportChanges();
         };
     }, []);
 
@@ -77,9 +176,10 @@ export default function Services() {
                 return;
             }
 
+            const viewportHeight = getViewportHeight();
             const sectionTop = section.getBoundingClientRect().top;
-            const animationStart = window.innerHeight;
-            const animationEnd = window.innerHeight * mobileFooterEndOffsetVh;
+            const animationStart = viewportHeight;
+            const animationEnd = viewportHeight * mobileFooterEndOffsetVh;
             const nextProgress = Math.max(0, Math.min(1, (animationStart - sectionTop) / (animationStart - animationEnd)));
 
             setMobileFooterProgress((current) => (
@@ -98,11 +198,11 @@ export default function Services() {
 
         requestSync();
         window.addEventListener('scroll', requestSync, { passive: true });
-        window.addEventListener('resize', requestSync);
+        const unsubscribeViewportChanges = subscribeViewportChanges(requestSync);
 
         return () => {
             window.removeEventListener('scroll', requestSync);
-            window.removeEventListener('resize', requestSync);
+            unsubscribeViewportChanges();
 
             if (frameId !== null) {
                 window.cancelAnimationFrame(frameId);
@@ -110,11 +210,63 @@ export default function Services() {
         };
     }, []);
 
+    useEffect(() => {
+        const root = document.documentElement;
+        const previousSnapType = root.style.scrollSnapType;
+        const previousScrollPaddingTop = root.style.scrollPaddingTop;
+
+        const syncMobileSnap = () => {
+            const section = sectionRef.current;
+
+            if (window.innerWidth >= 768 || !section) {
+                root.style.scrollSnapType = previousSnapType;
+                root.style.scrollPaddingTop = previousScrollPaddingTop;
+                return;
+            }
+
+            const sectionRect = section.getBoundingClientRect();
+            const viewportHeight = getViewportHeight();
+            const sectionIsActive = sectionRect.top < viewportHeight && sectionRect.bottom > 0;
+
+            if (!sectionIsActive) {
+                root.style.scrollSnapType = previousSnapType;
+                root.style.scrollPaddingTop = previousScrollPaddingTop;
+                return;
+            }
+
+            const stickyHeaderHeight = headerRef.current?.offsetHeight ?? 0;
+            const snapPadding = stickyHeaderHeight > 0
+                ? Math.round(stickyHeaderHeight + 28)
+                : Math.round(viewportHeight * 0.34);
+
+            root.style.scrollSnapType = 'y proximity';
+            root.style.scrollPaddingTop = `${snapPadding}px`;
+        };
+
+        syncMobileSnap();
+        window.addEventListener('scroll', syncMobileSnap, { passive: true });
+        const unsubscribeViewportChanges = subscribeViewportChanges(syncMobileSnap);
+
+        return () => {
+            window.removeEventListener('scroll', syncMobileSnap);
+            unsubscribeViewportChanges();
+            root.style.scrollSnapType = previousSnapType;
+            root.style.scrollPaddingTop = previousScrollPaddingTop;
+        };
+    }, []);
+
+    const mobilePhoneSpacerHeight = mobileViewportHeight * 0.42;
+    const mobilePhoneStickyTop = mobileViewportHeight * 0.4;
+    const mobilePhoneTranslateY = (
+        1 - (mobileFooterStartOffset + (mobileFooterProgress * (1 - mobileFooterStartOffset)))
+    ) * mobileViewportHeight * 0.62;
+    const mobilePhoneViewportHeight = mobileViewportHeight * 0.6;
+
     return (
         <section
             id="services"
             ref={sectionRef}
-            className="relative bg-[#ffffff] text-gray-900 py-24"
+            className="relative overflow-x-clip bg-[#ffffff] text-gray-900 py-24"
             aria-labelledby="services-heading"
         >
             <div className="mx-auto max-w-[1600px] px-6 md:px-8 lg:px-12">
@@ -163,7 +315,8 @@ export default function Services() {
                                 ))}
                                 <div
                                     aria-hidden="true"
-                                    className="pointer-events-none h-[42svh] md:hidden"
+                                    className="pointer-events-none md:hidden"
+                                    style={{ height: `${mobilePhoneSpacerHeight}px` }}
                                 />
                             </div>
                         </div>
@@ -174,12 +327,15 @@ export default function Services() {
                 <div
                     className="sticky"
                     style={{
-                        top: '40svh',
-                        transform: `translateY(${(1 - (mobileFooterStartOffset + (mobileFooterProgress * (1 - mobileFooterStartOffset)))) * 62}svh)`,
+                        top: `${mobilePhoneStickyTop}px`,
+                        transform: `translateY(${mobilePhoneTranslateY}px)`,
                         willChange: 'transform',
                     }}
                 >
-                    <div className="relative h-[60svh] overflow-hidden rounded-t-[1.9rem] bg-[#fff]">
+                    <div
+                        className="relative overflow-hidden rounded-t-[1.9rem] bg-[#fff]"
+                        style={{ height: `${mobilePhoneViewportHeight}px` }}
+                    >
                         <div className="absolute left-1/2 top-[40px] -translate-x-[20%]">
                             <div
                                 className="w-[25.8rem] max-w-none"
@@ -408,12 +564,13 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
         const upcomingHiddenOpacity = 0.16;
         const fadeEndZone = 420;
         const minimumPassedOpacity = 0.22;
-        const revealStart = window.innerHeight * 0.9;
-        const revealEnd = window.innerHeight * 0.74;
         const fadeTriggerOffset = 10;
         const fadeStartDelay = 120;
 
         const updateOpacity = () => {
+            const viewportHeight = getViewportHeight();
+            const revealStart = viewportHeight * 0.9;
+            const revealEnd = viewportHeight * 0.74;
             const rect = card.getBoundingClientRect();
             const cardTop = rect.top;
             const isPastActive = service.id < activeServiceId;
@@ -451,10 +608,12 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
         };
 
         window.addEventListener('scroll', updateOpacity, { passive: true });
+        const unsubscribeViewportChanges = subscribeViewportChanges(updateOpacity);
         updateOpacity(); // Initial check
 
         return () => {
             window.removeEventListener('scroll', updateOpacity);
+            unsubscribeViewportChanges();
         };
     }, [activeServiceId, headerRef, isActive, ruleRef, service.id]);
 
@@ -473,6 +632,8 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
             style={{
                 opacity: opacity,
                 transform: isActive ? 'translateY(0)' : 'translateY(5px)',
+                scrollSnapAlign: 'start',
+                scrollSnapStop: 'always',
             }}
         >
             <CardContent service={service} />
