@@ -27,6 +27,7 @@ export default function Navbar() {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [dropdownLeft, setDropdownLeft] = useState(null);
     const [isCompact, setIsCompact] = useState(false);
+    const [isLightOverlay, setIsLightOverlay] = useState(false);
     const [isCompactHovered, setIsCompactHovered] = useState(false);
     const [isCompactPreviewReady, setIsCompactPreviewReady] = useState(false);
     const navRef = useRef(null);
@@ -42,8 +43,21 @@ export default function Navbar() {
         const syncCompactState = () => {
             const desktop = window.matchMedia('(min-width: 1280px)').matches;
             const nextCompact = desktop && window.scrollY > 180;
+            const navRect = navRef.current?.getBoundingClientRect();
+            const probeY = navRect ? navRect.top + navRect.height * 0.5 : 64;
+            const lightSectionIds = ['services', 'laptop-services'];
+            const nextLightOverlay = lightSectionIds.some(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (!section) {
+                    return false;
+                }
+
+                const rect = section.getBoundingClientRect();
+                return rect.top <= probeY && rect.bottom >= probeY;
+            });
 
             setIsCompact(current => (current === nextCompact ? current : nextCompact));
+            setIsLightOverlay(current => (current === nextLightOverlay ? current : nextLightOverlay));
             frameId = null;
         };
 
@@ -147,6 +161,18 @@ export default function Navbar() {
             : 'xl:pr-[7rem] 2xl:pr-[7.5rem]';
     const contentGap = isCompact && !compactPreviewOpen ? 'gap-3' : 'gap-2.5';
     const shellWidth = !isCompact ? '100%' : compactPreviewOpen ? COMPACT_PREVIEW_WIDTH : COMPACT_WIDTH;
+    const shellBorderColor = isLightOverlay ? 'rgba(15, 23, 42, 0.08)' : 'transparent';
+    const logoClassName = isLightOverlay
+        ? 'bg-[radial-gradient(circle_at_18%_18%,#d7d3c7_0%,#bdb8aa_34%,#979181_68%,#716c5f_100%)] bg-clip-text text-transparent [text-shadow:0_0_0.01px_rgba(113,108,95,0.18)]'
+        : 'text-white';
+    const desktopLinkClassName = isLightOverlay ? 'text-slate-700 hover:text-slate-950' : 'text-white/70 hover:text-white';
+    const mobileLinkClassName = isLightOverlay ? 'text-slate-700 hover:text-slate-950' : 'text-white/70 hover:text-white';
+    const mobileDividerClassName = isLightOverlay ? 'border-black/10' : 'border-white/10';
+    const mobileChipClassName = isLightOverlay
+        ? 'border border-black/10 bg-black/[0.03] text-slate-700 hover:border-black/20 hover:bg-black/[0.06] hover:text-slate-950'
+        : 'border border-white/12 bg-white/6 text-white/78 hover:border-white/22 hover:bg-white/10 hover:text-white';
+    const ctaClassName = isLightOverlay ? 'bg-slate-950 text-white' : 'bg-white text-black';
+    const mobileMenuBarClassName = isLightOverlay ? 'bg-slate-950' : 'bg-white';
 
     const getDropdownItemLabel = item => (typeof item === 'string' ? item : item.label);
     const getDropdownItemHref = (item, fallbackHref) => (typeof item === 'string' ? fallbackHref : item.href || fallbackHref);
@@ -205,17 +231,34 @@ export default function Navbar() {
                 >
                     <div
                         ref={navRef}
-                        className="relative min-h-[60px] overflow-hidden rounded-2xl border border-transparent bg-black/30 px-3 py-2.5 backdrop-blur-xl sm:px-4"
-                        style={{
-                            backgroundImage:
-                                'linear-gradient(rgba(0,0,0,0.29), rgba(0,0,0,0.29)), linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.09) 22%, rgba(255,255,255,0.03) 46%, rgba(255,255,255,0.018) 68%, rgba(255,255,255,0.05) 100%)',
-                            backgroundOrigin: 'border-box',
-                            backgroundClip: 'padding-box, border-box',
-                        }}
+                        className="relative min-h-[60px] overflow-hidden rounded-2xl border px-3 py-2.5 backdrop-blur-xl sm:px-4"
+                        style={{ borderColor: shellBorderColor }}
                     >
-                        <div className={`flex min-h-9 items-center ${contentGap} ${contentRightPadding}`}>
+                        <motion.div
+                            className="pointer-events-none absolute inset-0"
+                            animate={{ opacity: isLightOverlay ? 0 : 1 }}
+                            transition={{ duration: 0.28, ease: 'easeOut' }}
+                            style={{
+                                backgroundImage:
+                                    'linear-gradient(rgba(0,0,0,0.29), rgba(0,0,0,0.29)), linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.09) 22%, rgba(255,255,255,0.03) 46%, rgba(255,255,255,0.018) 68%, rgba(255,255,255,0.05) 100%)',
+                                backgroundOrigin: 'border-box',
+                                backgroundClip: 'padding-box, border-box',
+                            }}
+                        />
+                        <motion.div
+                            className="pointer-events-none absolute inset-0"
+                            animate={{ opacity: isLightOverlay ? 1 : 0 }}
+                            transition={{ duration: 0.28, ease: 'easeOut' }}
+                            style={{
+                                backgroundImage:
+                                    'linear-gradient(rgba(255,255,255,0.46), rgba(255,255,255,0.46)), linear-gradient(135deg, rgba(255,255,255,0.76) 0%, rgba(255,255,255,0.56) 24%, rgba(255,255,255,0.28) 54%, rgba(255,255,255,0.12) 100%)',
+                                backgroundOrigin: 'border-box',
+                                backgroundClip: 'padding-box, border-box',
+                            }}
+                        />
+                        <div className={`relative z-10 flex min-h-9 items-center ${contentGap} ${contentRightPadding}`}>
                             <a href="#" className="shrink-0">
-                                <span className="text-2xl font-black leading-none tracking-tight text-white">
+                                <span className={`text-2xl font-black leading-none tracking-tight transition-colors duration-300 ${logoClassName}`}>
                                     Jux Studio
                                 </span>
                                 <span className="hidden">
@@ -258,7 +301,7 @@ export default function Navbar() {
                                                     >
                                                         <a
                                                             href={link.href}
-                                                            className={`flex items-center gap-1 py-1.5 pr-3 text-[13px] font-medium text-white/70 transition-all duration-150 hover:text-white ${index === 0 ? 'pl-0' : 'pl-3'}`}
+                                                            className={`flex items-center gap-1 py-1.5 pr-3 text-[13px] font-medium transition-all duration-150 ${desktopLinkClassName} ${index === 0 ? 'pl-0' : 'pl-3'}`}
                                                         >
                                                             {link.label}
                                                             <ChevronDown />
@@ -302,7 +345,7 @@ export default function Navbar() {
                                             >
                                                 <a
                                                     href={link.href}
-                                                    className={`flex items-center gap-1 py-1.5 pr-2.5 text-[13px] font-medium text-white/70 transition-all duration-150 hover:text-white ${index === 0 ? 'pl-0' : 'pl-2.5'}`}
+                                                    className={`flex items-center gap-1 py-1.5 pr-2.5 text-[13px] font-medium transition-all duration-150 ${desktopLinkClassName} ${index === 0 ? 'pl-0' : 'pl-2.5'}`}
                                                 >
                                                     {link.label}
                                                     <ChevronDown />
@@ -328,22 +371,22 @@ export default function Navbar() {
                                 }}
                                 aria-label="Toggle menu"
                             >
-                                <span className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'translate-y-2 rotate-45' : ''}`} />
-                                <span className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
-                                <span className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-translate-y-2 -rotate-45' : ''}`} />
+                                <span className={`h-0.5 w-6 transition-all duration-300 ${mobileMenuBarClassName} ${isMobileMenuOpen ? 'translate-y-2 rotate-45' : ''}`} />
+                                <span className={`h-0.5 w-6 transition-all duration-300 ${mobileMenuBarClassName} ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
+                                <span className={`h-0.5 w-6 transition-all duration-300 ${mobileMenuBarClassName} ${isMobileMenuOpen ? '-translate-y-2 -rotate-45' : ''}`} />
                             </button>
                         </div>
 
                         <a
                             href="#contact"
-                            className="absolute right-3 top-1/2 hidden h-9 -translate-y-1/2 items-center gap-1.5 rounded-lg bg-white px-4 text-[13px] font-semibold text-black transition-transform duration-300 hover:scale-105 xl:inline-flex sm:right-4"
+                            className={`absolute right-3 top-1/2 hidden h-9 -translate-y-1/2 items-center gap-1.5 rounded-lg px-4 text-[13px] font-semibold transition-all duration-300 hover:scale-105 xl:inline-flex sm:right-4 ${ctaClassName}`}
                         >
                             <PulseDot />
                             Book a Call
                         </a>
 
                         {isMobileMenuOpen && (
-                            <div className="mt-3 border-t border-white/10 pt-3 xl:hidden">
+                            <div className={`relative z-10 mt-3 border-t pt-3 xl:hidden ${mobileDividerClassName}`}>
                                 <div className="space-y-2.5">
                                     {headerLinks.map((link, index) => {
                                         if (!link.dropdown) {
@@ -351,7 +394,7 @@ export default function Navbar() {
                                                 <a
                                                     key={index}
                                                     href={link.href}
-                                                    className="block py-1 text-base font-medium text-white/70 hover:text-white"
+                                                    className={`block py-1 text-base font-medium transition-colors ${mobileLinkClassName}`}
                                                     onClick={() => setIsMobileMenuOpen(false)}
                                                 >
                                                     {link.label}
@@ -371,7 +414,7 @@ export default function Navbar() {
                                             <div key={index} className="py-1">
                                                 <button
                                                     type="button"
-                                                    className="flex w-full items-center justify-between text-left text-base font-medium text-white/70 transition-colors hover:text-white"
+                                                    className={`flex w-full items-center justify-between text-left text-base font-medium transition-colors ${mobileLinkClassName}`}
                                                     onClick={() => {
                                                         setMobileExpandedDropdown(current => current === index ? null : index);
                                                     }}
@@ -400,7 +443,7 @@ export default function Navbar() {
                                                                     <a
                                                                         key={item.href}
                                                                         href={item.href}
-                                                                        className="inline-flex rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-[12px] font-medium text-white/78 transition-colors hover:border-white/22 hover:bg-white/10 hover:text-white"
+                                                                        className={`inline-flex rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${mobileChipClassName}`}
                                                                         onClick={() => {
                                                                             setIsMobileMenuOpen(false);
                                                                             setMobileExpandedDropdown(null);
@@ -418,7 +461,7 @@ export default function Navbar() {
                                     })}
                                     <a
                                         href="#contact"
-                                        className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black"
+                                        className={`mt-1 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold ${ctaClassName}`}
                                         onClick={() => {
                                             setIsMobileMenuOpen(false);
                                             setMobileExpandedDropdown(null);
