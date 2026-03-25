@@ -37,8 +37,8 @@ const VIEWPORTS = {
         cardCount: 5,
         cardWidth: 150,
         cardHeight: 209,
-        orbitRadiusX: 186,
-        orbitRadiusY: 42,
+        orbitRadiusX: 142,
+        orbitRadiusY: 32,
         angleJitterMain: 0.016,
         angleJitterSecondary: 0.006,
         angleJitterTertiary: 0.004,
@@ -47,7 +47,7 @@ const VIEWPORTS = {
         liftJitter: 4.5,
         tiltJitterMain: 0.9,
         tiltJitterSecondary: 0.35,
-        sideSpread: 6,
+        sideSpread: 4.75,
         yOffset: 22,
         depthLift: 4,
         scaleBase: 0.86,
@@ -65,8 +65,8 @@ const VIEWPORTS = {
         stageMaxWidth: 560,
         cardTop: '48%',
         guideTop: '56%',
-        guideWidth: 430,
-        guideHeight: 156,
+        guideWidth: 327,
+        guideHeight: 119,
         glowWidth: '84%',
         glowHeight: 44,
         glowBottom: 54,
@@ -275,7 +275,6 @@ export default function Marquee({ className = '' }) {
     const lastTimeRef = useRef(null);
     const config = getViewportConfig(viewportWidth);
     const cards = marqueeCardSet.slice(0, config.cardCount);
-    const shouldAnimate = viewportWidth >= 768;
 
     useEffect(() => {
         const handleResize = () => {
@@ -291,11 +290,6 @@ export default function Marquee({ className = '' }) {
     }, []);
 
     useEffect(() => {
-        if (!shouldAnimate) {
-            setRotation(0);
-            return () => {};
-        }
-
         lastTimeRef.current = null;
 
         const animate = now => {
@@ -303,7 +297,7 @@ export default function Marquee({ className = '' }) {
                 lastTimeRef.current = now;
             }
 
-            const delta = now - lastTimeRef.current;
+            const delta = Math.min(now - lastTimeRef.current, 32);
             lastTimeRef.current = now;
 
             setRotation(previous => (previous + delta * config.speed) % TAU);
@@ -317,7 +311,7 @@ export default function Marquee({ className = '' }) {
                 window.cancelAnimationFrame(frameRef.current);
             }
         };
-    }, [config.speed, shouldAnimate]);
+    }, [config.speed]);
 
     return (
         <motion.section
