@@ -14,7 +14,7 @@ function App() {
             <main className="flex-1">
                 <div className="relative overflow-hidden">
                     <UnicornHeroBackground />
-                    <div className="absolute inset-0 z-[1] bg-black/35" />
+                    <div className="pointer-events-none absolute inset-0 z-[1] bg-black/35" />
                     <Hero />
                     <Marquee rows="top" className="relative z-10 pt-4" />
                     <Navbar />

@@ -3,8 +3,8 @@ import { PulseDot } from '../ui/Button';
 
 export default function Hero() {
     return (
-        <section className="relative flex items-center overflow-hidden pt-48 pb-8 sm:pt-56 sm:pb-12">
-            <div className="relative z-10 flex flex-col items-start justify-center text-left px-8 w-full max-w-4xl mx-auto" style={{ maxWidth: '56rem' }}>
+        <section className="pointer-events-none relative flex items-center overflow-hidden pt-48 pb-8 sm:pt-56 sm:pb-12">
+            <div className="pointer-events-auto relative z-10 flex flex-col items-start justify-center text-left px-8 w-full max-w-4xl mx-auto" style={{ maxWidth: '56rem' }}>
                 <motion.h1
                     className="font-extrabold leading-[1.05] tracking-tight mb-5 text-white"
                     style={{ fontSize: 'clamp(2rem, 5vw, var(--text-h1))' }}
