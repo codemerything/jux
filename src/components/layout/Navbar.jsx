@@ -200,10 +200,10 @@ export default function Navbar() {
                 >
                     <div
                         ref={navRef}
-                        className="relative min-h-[60px] overflow-hidden rounded-2xl border border-transparent bg-black/38 px-3 py-2.5 shadow-[0_20px_60px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:px-4"
+                        className="relative min-h-[60px] overflow-hidden rounded-2xl border border-transparent bg-black/30 px-3 py-2.5 backdrop-blur-xl sm:px-4"
                         style={{
                             backgroundImage:
-                                'linear-gradient(rgba(0,0,0,0.38), rgba(0,0,0,0.38)), linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.09) 22%, rgba(255,255,255,0.03) 46%, rgba(255,255,255,0.018) 68%, rgba(255,255,255,0.05) 100%)',
+                                'linear-gradient(rgba(0,0,0,0.29), rgba(0,0,0,0.29)), linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.09) 22%, rgba(255,255,255,0.03) 46%, rgba(255,255,255,0.018) 68%, rgba(255,255,255,0.05) 100%)',
                             backgroundOrigin: 'border-box',
                             backgroundClip: 'padding-box, border-box',
                         }}
