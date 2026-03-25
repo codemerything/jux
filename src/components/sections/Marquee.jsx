@@ -32,6 +32,15 @@ const marqueeCardSet = MARQUEE_CARD_ORDER
     .map(card => card.src);
 
 const TAU = Math.PI * 2;
+const MOBILE_DRAG_ROTATION_FACTOR = 0.0085;
+const MOBILE_INERTIA_DAMPING = 0.92;
+const MOBILE_INERTIA_MIN_VELOCITY = 0.00008;
+
+const normalizeRotation = value => {
+    const normalized = value % TAU;
+    return normalized < 0 ? normalized + TAU : normalized;
+};
+
 const VIEWPORTS = {
     mobile: {
         cardCount: 5,
@@ -179,7 +188,7 @@ function getViewportConfig(width) {
     return VIEWPORTS.desktop;
 }
 
-function OrbitCard({ src, index, total, rotation, config }) {
+function OrbitCard({ src, index, total, rotation, config, allowHoverMotion, isTouchDevice }) {
     const seed = index / total;
     const baseAngle = rotation + seed * TAU;
     const angleOffset =
@@ -218,7 +227,7 @@ function OrbitCard({ src, index, total, rotation, config }) {
 
     return (
         <div
-            className="absolute left-1/2"
+            className={`absolute left-1/2 ${isTouchDevice ? 'pointer-events-none' : ''}`}
             style={{
                 top: config.cardTop,
                 width: `${config.cardWidth}px`,
@@ -232,11 +241,11 @@ function OrbitCard({ src, index, total, rotation, config }) {
         >
             <motion.div
                 className="relative isolate h-full w-full rounded-[1.45rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.12)_18%,rgba(255,255,255,0.06)_52%,rgba(255,255,255,0.16)_100%)] p-px"
-                whileHover={{
+                whileHover={allowHoverMotion ? {
                     y: -18,
                     rotate: hoverTilt,
                     scale: 1.014,
-                }}
+                } : undefined}
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
                 style={{
                     boxShadow: `0 36px 96px rgba(0,0,0,${Math.min(0.52, shadowOpacity + 0.08)}), 0 14px 34px rgba(0,0,0,${Math.max(
@@ -256,6 +265,7 @@ function OrbitCard({ src, index, total, rotation, config }) {
                     <img
                         src={src}
                         alt=""
+                        draggable={false}
                         loading="lazy"
                         decoding="async"
                         fetchPriority="low"
@@ -271,10 +281,24 @@ function OrbitCard({ src, index, total, rotation, config }) {
 export default function Marquee({ className = '' }) {
     const [rotation, setRotation] = useState(0);
     const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1440 : window.innerWidth));
+    const stageRef = useRef(null);
     const frameRef = useRef(null);
     const lastTimeRef = useRef(null);
+    const rotationRef = useRef(0);
+    const dragStateRef = useRef({
+        active: false,
+        pointerId: null,
+        startX: 0,
+        startRotation: 0,
+        lastX: 0,
+        lastTime: 0,
+    });
+    const inertiaVelocityRef = useRef(0);
+    const pauseAutoRotateUntilRef = useRef(0);
     const config = getViewportConfig(viewportWidth);
     const cards = marqueeCardSet.slice(0, config.cardCount);
+    const isTouchCarousel = viewportWidth < 768;
+    const allowHoverMotion = !isTouchCarousel;
 
     useEffect(() => {
         const handleResize = () => {
@@ -297,10 +321,34 @@ export default function Marquee({ className = '' }) {
                 lastTimeRef.current = now;
             }
 
+            if (dragStateRef.current.active || now < pauseAutoRotateUntilRef.current) {
+                const delta = Math.min(now - lastTimeRef.current, 32);
+                lastTimeRef.current = now;
+
+                if (!dragStateRef.current.active && Math.abs(inertiaVelocityRef.current) > MOBILE_INERTIA_MIN_VELOCITY) {
+                    const nextRotation = normalizeRotation(
+                        rotationRef.current + inertiaVelocityRef.current * delta
+                    );
+
+                    inertiaVelocityRef.current *= Math.pow(MOBILE_INERTIA_DAMPING, delta / 16);
+                    rotationRef.current = nextRotation;
+                    setRotation(nextRotation);
+                } else if (!dragStateRef.current.active) {
+                    inertiaVelocityRef.current = 0;
+                }
+
+                frameRef.current = window.requestAnimationFrame(animate);
+                return;
+            }
+
             const delta = Math.min(now - lastTimeRef.current, 32);
             lastTimeRef.current = now;
 
-            setRotation(previous => (previous + delta * config.speed) % TAU);
+            setRotation(previous => {
+                const nextRotation = normalizeRotation(previous + delta * config.speed);
+                rotationRef.current = nextRotation;
+                return nextRotation;
+            });
             frameRef.current = window.requestAnimationFrame(animate);
         };
 
@@ -313,6 +361,64 @@ export default function Marquee({ className = '' }) {
         };
     }, [config.speed]);
 
+    const handlePointerDown = event => {
+        if (!isTouchCarousel || event.pointerType === 'mouse') {
+            return;
+        }
+
+        dragStateRef.current = {
+            active: true,
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startRotation: rotationRef.current,
+            lastX: event.clientX,
+            lastTime: performance.now(),
+        };
+        inertiaVelocityRef.current = 0;
+        pauseAutoRotateUntilRef.current = performance.now() + 1200;
+        stageRef.current?.setPointerCapture?.(event.pointerId);
+    };
+
+    const handlePointerMove = event => {
+        const dragState = dragStateRef.current;
+        if (!dragState.active || dragState.pointerId !== event.pointerId) {
+            return;
+        }
+
+        const deltaX = event.clientX - dragState.startX;
+        const now = performance.now();
+        const deltaTime = Math.max(1, now - dragState.lastTime);
+        const nextRotation = normalizeRotation(
+            dragState.startRotation + deltaX * MOBILE_DRAG_ROTATION_FACTOR
+        );
+        const instantVelocity =
+            ((event.clientX - dragState.lastX) * MOBILE_DRAG_ROTATION_FACTOR) / deltaTime;
+
+        inertiaVelocityRef.current = instantVelocity * 0.7 + inertiaVelocityRef.current * 0.3;
+        dragState.lastX = event.clientX;
+        dragState.lastTime = now;
+        rotationRef.current = nextRotation;
+        setRotation(nextRotation);
+    };
+
+    const handlePointerRelease = event => {
+        const dragState = dragStateRef.current;
+        if (!dragState.active || dragState.pointerId !== event.pointerId) {
+            return;
+        }
+
+        dragStateRef.current = {
+            active: false,
+            pointerId: null,
+            startX: 0,
+            startRotation: rotationRef.current,
+            lastX: 0,
+            lastTime: 0,
+        };
+        pauseAutoRotateUntilRef.current = performance.now() + 700;
+        stageRef.current?.releasePointerCapture?.(event.pointerId);
+    };
+
     return (
         <motion.section
             className={`relative overflow-hidden ${className}`}
@@ -321,8 +427,18 @@ export default function Marquee({ className = '' }) {
             transition={{ duration: 1.35, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
         >
             <div
+                ref={stageRef}
                 className="relative mx-auto w-full overflow-hidden px-4 sm:px-6 lg:px-0"
-                style={{ height: `${config.stageHeight}px`, maxWidth: `${config.stageMaxWidth}px` }}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerRelease}
+                onPointerCancel={handlePointerRelease}
+                onLostPointerCapture={handlePointerRelease}
+                style={{
+                    height: `${config.stageHeight}px`,
+                    maxWidth: `${config.stageMaxWidth}px`,
+                    touchAction: isTouchCarousel ? 'pan-y' : 'auto',
+                }}
             >
                 <div
                     className="pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2 rounded-full bg-white/5 blur-3xl"
@@ -348,6 +464,8 @@ export default function Marquee({ className = '' }) {
                         total={cards.length}
                         rotation={rotation}
                         config={config}
+                        allowHoverMotion={allowHoverMotion}
+                        isTouchDevice={isTouchCarousel}
                     />
                 ))}
             </div>
