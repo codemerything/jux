@@ -147,13 +147,15 @@ export default function LaptopServices() {
                                     key={service.id}
                                     ref={el => cardRefs.current[index] = el}
                                     onClick={() => toggleMobilePreview(service.id)}
-                                    className={`rounded-2xl border p-8 transition-all duration-500 ${index === laptopServices.length - 1 ? 'pb-16' : ''} ${activeService === index
+                                    className={`rounded-2xl border transition-all duration-500 ${index === laptopServices.length - 1 ? 'lg:pb-16' : ''} ${activeService === index
                                         ? 'bg-white border-gray-200 shadow-lg'
                                         : 'bg-transparent border-gray-100'
                                         } ${mobilePreviewSlides[service.id] ? 'cursor-pointer lg:cursor-default' : ''}`}
                                 >
-                                    <h3 className="font-bold mb-4 text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>{service.title}</h3>
-                                    <p className="text-gray-500 mb-6 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>{service.description}</p>
+                                    <div className="px-8 pt-8">
+                                        <h3 className="font-bold mb-4 text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>{service.title}</h3>
+                                        <p className="text-gray-500 mb-6 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>{service.description}</p>
+                                    </div>
 
                                     {mobilePreviewSlides[service.id] ? (
                                         <div className="space-y-0">
@@ -162,18 +164,20 @@ export default function LaptopServices() {
                                                     mobilePreviewServiceId === service.id ? 'max-h-0 opacity-0' : 'max-h-[220px] opacity-100'
                                                 }`}
                                             >
-                                                <div className="mb-6 h-[21px]" aria-hidden="true" />
+                                                <div className="px-8 pb-8">
+                                                    <div className="mb-6 h-[21px]" aria-hidden="true" />
 
-                                                {laptopServiceCallouts[service.id] && (
-                                                    <div className="pt-6 border-t border-gray-100">
-                                                        <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
-                                                            {laptopServiceCallouts[service.id].title}
-                                                        </p>
-                                                        <p className="max-w-[560px] leading-[1.5] text-gray-500" style={{ fontSize: 'var(--text-xs)' }}>
-                                                            {laptopServiceCallouts[service.id].detail}
-                                                        </p>
-                                                    </div>
-                                                )}
+                                                    {laptopServiceCallouts[service.id] && (
+                                                        <div className="pt-6 border-t border-gray-100">
+                                                            <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
+                                                                {laptopServiceCallouts[service.id].title}
+                                                            </p>
+                                                            <p className="max-w-[560px] leading-[1.5] text-gray-500" style={{ fontSize: 'var(--text-xs)' }}>
+                                                                {laptopServiceCallouts[service.id].detail}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             <div
@@ -183,19 +187,21 @@ export default function LaptopServices() {
                                                         : 'mt-0 max-h-0 opacity-0'
                                                 }`}
                                             >
-                                                <div className="overflow-hidden rounded-[12px] border border-gray-200 bg-white">
-                                                    <div
-                                                        className="aspect-[16/10] bg-white bg-cover bg-top bg-no-repeat"
-                                                        style={{
-                                                            backgroundImage: `url(${laptopWideSlides[mobilePreviewSlides[service.id].key]})`,
-                                                            backgroundPosition: mobilePreviewSlides[service.id].position,
-                                                        }}
-                                                    />
+                                                <div className="px-2 pb-2">
+                                                    <div className="overflow-hidden rounded-[12px] border border-gray-200 bg-white">
+                                                        <div
+                                                            className="aspect-[16/10] bg-white bg-cover bg-top bg-no-repeat"
+                                                            style={{
+                                                                backgroundImage: `url(${laptopWideSlides[mobilePreviewSlides[service.id].key]})`,
+                                                                backgroundPosition: mobilePreviewSlides[service.id].position,
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     ) : (
-                                        <>
+                                        <div className="px-8 pb-8">
                                             <div className="mb-6 h-[21px]" aria-hidden="true" />
 
                                             {laptopServiceCallouts[service.id] && (
@@ -208,7 +214,7 @@ export default function LaptopServices() {
                                                     </p>
                                                 </div>
                                             )}
-                                        </>
+                                        </div>
                                     )}
                                 </div>
                             ))}
