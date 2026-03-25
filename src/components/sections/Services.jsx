@@ -37,19 +37,16 @@ const subscribeViewportChanges = (callback) => {
 
     const viewport = window.visualViewport;
     viewport?.addEventListener('resize', callback);
-    viewport?.addEventListener('scroll', callback);
 
     return () => {
         window.removeEventListener('resize', callback);
         window.removeEventListener('orientationchange', callback);
         viewport?.removeEventListener('resize', callback);
-        viewport?.removeEventListener('scroll', callback);
     };
 };
 
 export default function Services() {
     const [activeService, setActiveService] = useState(1);
-    const [mobileViewportHeight, setMobileViewportHeight] = useState(() => getViewportHeight());
     const cardsRef = useRef([]);
     const sectionRef = useRef(null);
     const headerRef = useRef(null);
@@ -57,38 +54,6 @@ export default function Services() {
     const lastScrollYRef = useRef(0);
     const lastServiceChangeScrollYRef = useRef(0);
     const lastServiceId = phoneServices[phoneServices.length - 1]?.id ?? 1;
-
-    useEffect(() => {
-        let frameId = null;
-
-        const syncViewportHeight = () => {
-            frameId = null;
-
-            const nextViewportHeight = getViewportHeight();
-            setMobileViewportHeight((current) => (
-                Math.abs(current - nextViewportHeight) < 1 ? current : nextViewportHeight
-            ));
-        };
-
-        const requestSync = () => {
-            if (frameId !== null) {
-                return;
-            }
-
-            frameId = window.requestAnimationFrame(syncViewportHeight);
-        };
-
-        requestSync();
-        const unsubscribeViewportChanges = subscribeViewportChanges(requestSync);
-
-        return () => {
-            unsubscribeViewportChanges();
-
-            if (frameId !== null) {
-                window.cancelAnimationFrame(frameId);
-            }
-        };
-    }, []);
 
     useEffect(() => {
         const cards = cardsRef.current.filter(Boolean);
@@ -158,10 +123,10 @@ export default function Services() {
     }, []);
 
     const mobilePhoneSpacerHeight = activeService === lastServiceId
-        ? Math.max(mobileViewportHeight * 0.08, 72)
-        : mobileViewportHeight * 0.42;
-    const mobilePhoneStickyTop = mobileViewportHeight * 0.4;
-    const mobilePhoneViewportHeight = mobileViewportHeight * 0.6;
+        ? 'max(8dvh, 72px)'
+        : '42dvh';
+    const mobilePhoneStickyTop = '40dvh';
+    const mobilePhoneViewportHeight = '60dvh';
 
     return (
         <section
@@ -217,7 +182,7 @@ export default function Services() {
                                 <div
                                     aria-hidden="true"
                                     className="pointer-events-none transition-[height] duration-300 md:hidden"
-                                    style={{ height: `${mobilePhoneSpacerHeight}px` }}
+                                    style={{ height: mobilePhoneSpacerHeight }}
                                 />
                             </div>
                         </div>
@@ -228,17 +193,25 @@ export default function Services() {
                 <div
                     className="sticky"
                     style={{
-                        top: `${mobilePhoneStickyTop}px`,
+                        top: mobilePhoneStickyTop,
                     }}
                 >
                     <div
                         className="relative overflow-hidden rounded-t-[1.9rem] bg-[#fff]"
-                        style={{ height: `${mobilePhoneViewportHeight}px` }}
+                        style={{
+                            height: mobilePhoneViewportHeight,
+                            transform: 'translateZ(0)',
+                            backfaceVisibility: 'hidden',
+                        }}
                     >
                         <div className="absolute left-1/2 top-[90px] -translate-x-[20%]">
                             <div
                                 className="w-[25.8rem] max-w-none"
-                                style={{ transform: 'rotate(16deg) scale(1.1)', transformOrigin: 'top center' }}
+                                style={{
+                                    transform: 'translateZ(0) rotate(16deg) scale(1.1)',
+                                    transformOrigin: 'top center',
+                                    backfaceVisibility: 'hidden',
+                                }}
                             >
                                 <PhoneMockup activeService={activeService} className="w-full" />
                             </div>
