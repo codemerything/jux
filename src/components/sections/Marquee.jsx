@@ -8,14 +8,33 @@ const ringCards = Object.entries(
     })
 )
     .sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath))
-    .map(([, src]) => src);
+    .map(([path, src]) => ({
+        fileName: path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? path,
+        src,
+    }));
+
+const MARQUEE_CARD_ORDER = [
+    '9slJRiUdX60eHMiQLI6Tf2AnWMU',
+    'ahzChqmXkvjgw1OjVCmmejV1s',
+    '1',
+    'qFdogfcA55X0fvnIj1bHUa9obg',
+    '1.1',
+    'KcUjqrwClJ7a1KDTpEofNVleg',
+    '1.5diamonds1',
+    'LmK9SwBD5YaCi8DkyxMrDclx1xU',
+    '23',
+    '1.7',
+];
+
+const marqueeCardSet = MARQUEE_CARD_ORDER
+    .map(fileName => ringCards.find(card => card.fileName === fileName))
+    .filter(Boolean)
+    .map(card => card.src);
 
 const TAU = Math.PI * 2;
-const OVERLAY_NOISE_TEXTURE =
-    `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E")`;
 const VIEWPORTS = {
     mobile: {
-        cardCount: 7,
+        cardCount: 5,
         cardWidth: 150,
         cardHeight: 209,
         orbitRadiusX: 186,
@@ -59,7 +78,7 @@ const VIEWPORTS = {
         speed: 0.000084,
     },
     tablet: {
-        cardCount: 8,
+        cardCount: 6,
         cardWidth: 214,
         cardHeight: 298,
         orbitRadiusX: 340,
@@ -103,7 +122,7 @@ const VIEWPORTS = {
         speed: 0.000112,
     },
     desktop: {
-        cardCount: 10,
+        cardCount: 8,
         cardWidth: 286,
         cardHeight: 398,
         orbitRadiusX: 510,
@@ -212,7 +231,7 @@ function OrbitCard({ src, index, total, rotation, config }) {
             }}
         >
             <motion.div
-                className="relative isolate h-full w-full overflow-hidden rounded-[1.4rem] border border-white/10 bg-transparent"
+                className="relative isolate h-full w-full rounded-[1.45rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.12)_18%,rgba(255,255,255,0.06)_52%,rgba(255,255,255,0.16)_100%)] p-px"
                 whileHover={{
                     y: -18,
                     rotate: hoverTilt,
@@ -226,9 +245,24 @@ function OrbitCard({ src, index, total, rotation, config }) {
                     )})`,
                 }}
             >
-                <div className="absolute inset-0 bg-black/80" />
-                <img src={src} alt="" className="relative z-10 h-full w-full object-cover" />
-                <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_18%,transparent_44%,transparent_100%)]" />
+                <div
+                    className="relative h-full w-full overflow-hidden bg-black"
+                    style={{
+                        borderRadius: 'calc(1.45rem - 1px)',
+                        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -1px 0 rgba(255,255,255,0.03)',
+                    }}
+                >
+                    <div className="absolute inset-0 bg-black/80" />
+                    <img
+                        src={src}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        fetchPriority="low"
+                        className="relative z-10 h-full w-full object-cover"
+                    />
+                    <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02)_18%,transparent_44%,transparent_100%)]" />
+                </div>
             </motion.div>
         </div>
     );
@@ -240,7 +274,8 @@ export default function Marquee({ className = '' }) {
     const frameRef = useRef(null);
     const lastTimeRef = useRef(null);
     const config = getViewportConfig(viewportWidth);
-    const cards = ringCards.slice(0, config.cardCount);
+    const cards = marqueeCardSet.slice(0, config.cardCount);
+    const shouldAnimate = viewportWidth >= 768;
 
     useEffect(() => {
         const handleResize = () => {
@@ -256,6 +291,11 @@ export default function Marquee({ className = '' }) {
     }, []);
 
     useEffect(() => {
+        if (!shouldAnimate) {
+            setRotation(0);
+            return () => {};
+        }
+
         lastTimeRef.current = null;
 
         const animate = now => {
@@ -277,7 +317,7 @@ export default function Marquee({ className = '' }) {
                 window.cancelAnimationFrame(frameRef.current);
             }
         };
-    }, [config.speed]);
+    }, [config.speed, shouldAnimate]);
 
     return (
         <motion.section
@@ -335,15 +375,6 @@ export default function Marquee({ className = '' }) {
                     className="absolute inset-0"
                     style={{
                         background: config.overlayGradient,
-                    }}
-                />
-                <div
-                    className="absolute inset-0 opacity-[0.12]"
-                    style={{
-                        backgroundImage: OVERLAY_NOISE_TEXTURE,
-                        backgroundRepeat: 'repeat',
-                        backgroundSize: '180px 180px',
-                        mixBlendMode: 'multiply',
                     }}
                 />
             </div>

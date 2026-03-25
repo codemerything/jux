@@ -117,6 +117,7 @@ const useMobileRevealProgress = (targetRef, { start = 0.72, end = 0.42 } = {}) =
 
 export default function Services() {
     const [activeService, setActiveService] = useState(1);
+    const [shouldLoadPhoneMedia, setShouldLoadPhoneMedia] = useState(false);
     const cardsRef = useRef([]);
     const sectionRef = useRef(null);
     const headerRef = useRef(null);
@@ -128,6 +129,33 @@ export default function Services() {
     const headerLineOneProgress = getStaggeredProgress(headerRevealProgress, 0);
     const headerLineTwoProgress = getStaggeredProgress(headerRevealProgress, 0.18);
     const headerRuleProgress = getStaggeredProgress(headerRevealProgress, 0.32);
+
+    useEffect(() => {
+        const section = sectionRef.current;
+        if (!section || shouldLoadPhoneMedia) {
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        setShouldLoadPhoneMedia(true);
+                        observer.disconnect();
+                    }
+                });
+            },
+            {
+                rootMargin: '320px 0px',
+            }
+        );
+
+        observer.observe(section);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [shouldLoadPhoneMedia]);
 
     useEffect(() => {
         const cards = cardsRef.current.filter(Boolean);
@@ -213,7 +241,7 @@ export default function Services() {
                 <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-start gap-8 lg:grid-cols-[460px_minmax(0,1fr)] lg:gap-12 lg:translate-x-10 xl:translate-x-16">
                     {/* Phone Mockup */}
                     <div className="hidden lg:block sticky top-24">
-                        <PhoneMockup activeService={activeService} />
+                        <PhoneMockup activeService={activeService} shouldLoadMedia={shouldLoadPhoneMedia} />
                     </div>
 
                     {/* Content Column */}
@@ -299,7 +327,7 @@ export default function Services() {
                                     backfaceVisibility: 'hidden',
                                 }}
                             >
-                                <PhoneMockup activeService={activeService} className="w-full" />
+                                <PhoneMockup activeService={activeService} shouldLoadMedia={shouldLoadPhoneMedia} className="w-full" />
                             </div>
                         </div>
                     </div>
@@ -356,7 +384,7 @@ const phoneServiceUtilityCards = {
     },
 };
 
-function PhoneMockup({ activeService, className = '' }) {
+function PhoneMockup({ activeService, shouldLoadMedia = false, className = '' }) {
     // Screen area within phone.png (1349×2048), measured via pixel scan:
     // left=18px (1.33%), right margin=521px (38.62%), top=26px (1.27%), bottom margin=372px (18.16%)
     // Screen dimensions: 810×1650px within 1349×2048 image
@@ -369,6 +397,8 @@ function PhoneMockup({ activeService, className = '' }) {
             <img
                 src="/phone.png"
                 alt="Phone body"
+                loading="lazy"
+                decoding="async"
                 className="relative z-0 h-full w-full rounded-[60px]"
             />
 
@@ -389,6 +419,8 @@ function PhoneMockup({ activeService, className = '' }) {
                         service={service}
                         screenStyle={serviceScreenStyles[index]}
                         isActive={activeService === service.id}
+                        shouldPrime={Math.abs(activeService - service.id) <= 1}
+                        shouldLoadMedia={shouldLoadMedia}
                     />
                 ))}
             </div>
@@ -397,6 +429,8 @@ function PhoneMockup({ activeService, className = '' }) {
             <img
                 src="/widget.png"
                 alt="Dynamic Island"
+                loading="lazy"
+                decoding="async"
                 className="absolute z-20 pointer-events-none"
                 style={{
                     width: '19.69%',
@@ -409,16 +443,23 @@ function PhoneMockup({ activeService, className = '' }) {
     );
 }
 
-function PhoneScreen({ service, screenStyle, isActive }) {
+function PhoneScreen({ service, screenStyle, isActive, shouldPrime, shouldLoadMedia }) {
     const hasImageBackground = Boolean(screenStyle.image);
     const hasVideoBackground = Boolean(screenStyle.video);
     const hasMediaBackground = hasImageBackground || hasVideoBackground;
     const fitWidthTop = Boolean(screenStyle.fitWidthTop);
     const videoRef = useRef(null);
+    const [hasAttachedMedia, setHasAttachedMedia] = useState(false);
+
+    useEffect(() => {
+        if (shouldLoadMedia && shouldPrime) {
+            setHasAttachedMedia(true);
+        }
+    }, [shouldLoadMedia, shouldPrime]);
 
     useEffect(() => {
         const video = videoRef.current;
-        if (!video || !hasVideoBackground) {
+        if (!video || !hasVideoBackground || !hasAttachedMedia) {
             return;
         }
 
@@ -431,7 +472,7 @@ function PhoneScreen({ service, screenStyle, isActive }) {
         }
 
         video.pause();
-    }, [hasVideoBackground, isActive]);
+    }, [hasAttachedMedia, hasVideoBackground, isActive]);
 
     return (
         <div
@@ -441,8 +482,10 @@ function PhoneScreen({ service, screenStyle, isActive }) {
         >
             {hasImageBackground && (
                 <img
-                    src={screenStyle.image}
+                    src={hasAttachedMedia ? screenStyle.image : undefined}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className={fitWidthTop
                         ? 'absolute left-0 top-0 w-full h-auto'
                         : 'absolute inset-0 h-full w-full object-cover object-center'}
@@ -451,12 +494,12 @@ function PhoneScreen({ service, screenStyle, isActive }) {
             {hasVideoBackground && (
                 <video
                     ref={videoRef}
-                    src={screenStyle.video}
+                    src={hasAttachedMedia ? screenStyle.video : undefined}
                     className="absolute inset-0 h-full w-full object-cover object-center"
                     muted
                     loop
                     playsInline
-                    preload="auto"
+                    preload={isActive ? 'metadata' : 'none'}
                 />
             )}
             {/* Decorative content inside the phone screen */}

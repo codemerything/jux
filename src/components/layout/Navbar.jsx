@@ -146,6 +146,9 @@ export default function Navbar() {
     const contentGap = isCompact && !compactPreviewOpen ? 'gap-3' : 'gap-2.5';
     const shellWidth = !isCompact ? '100%' : compactPreviewOpen ? COMPACT_PREVIEW_WIDTH : COMPACT_WIDTH;
 
+    const getDropdownItemLabel = item => (typeof item === 'string' ? item : item.label);
+    const getDropdownItemHref = (item, fallbackHref) => (typeof item === 'string' ? fallbackHref : item.href || fallbackHref);
+
     return (
         <nav
             className="fixed inset-x-0 top-0 z-30 px-3 pt-3 sm:px-4 sm:pt-4"
@@ -386,10 +389,10 @@ export default function Navbar() {
                                                 {section.items.map((item, itemIndex) => (
                                                     <a
                                                         key={itemIndex}
-                                                        href="#services"
+                                                        href={getDropdownItemHref(item, activeDropdown.href)}
                                                         className="block text-[13px] text-white/70 transition-colors hover:text-white"
                                                     >
-                                                        {item}
+                                                        {getDropdownItemLabel(item)}
                                                     </a>
                                                 ))}
                                             </div>

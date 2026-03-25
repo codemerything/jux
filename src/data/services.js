@@ -142,7 +142,21 @@ export const navLinks = [
         ]
     },
     { label: 'About', href: '#about' },
-    { label: 'Arcade', href: '#arcade' },
+    {
+        label: 'Arcade',
+        href: '#arcade',
+        dropdown: [
+            {
+                section: 'Games',
+                items: [
+                    {
+                        label: 'Marrow Grow',
+                        href: '#arcade',
+                    },
+                ]
+            }
+        ]
+    },
     { label: 'Contact', href: '#contact' }
 ];
 
