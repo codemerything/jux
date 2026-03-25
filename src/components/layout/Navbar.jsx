@@ -23,6 +23,7 @@ function ChevronDown() {
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [mobileExpandedDropdown, setMobileExpandedDropdown] = useState(null);
     const [openDropdown, setOpenDropdown] = useState(null);
     const [dropdownLeft, setDropdownLeft] = useState(null);
     const [isCompact, setIsCompact] = useState(false);
@@ -76,6 +77,7 @@ export default function Navbar() {
         setOpenDropdown(null);
         setDropdownLeft(null);
         setIsMobileMenuOpen(false);
+        setMobileExpandedDropdown(null);
         setIsCompactHovered(false);
         setIsCompactPreviewReady(false);
     }, [isCompact]);
@@ -315,7 +317,15 @@ export default function Navbar() {
 
                             <button
                                 className="flex flex-col gap-1.5 p-1.5 xl:hidden"
-                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                onClick={() => {
+                                    setIsMobileMenuOpen(current => {
+                                        const nextIsOpen = !current;
+                                        if (!nextIsOpen) {
+                                            setMobileExpandedDropdown(null);
+                                        }
+                                        return nextIsOpen;
+                                    });
+                                }}
                                 aria-label="Toggle menu"
                             >
                                 <span className={`h-0.5 w-6 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'translate-y-2 rotate-45' : ''}`} />
@@ -335,20 +345,84 @@ export default function Navbar() {
                         {isMobileMenuOpen && (
                             <div className="mt-3 border-t border-white/10 pt-3 xl:hidden">
                                 <div className="space-y-2.5">
-                                    {headerLinks.map((link, index) => (
-                                        <a
-                                            key={index}
-                                            href={link.href}
-                                            className="block py-1 text-base font-medium text-white/70 hover:text-white"
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                        >
-                                            {link.label}
-                                        </a>
-                                    ))}
+                                    {headerLinks.map((link, index) => {
+                                        if (!link.dropdown) {
+                                            return (
+                                                <a
+                                                    key={index}
+                                                    href={link.href}
+                                                    className="block py-1 text-base font-medium text-white/70 hover:text-white"
+                                                    onClick={() => setIsMobileMenuOpen(false)}
+                                                >
+                                                    {link.label}
+                                                </a>
+                                            );
+                                        }
+
+                                        const isExpanded = mobileExpandedDropdown === index;
+                                        const mobileDropdownItems = link.dropdown.flatMap(section => (
+                                            section.items.map(item => ({
+                                                label: getDropdownItemLabel(item),
+                                                href: getDropdownItemHref(item, link.href),
+                                            }))
+                                        ));
+
+                                        return (
+                                            <div key={index} className="py-1">
+                                                <button
+                                                    type="button"
+                                                    className="flex w-full items-center justify-between text-left text-base font-medium text-white/70 transition-colors hover:text-white"
+                                                    onClick={() => {
+                                                        setMobileExpandedDropdown(current => current === index ? null : index);
+                                                    }}
+                                                >
+                                                    <span>{link.label}</span>
+                                                    <motion.span
+                                                        animate={{ rotate: isExpanded ? 180 : 0 }}
+                                                        transition={{ duration: 0.2, ease: 'easeOut' }}
+                                                        className="text-white/45"
+                                                    >
+                                                        <ChevronDown />
+                                                    </motion.span>
+                                                </button>
+
+                                                <AnimatePresence initial={false}>
+                                                    {isExpanded && (
+                                                        <motion.div
+                                                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                                            animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+                                                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                                            transition={{ duration: 0.22, ease: 'easeOut' }}
+                                                            className="overflow-hidden"
+                                                        >
+                                                            <div className="flex flex-wrap gap-2 pr-2">
+                                                                {mobileDropdownItems.map(item => (
+                                                                    <a
+                                                                        key={item.href}
+                                                                        href={item.href}
+                                                                        className="inline-flex rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-[12px] font-medium text-white/78 transition-colors hover:border-white/22 hover:bg-white/10 hover:text-white"
+                                                                        onClick={() => {
+                                                                            setIsMobileMenuOpen(false);
+                                                                            setMobileExpandedDropdown(null);
+                                                                        }}
+                                                                    >
+                                                                        {item.label}
+                                                                    </a>
+                                                                ))}
+                                                            </div>
+                                                        </motion.div>
+                                                    )}
+                                                </AnimatePresence>
+                                            </div>
+                                        );
+                                    })}
                                     <a
                                         href="#contact"
                                         className="mt-1 inline-flex items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black"
-                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        onClick={() => {
+                                            setIsMobileMenuOpen(false);
+                                            setMobileExpandedDropdown(null);
+                                        }}
                                     >
                                         <PulseDot />
                                         Book a Call

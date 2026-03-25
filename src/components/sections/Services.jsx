@@ -628,6 +628,7 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
 
     return (
         <div
+            id={service.anchorId}
             ref={(el) => {
                 cardRef.current = el;
                 if (typeof ref === 'function') {
@@ -643,6 +644,7 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
                 transform: isActive ? 'translateY(0)' : 'translateY(5px)',
                 scrollSnapAlign: 'start',
                 scrollSnapStop: 'normal',
+                scrollMarginTop: '15rem',
             }}
         >
             <CardContent service={service} revealProgress={revealProgress} />

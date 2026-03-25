@@ -2,17 +2,44 @@ import { useRef, useState, useEffect } from 'react';
 
 export default function ScratchPrice({ price }) {
     const canvasRef = useRef(null);
+    const textRef = useRef(null);
     const [revealed, setRevealed] = useState(false);
+    const [overlaySize, setOverlaySize] = useState({ width: 176, height: 48 });
     const isDrawing = useRef(false);
     const lastPos = useRef(null);
 
     const isEnquiry = price === 'on enquiry';
 
     useEffect(() => {
+        if (isEnquiry) return;
+
+        const textElement = textRef.current;
+        if (!textElement) return;
+
+        const syncOverlaySize = () => {
+            const rect = textElement.getBoundingClientRect();
+            setOverlaySize({
+                width: Math.ceil(rect.width + 32),
+                height: Math.ceil(rect.height + 16),
+            });
+        };
+
+        syncOverlaySize();
+
+        const resizeObserver = new ResizeObserver(syncOverlaySize);
+        resizeObserver.observe(textElement);
+
+        return () => {
+            resizeObserver.disconnect();
+        };
+    }, [isEnquiry, price]);
+
+    useEffect(() => {
         if (revealed || isEnquiry) return;
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Gold metallic scratchable surface
         const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -37,11 +64,11 @@ export default function ScratchPrice({ price }) {
 
         // Hint text
         ctx.fillStyle = 'rgba(80,50,0,0.7)';
-        ctx.font = '600 9px system-ui, sans-serif';
+        ctx.font = '600 10px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('✦ scratch to reveal', canvas.width / 2, canvas.height / 2);
-    }, [revealed, isEnquiry]);
+        ctx.fillText('scratch to reveal', canvas.width / 2, canvas.height / 2);
+    }, [overlaySize, revealed, isEnquiry]);
 
     const getPos = (e, canvas) => {
         const rect = canvas.getBoundingClientRect();
@@ -98,9 +125,16 @@ export default function ScratchPrice({ price }) {
     }
 
     return (
-        <div className="relative inline-flex items-center">
+        <div
+            className="relative inline-flex items-center justify-center"
+            style={{
+                width: `${overlaySize.width}px`,
+                minHeight: `${overlaySize.height}px`,
+            }}
+        >
             {/* Price sits underneath, large and white so it's clearly readable once scratched */}
             <span
+                ref={textRef}
                 className="font-extrabold text-white"
                 style={{ fontSize: 'var(--text-h5)' }}
             >
@@ -111,10 +145,9 @@ export default function ScratchPrice({ price }) {
             {!revealed && (
                 <canvas
                     ref={canvasRef}
-                    width={160}
-                    height={36}
+                    width={overlaySize.width}
+                    height={overlaySize.height}
                     className="absolute inset-0 w-full h-full cursor-crosshair rounded-md touch-none select-none"
-                    style={{ left: '-4px', top: '-2px' }}
                     onMouseDown={(e) => {
                         isDrawing.current = true;
                         lastPos.current = null;

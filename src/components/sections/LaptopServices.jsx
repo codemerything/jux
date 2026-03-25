@@ -145,12 +145,14 @@ export default function LaptopServices() {
                             {laptopServices.map((service, index) => (
                                 <div
                                     key={service.id}
+                                    id={service.anchorId}
                                     ref={el => cardRefs.current[index] = el}
                                     onClick={() => toggleMobilePreview(service.id)}
                                     className={`rounded-2xl border transition-all duration-500 ${index === laptopServices.length - 1 ? 'lg:pb-16' : ''} ${activeService === index
                                         ? 'bg-white border-gray-200 shadow-lg'
                                         : 'bg-transparent border-gray-100'
                                         } ${mobilePreviewSlides[service.id] ? 'cursor-pointer lg:cursor-default' : ''}`}
+                                    style={{ scrollMarginTop: '7rem' }}
                                 >
                                     <div className="px-8 pt-8">
                                         <h3 className="font-bold mb-4 text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>{service.title}</h3>

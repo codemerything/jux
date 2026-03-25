@@ -3,6 +3,7 @@ export const phoneServices = [
     {
         id: 1,
         title: '3D Product Rendering',
+        anchorId: 'service-3d-product-rendering',
         description: 'The image your launch page, investor deck, and retail buyer all need, built from a single file. No photoshoot. No retakes. No location scouts.',
         price: 'Project basis',
         stat: '0',
@@ -17,6 +18,7 @@ export const phoneServices = [
     {
         id: 2,
         title: 'Animation & Motion',
+        anchorId: 'service-animation-and-motion',
         description: 'Rotating views, hero reels, and micro-animations. Built for product pages, social, and anything that needs to move. Files delivered ready for use.',
         price: 'Project basis',
         stat: '60fps',
@@ -31,6 +33,7 @@ export const phoneServices = [
     {
         id: 3,
         title: 'Packshot Sets',
+        anchorId: 'service-packshot-sets',
         description: 'Every angle, every SKU, every colorway, consistent, clean, ready. When you reformulate or repackage, we update the files. Not the shoot.',
         price: 'Project basis',
         stat: '∞',
@@ -45,6 +48,7 @@ export const phoneServices = [
     {
         id: 4,
         title: 'Web & App Development',
+        anchorId: 'service-web-and-app-development',
         description: 'We build the pages, tools, and experiences your product lives inside. Interactive product viewers. Custom storefronts. Performance-first builds.',
         price: 'Project basis',
         stat: '<2s',
@@ -63,6 +67,7 @@ export const laptopServices = [
     {
         id: 1,
         title: 'Digital Infrastructure',
+        anchorId: 'service-digital-infrastructure',
         description: 'Not just what\'s visible. The systems underneath: CMS architecture, asset pipelines, deployment, integrations. Built to scale when you do.',
         price: 'Project basis',
         displayLabel: 'INFRASTRUCTURE',
@@ -76,6 +81,7 @@ export const laptopServices = [
     {
         id: 2,
         title: 'Creative Direction',
+        anchorId: 'service-creative-direction',
         description: 'Don\'t have a brief? Good. Tell us what\'s not working. We\'ll figure out the rest, from visual concept to final execution.',
         price: 'Project basis',
         displayLabel: 'CREATIVE DIRECTION',
@@ -89,6 +95,7 @@ export const laptopServices = [
     {
         id: 3,
         title: 'Interactive Product Experiences',
+        anchorId: 'service-interactive-product-experiences',
         description: 'Configurators, 3D viewers, and AR-ready assets. Let your customer explore the product before they buy it.',
         price: 'Project basis',
         displayLabel: 'INTERACTIVE',
@@ -102,6 +109,7 @@ export const laptopServices = [
     {
         id: 4,
         title: 'Brand Visual Systems',
+        anchorId: 'service-brand-visual-systems',
         description: 'A consistent visual language across every format, product pages, ads, emails, and retail decks. Built once. Used everywhere.',
         price: 'Project basis',
         displayLabel: 'VISUAL SYSTEM',
@@ -124,24 +132,24 @@ export const navLinks = [
             {
                 section: 'Visual',
                 items: [
-                    '3D Product Rendering',
-                    'Animation & Motion',
-                    'Packshot Sets',
-                    'Creative Direction',
+                    { label: '3D Product Rendering', href: '#service-3d-product-rendering' },
+                    { label: 'Animation & Motion', href: '#service-animation-and-motion' },
+                    { label: 'Packshot Sets', href: '#service-packshot-sets' },
+                    { label: 'Creative Direction', href: '#service-creative-direction' },
                 ]
             },
             {
                 section: 'Digital',
                 items: [
-                    'Web & App Development',
-                    'Digital Infrastructure',
-                    'Interactive Product Experiences',
-                    'Brand Visual Systems',
+                    { label: 'Web & App Development', href: '#service-web-and-app-development' },
+                    { label: 'Digital Infrastructure', href: '#service-digital-infrastructure' },
+                    { label: 'Interactive Product Experiences', href: '#service-interactive-product-experiences' },
+                    { label: 'Brand Visual Systems', href: '#service-brand-visual-systems' },
                 ]
             }
         ]
     },
-    { label: 'About', href: '#about' },
+    { label: 'About', href: '#faq' },
     {
         label: 'Arcade',
         href: '#arcade',
@@ -151,7 +159,7 @@ export const navLinks = [
                 items: [
                     {
                         label: 'Marrow Grow',
-                        href: '#arcade',
+                        href: 'https://marrowgrow-v2.vercel.app/',
                     },
                 ]
             }
