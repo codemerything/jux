@@ -225,6 +225,43 @@ small {
     box-shadow: 0 0 40px var(--color-glow-purple);
 }
 
+.contact-range {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.contact-range::-webkit-slider-runnable-track {
+    height: 100%;
+    background: transparent;
+}
+
+.contact-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 9999px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+.contact-range::-moz-range-track {
+    height: 100%;
+    background: transparent;
+}
+
+.contact-range::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 9999px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
 /* Glass effect - for light theme */
 .glass {
     background: rgba(255, 255, 255, 0.7);

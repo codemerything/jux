@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { PulseDot } from '../ui/Button';
+import SmartLink from '../ui/SmartLink';
 
 export default function Hero() {
     return (
@@ -31,21 +32,21 @@ export default function Hero() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.45, delay: 0.24, ease: 'easeOut' }}
                 >
-                    <a
-                        href="#contact"
+                    <SmartLink
+                        href="/contact"
                         className="flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-lg text-sm font-semibold
                             transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10"
                     >
                         <PulseDot />
                         Start a Project
-                    </a>
-                    <a
+                    </SmartLink>
+                    <SmartLink
                         href="#services"
                         className="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-400 border border-gray-700
                             transition-all duration-300 hover:bg-white/5 hover:text-white hover:border-gray-500"
                     >
                         See Our Work
-                    </a>
+                    </SmartLink>
                 </motion.div>
             </div>
 

@@ -1,34 +1,30 @@
-import Navbar from './components/layout/Navbar';
-import Footer from './components/layout/Footer';
-import Hero from './components/sections/Hero';
-import Marquee from './components/sections/Marquee';
-import Services from './components/sections/Services';
-import LaptopServices from './components/sections/LaptopServices';
-import CTA from './components/sections/CTA';
-import ServicesMenu from './components/sections/ServicesMenu';
-import UnicornHeroBackground from './components/ui/UnicornHeroBackground';
+import { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import ContactPage from './pages/ContactPage';
 
-function App() {
-    return (
-        <div className="min-h-screen bg-black text-gray-900 relative flex flex-col">
-            <main className="flex-1">
-                <div className="relative overflow-hidden">
-                    <UnicornHeroBackground />
-                    <div className="absolute inset-0 z-[1] bg-black/35" />
-                    <Hero />
-                    <Marquee rows="top" className="relative z-10 pt-4" />
-                    <Navbar />
-                </div>
+function ScrollToTop() {
+    const location = useLocation();
 
-                <Services />
-                <LaptopServices />
-                <ServicesMenu />
-                <CTA />
-            </main>
+    useEffect(() => {
+        if (location.hash) {
+            return;
+        }
 
-            <Footer />
-        </div>
-    );
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }, [location.hash, location.pathname]);
+
+    return null;
 }
 
-export default App;
+export default function App() {
+    return (
+        <>
+            <ScrollToTop />
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/contact" element={<ContactPage />} />
+            </Routes>
+        </>
+    );
+}

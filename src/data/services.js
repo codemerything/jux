@@ -165,7 +165,7 @@ export const navLinks = [
             }
         ]
     },
-    { label: 'Contact', href: '#contact' }
+    { label: 'Contact', href: '/contact' }
 ];
 
 // Footer links

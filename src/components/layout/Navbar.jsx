@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import { navLinks } from '../../data/services';
 import { PulseDot } from '../ui/Button';
+import SmartLink from '../ui/SmartLink';
 
 const shellTransition = {
     type: 'spring',
@@ -22,6 +24,7 @@ function ChevronDown() {
 }
 
 export default function Navbar() {
+    const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [mobileExpandedDropdown, setMobileExpandedDropdown] = useState(null);
     const [openDropdown, setOpenDropdown] = useState(null);
@@ -173,6 +176,23 @@ export default function Navbar() {
         : 'border border-white/12 bg-white/6 text-white/78 hover:border-white/22 hover:bg-white/10 hover:text-white';
     const ctaClassName = isLightOverlay ? 'bg-slate-950 text-white' : 'bg-white text-black';
     const mobileMenuBarClassName = isLightOverlay ? 'bg-slate-950' : 'bg-white';
+    const isHomePage = location.pathname === '/';
+
+    const resolveHref = href => {
+        if (!href || href === '#') {
+            return '/';
+        }
+
+        if (href === '#contact' || href === '/contact') {
+            return '/contact';
+        }
+
+        if (href.startsWith('#')) {
+            return isHomePage ? href : `/${href}`;
+        }
+
+        return href;
+    };
 
     const getDropdownItemLabel = item => (typeof item === 'string' ? item : item.label);
     const getDropdownItemHref = (item, fallbackHref) => (typeof item === 'string' ? fallbackHref : item.href || fallbackHref);
@@ -257,14 +277,14 @@ export default function Navbar() {
                             }}
                         />
                         <div className={`relative z-10 flex min-h-9 items-center ${contentGap} ${contentRightPadding}`}>
-                            <a href="#" className="shrink-0">
+                            <SmartLink href="/" className="shrink-0">
                                 <span className={`text-2xl font-black leading-none tracking-tight transition-colors duration-300 ${logoClassName}`}>
                                     Jux Studio
                                 </span>
                                 <span className="hidden">
                                     ®
                                 </span>
-                            </a>
+                            </SmartLink>
 
                             <AnimatePresence initial={false}>
                                 {!isCompact && (
@@ -275,7 +295,7 @@ export default function Navbar() {
                                         exit={{ opacity: 0, x: 24, transition: { duration: 0.2 } }}
                                         className="pointer-events-none absolute inset-x-0 top-0 hidden h-full items-center xl:flex"
                                     >
-                                        <div className="mx-auto flex w-full max-w-4xl items-center px-3 sm:px-4 md:px-6">
+                                        <div className="pointer-events-none mx-auto flex w-full max-w-4xl items-center px-3 sm:px-4 md:px-6">
                                             <div className="pointer-events-auto flex items-center gap-1.5">
                                                 {headerLinks.map((link, index) => (
                                                     <div
@@ -299,13 +319,13 @@ export default function Navbar() {
                                                             }
                                                         }}
                                                     >
-                                                        <a
-                                                            href={link.href}
+                                                        <SmartLink
+                                                            href={resolveHref(link.href)}
                                                             className={`flex items-center gap-1 py-1.5 pr-3 text-[13px] font-medium transition-all duration-150 ${desktopLinkClassName} ${index === 0 ? 'pl-0' : 'pl-3'}`}
                                                         >
                                                             {link.label}
                                                             <ChevronDown />
-                                                        </a>
+                                                        </SmartLink>
                                                     </div>
                                                 ))}
                                             </div>
@@ -343,13 +363,13 @@ export default function Navbar() {
                                                     }
                                                 }}
                                             >
-                                                <a
-                                                    href={link.href}
+                                                <SmartLink
+                                                    href={resolveHref(link.href)}
                                                     className={`flex items-center gap-1 py-1.5 pr-2.5 text-[13px] font-medium transition-all duration-150 ${desktopLinkClassName} ${index === 0 ? 'pl-0' : 'pl-2.5'}`}
                                                 >
                                                     {link.label}
                                                     <ChevronDown />
-                                                </a>
+                                                </SmartLink>
                                             </div>
                                         ))}
                                     </motion.div>
@@ -377,13 +397,13 @@ export default function Navbar() {
                             </button>
                         </div>
 
-                        <a
-                            href="#contact"
-                            className={`absolute right-3 top-1/2 hidden h-9 -translate-y-1/2 items-center gap-1.5 rounded-lg px-4 text-[13px] font-semibold transition-all duration-300 hover:scale-105 xl:inline-flex sm:right-4 ${ctaClassName}`}
+                        <SmartLink
+                            href="/contact"
+                            className={`absolute right-3 top-1/2 z-20 hidden h-9 -translate-y-1/2 items-center gap-1.5 rounded-lg px-4 text-[13px] font-semibold transition-all duration-300 hover:scale-105 xl:inline-flex sm:right-4 ${ctaClassName}`}
                         >
                             <PulseDot />
                             Book a Call
-                        </a>
+                        </SmartLink>
 
                         {isMobileMenuOpen && (
                             <div className={`relative z-10 mt-3 border-t pt-3 xl:hidden ${mobileDividerClassName}`}>
@@ -391,14 +411,14 @@ export default function Navbar() {
                                     {headerLinks.map((link, index) => {
                                         if (!link.dropdown) {
                                             return (
-                                                <a
+                                                <SmartLink
                                                     key={index}
-                                                    href={link.href}
+                                                    href={resolveHref(link.href)}
                                                     className={`block py-1 text-base font-medium transition-colors ${mobileLinkClassName}`}
                                                     onClick={() => setIsMobileMenuOpen(false)}
                                                 >
                                                     {link.label}
-                                                </a>
+                                                </SmartLink>
                                             );
                                         }
 
@@ -440,9 +460,9 @@ export default function Navbar() {
                                                         >
                                                             <div className="flex flex-wrap gap-2 pr-2">
                                                                 {mobileDropdownItems.map(item => (
-                                                                    <a
+                                                                    <SmartLink
                                                                         key={item.href}
-                                                                        href={item.href}
+                                                                        href={resolveHref(item.href)}
                                                                         className={`inline-flex rounded-full px-3 py-1.5 text-[12px] font-medium transition-colors ${mobileChipClassName}`}
                                                                         onClick={() => {
                                                                             setIsMobileMenuOpen(false);
@@ -450,7 +470,7 @@ export default function Navbar() {
                                                                         }}
                                                                     >
                                                                         {item.label}
-                                                                    </a>
+                                                                    </SmartLink>
                                                                 ))}
                                                             </div>
                                                         </motion.div>
@@ -459,8 +479,8 @@ export default function Navbar() {
                                             </div>
                                         );
                                     })}
-                                    <a
-                                        href="#contact"
+                                    <SmartLink
+                                        href="/contact"
                                         className={`mt-1 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold ${ctaClassName}`}
                                         onClick={() => {
                                             setIsMobileMenuOpen(false);
@@ -469,7 +489,7 @@ export default function Navbar() {
                                     >
                                         <PulseDot />
                                         Book a Call
-                                    </a>
+                                    </SmartLink>
                                 </div>
                             </div>
                         )}
@@ -504,13 +524,13 @@ export default function Navbar() {
                                             </span>
                                             <div className="space-y-1.5">
                                                 {section.items.map((item, itemIndex) => (
-                                                    <a
+                                                    <SmartLink
                                                         key={itemIndex}
-                                                        href={getDropdownItemHref(item, activeDropdown.href)}
+                                                        href={resolveHref(getDropdownItemHref(item, activeDropdown.href))}
                                                         className="block text-[13px] text-white/70 transition-colors hover:text-white"
                                                     >
                                                         {getDropdownItemLabel(item)}
-                                                    </a>
+                                                    </SmartLink>
                                                 ))}
                                             </div>
                                         </div>

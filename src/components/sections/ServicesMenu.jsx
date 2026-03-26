@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ScratchPrice from '../ui/ScratchPrice';
 import ServiceModal from '../ui/ServiceModal';
+import SmartLink from '../ui/SmartLink';
 
 const groups = {
     Visual: [
@@ -213,14 +214,14 @@ export default function ServicesMenu() {
                         <p className="text-white/40 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>
                             Tell us what you're building, and we'll tell you what it takes.
                         </p>
-                        <a
-                            href="#contact"
+                        <SmartLink
+                            href="/contact"
                             className="shrink-0 inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-lg font-semibold
                                 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10"
                             style={{ fontSize: 'var(--text-sm)' }}
                         >
                             Start a Project
-                        </a>
+                        </SmartLink>
                     </div>
                 </div>
             </section>

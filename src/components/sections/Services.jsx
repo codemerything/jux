@@ -356,34 +356,34 @@ const serviceScreenStyles = [
 
 const phoneServiceUtilityCards = {
     1: {
-        primary: ['Single SKU', 'Multi-SKU', 'Multi-angle'],
+        primary: ['Architectural Renders', 'Concept Visualization', 'High-Resolution Output', 'Product Breakdowns', 'Multi-Angle Views'],
         programs: [
             { label: 'C4D', tint: 'bg-[#1f2937] text-white' },
             { label: 'Redshift', tint: 'bg-[#7c2d12] text-white' },
-            { label: 'PS', tint: 'bg-[#172554] text-[#93c5fd]' },
-            { label: 'Ai', tint: 'bg-[#431407] text-[#fdba74]' },
+            { label: 'SketchUp', tint: 'bg-[#b45309] text-[#fde68a]' },
+            { label: 'Three', tint: 'bg-[#0f172a] text-[#e2e8f0]' },
         ],
     },
     2: {
-        primary: ['Hero reels', 'Social loops', 'Paid media'],
+        primary: ['Hero reels', 'Social loops', 'Micro-interactions', 'UI motion', 'UX flows'],
         programs: [
             { label: 'AE', tint: 'bg-[#312e81] text-[#c4b5fd]' },
             { label: 'PR', tint: 'bg-[#3b0764] text-[#f0abfc]' },
             { label: 'C4D', tint: 'bg-[#1f2937] text-white' },
-            { label: 'Spline', tint: 'bg-[#0f172a] text-[#93c5fd]' },
+            { label: 'Rive', tint: 'bg-[#0f172a] text-[#93c5fd]' },
         ],
     },
     3: {
-        primary: ['Colorways', 'Bundle sets', 'Multi-pack'],
+        primary: ['Material Previews', 'Packaging Mockups', 'SKU Variations', 'Label Swaps', 'Finish Options'],
         programs: [
             { label: 'PS', tint: 'bg-[#172554] text-[#93c5fd]' },
             { label: 'Ai', tint: 'bg-[#431407] text-[#fdba74]' },
             { label: 'C4D', tint: 'bg-[#1f2937] text-white' },
-            { label: 'Bridge', tint: 'bg-[#111827] text-[#d1d5db]' },
+            { label: 'Esko', tint: 'bg-[#111827] text-[#d1d5db]' },
         ],
     },
     4: {
-        primary: ['AR / VR', '3D viewer', 'Configurator'],
+        primary: ['Interactive Product Pages', '3D Viewers', 'Product Customizers', 'Custom Storefronts', 'Fast, Clean Builds'],
         programs: [
             { label: 'Figma', tint: 'bg-[#111827] text-white' },
             { label: 'React', tint: 'bg-[#083344] text-[#67e8f9]' },
@@ -392,6 +392,54 @@ const phoneServiceUtilityCards = {
         ],
     },
 };
+
+const programBrandMap = {
+    c4d: { name: 'Cinema 4D', monogram: 'C4D', accent: '#011A6A', surface: '#EEF4FF' },
+    redshift: { name: 'Redshift', monogram: 'RS', accent: '#E05A1B', surface: '#FFF4ED' },
+    ps: { name: 'Photoshop', monogram: 'Ps', accent: '#31A8FF', surface: '#EAF5FF' },
+    ai: { name: 'Illustrator', monogram: 'Ai', accent: '#FF9A00', surface: '#FFF3E0' },
+    ae: { name: 'After Effects', monogram: 'Ae', accent: '#9999FF', surface: '#F2EEFF' },
+    pr: { name: 'Premiere Pro', monogram: 'Pr', accent: '#EA77FF', surface: '#FAEEFF' },
+    rive: { name: 'Rive', monogram: 'Rv', accent: '#38BDF8', surface: '#ECFEFF' },
+    sketchup: { name: 'SketchUp', monogram: 'Sk', accent: '#005F9E', surface: '#EDF6FF' },
+    esko: { name: 'Esko', monogram: 'Es', accent: '#A3B18A', surface: '#F5F8ED' },
+    figma: { name: 'Figma', monogram: 'Fg', accent: '#F24E1E', surface: '#FFF1EE' },
+    react: { name: 'React', monogram: 'Re', accent: '#0891B2', surface: '#ECFEFF' },
+    shopify: { name: 'Shopify', monogram: 'Sh', accent: '#5D8C42', surface: '#F1F8EC' },
+    three: { name: 'Three.js', monogram: '3D', accent: '#111111', surface: '#F3F4F6' },
+};
+
+const getProgramBrand = (label) => programBrandMap[label.trim().toLowerCase()] ?? {
+    name: label,
+    monogram: label.slice(0, 2),
+    accent: '#111827',
+    surface: '#F3F4F6',
+};
+
+function ProgramMark({ label }) {
+    const brand = getProgramBrand(label);
+
+    return (
+        <span
+            className="inline-flex items-center gap-2.5 text-[11px] font-normal tracking-[-0.01em] text-gray-500"
+            title={brand.name}
+        >
+            <span
+                className="flex h-7 w-7 items-center justify-center rounded-full ring-1 ring-black/5"
+                style={{ backgroundColor: brand.surface ?? '#FFFFFF' }}
+                aria-hidden="true"
+            >
+                <span
+                    className="font-semibold tracking-[-0.04em]"
+                    style={{ color: brand.accent, fontSize: '10px' }}
+                >
+                    {brand.monogram}
+                </span>
+            </span>
+            <span className="whitespace-nowrap font-light">{brand.name}</span>
+        </span>
+    );
+}
 
 function PhoneMockup({ activeService, shouldLoadMedia = false, className = '' }) {
     // Screen area within phone.png (1349×2048), measured via pixel scan:
@@ -685,7 +733,7 @@ function CardContent({ service, revealProgress }) {
             </p>
             {utilityCard && (
                 <div
-                    className="hidden max-w-[480px] rounded-[1.35rem] border border-gray-200 bg-[#f4f4f1] p-5 transition-[opacity,transform] duration-300 ease-out md:block"
+                    className="hidden max-w-[560px] rounded-[1.35rem] border border-gray-200 bg-[#f4f4f1] p-5 transition-[opacity,transform] duration-300 ease-out md:block"
                     style={getRevealStyle(utilityProgress, 18)}
                 >
                     <div className="flex flex-wrap gap-2">
@@ -701,13 +749,7 @@ function CardContent({ service, revealProgress }) {
                     </div>
                     <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-gray-200 pt-4">
                         {utilityCard.programs.map((program) => (
-                            <span
-                                key={program.label}
-                                className={`inline-flex h-9 min-w-9 items-center justify-center rounded-xl px-2.5 font-semibold tracking-[-0.02em] shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] ${program.tint}`}
-                                style={{ fontSize: '11px' }}
-                            >
-                                {program.label}
-                            </span>
+                            <ProgramMark key={program.label} label={program.label} />
                         ))}
                     </div>
                 </div>

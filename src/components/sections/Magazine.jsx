@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import SmartLink from '../ui/SmartLink';
 
 export default function Magazine() {
     const [currentPage, setCurrentPage] = useState(0);
@@ -191,12 +192,12 @@ function PageContent({ pageIndex, side }) {
                     <div className="text-[10px] tracking-[0.5em] text-white/30 mb-12">JUX STUDIO • 2026</div>
                     <div className="font-display text-4xl text-white mb-10">FIN.</div>
                     <p className="text-sm text-white/50 mb-8">Join the standard of digital excellence.</p>
-                    <a
-                        href="#contact"
+                    <SmartLink
+                        href="/contact"
                         className="bg-white text-gray-900 px-10 py-4 font-bold text-[11px] tracking-[0.1em] hover:bg-gray-100 transition-colors rounded-lg"
                     >
                         START A PROJECT
-                    </a>
+                    </SmartLink>
                     <div className="mt-auto text-xs text-white/20">ISSUE 01 / END</div>
                 </div>
             );

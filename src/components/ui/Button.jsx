@@ -1,3 +1,5 @@
+import SmartLink from './SmartLink';
+
 export default function Button({
     children,
     variant = 'primary',
@@ -24,9 +26,9 @@ export default function Button({
 
     if (href) {
         return (
-            <a href={href} className={classes} {...props}>
+            <SmartLink href={href} className={classes} {...props}>
                 {children}
-            </a>
+            </SmartLink>
         );
     }
 

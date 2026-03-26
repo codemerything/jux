@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SmartLink from './SmartLink';
 
 const processData = {
     '3D Product Rendering': {
@@ -361,15 +362,15 @@ export default function ServiceModal({ service, onClose }) {
                                         {service.price}
                                     </p>
                                 </div>
-                                <a
-                                    href="#contact"
+                                <SmartLink
+                                    href="/contact"
                                     onClick={onClose}
                                     className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-xl font-semibold
                                         transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10"
                                     style={{ fontSize: 'var(--text-sm)' }}
                                 >
                                     Start this project
-                                </a>
+                                </SmartLink>
                             </div>
                         </div>
                     </motion.div>
