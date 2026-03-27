@@ -154,7 +154,7 @@ export default function LaptopServices() {
     return (
         <section id="laptop-services" className="relative bg-[#f5f5f0] py-24 overflow-visible" aria-labelledby="laptop-services-heading">
             <h2 id="laptop-services-heading" className="sr-only">How we work</h2>
-            <div className="max-w-[1400px] mx-auto px-8">
+            <div className="mx-auto max-w-[1400px] px-4 sm:px-8">
                 <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-16 xl:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)] xl:gap-20">
 
                     {/* Left: Scrolling Content */}
@@ -166,16 +166,16 @@ export default function LaptopServices() {
                                     id={service.anchorId}
                                     ref={el => cardRefs.current[index] = el}
                                     onClick={() => toggleMobilePreview(service.id)}
-                                    className={`rounded-2xl border transition-all duration-500 ${index === laptopServices.length - 1 ? 'lg:pb-16' : ''} ${activeService === index
+                                    className={`rounded-2xl border transition-all duration-500 ${activeService === index
                                         ? 'bg-white border-gray-200 shadow-lg'
                                         : 'bg-transparent border-gray-100'
                                         } ${mobilePreviewSlides[service.id] ? 'cursor-pointer lg:cursor-default' : ''}`}
                                     style={{ scrollMarginTop: '7rem' }}
                                 >
-                                    <div className="px-8 pt-8">
+                                    <div className="px-4 pt-8 sm:px-8">
                                         <h3 className="font-bold mb-4 text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>{service.title}</h3>
                                         <p
-                                            className={`text-gray-500 leading-relaxed ${mobilePreviewSlides[service.id] ? 'mb-0' : 'mb-6'}`}
+                                            className={`text-gray-500 leading-relaxed ${mobilePreviewSlides[service.id] ? 'mb-0' : 'mb-4 sm:mb-6'}`}
                                             style={{ fontSize: 'var(--text-sm)' }}
                                         >
                                             {service.description}
@@ -189,7 +189,7 @@ export default function LaptopServices() {
                                                     mobilePreviewServiceId === service.id ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
                                                 }`}
                                             >
-                                                <div className="min-h-0 px-8 pb-8">
+                                                <div className="min-h-0 px-4 pb-8 sm:px-8">
                                                     <div className="flex h-[84px] items-center justify-center">
                                                         <MobilePreviewBadge expanded={mobilePreviewServiceId === service.id} />
                                                     </div>
@@ -228,11 +228,11 @@ export default function LaptopServices() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="px-8 pb-8">
-                                            <div className="mb-6 h-[21px]" aria-hidden="true" />
+                                        <div className="px-4 pb-5 sm:px-8 sm:pb-8">
+                                            <div className="mb-6 hidden h-[21px] lg:block" aria-hidden="true" />
 
                                             {laptopServiceCallouts[service.id] && (
-                                                <div className="pt-6 border-t border-gray-100">
+                                                <div className="border-t border-gray-100 pt-5 sm:pt-6">
                                                     <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
                                                         {laptopServiceCallouts[service.id].title}
                                                     </p>
