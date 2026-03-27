@@ -42,14 +42,14 @@ export default function Hero({ onOpenPreview }) {
                     The gap between a product and a purchase is almost always visual. We close it through 3D, motion, and the digital experiences built around them.
                 </motion.p>
                 <motion.div
-                    className="flex w-full max-w-[26rem] items-center gap-2 justify-start sm:w-auto sm:max-w-none sm:gap-3"
+                    className="flex w-full max-w-[26rem] items-stretch gap-2 justify-start sm:w-auto sm:max-w-none sm:gap-3"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.45, delay: 0.24, ease: 'easeOut' }}
                 >
                     <SmartLink
                         href="/contact"
-                        className="flex min-w-0 flex-1 items-center justify-center gap-2 bg-white text-black px-3 py-2.5 rounded-lg text-[13px] font-semibold whitespace-nowrap
+                        className="flex h-11 min-w-0 flex-1 items-center justify-center gap-2 bg-white text-black px-3 rounded-lg text-[13px] font-semibold whitespace-nowrap
                             sm:flex-none sm:px-5 sm:text-sm
                             transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10"
                     >
@@ -60,7 +60,8 @@ export default function Hero({ onOpenPreview }) {
                         type="button"
                         onClick={onOpenPreview}
                         aria-label="Open featured work gallery"
-                        className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-lg border border-gray-700 text-gray-400
+                        className="flex h-11 min-w-0 flex-1 items-center justify-center rounded-lg border border-gray-700 text-gray-400
+                            sm:w-11 sm:flex-none sm:shrink-0
                             transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-500 hover:bg-white/5 hover:text-white"
                     >
                         <EyeIcon />
