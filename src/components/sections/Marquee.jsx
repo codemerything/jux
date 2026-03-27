@@ -443,8 +443,8 @@ function HeroLightbox({
                         onPointerCancel={onPointerCancel}
                         onLostPointerCapture={onPointerCancel}
                         style={{
-                            touchAction: 'pan-y',
-                            overscrollBehaviorX: 'contain',
+                            touchAction: 'none',
+                            overscrollBehavior: 'none',
                         }}
                     >
                         <div
@@ -780,6 +780,7 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
             return;
         }
 
+        event.preventDefault();
         lightboxDragStateRef.current = {
             active: true,
             pointerId: event.pointerId,
