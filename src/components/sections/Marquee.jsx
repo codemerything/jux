@@ -463,7 +463,7 @@ function HeroLightbox({
                         >
                             {windowedCards.map((src, index) => (
                                 <div
-                                    key={`${src}-${index}`}
+                                    key={index}
                                     className="flex h-full w-full shrink-0 items-center justify-center px-2 sm:px-8 lg:px-16"
                                 >
                                     <figure
@@ -479,6 +479,8 @@ function HeroLightbox({
                                             src={src}
                                             alt=""
                                             draggable={false}
+                                            loading="eager"
+                                            decoding="async"
                                             className="block h-auto w-auto max-w-full rounded-[6px] object-contain select-none"
                                             style={{
                                                 maxHeight: 'calc(82vh - clamp(8px, 1.4vw, 2.2rem))',
@@ -529,6 +531,7 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
     const lastTimeRef = useRef(null);
     const rotationRef = useRef(0);
     const lightboxViewportRef = useRef(null);
+    const preloadedLightboxImagesRef = useRef(new Set());
     const wheelNavigationLockRef = useRef(0);
     const lightboxDragStateRef = useRef({
         active: false,
@@ -673,6 +676,22 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
             return undefined;
         }
 
+        if (typeof Image !== 'undefined' && lightboxCards.length) {
+            [-1, 0, 1, 2].forEach(offset => {
+                const preloadIndex = wrapCarouselIndex(lightboxActiveIndex + offset, lightboxCards.length);
+                const preloadSrc = lightboxCards[preloadIndex];
+
+                if (!preloadSrc || preloadedLightboxImagesRef.current.has(preloadSrc)) {
+                    return;
+                }
+
+                const image = new Image();
+                image.decoding = 'async';
+                image.src = preloadSrc;
+                preloadedLightboxImagesRef.current.add(preloadSrc);
+            });
+        }
+
         const handleKeyDown = event => {
             if (event.key === 'Escape') {
                 onClosePreview?.();
@@ -694,7 +713,7 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
-    }, [isPreviewOpen, onClosePreview]);
+    }, [isPreviewOpen, lightboxActiveIndex, lightboxCards, onClosePreview]);
 
     useEffect(() => {
         if (!isPreviewOpen) {
