@@ -418,17 +418,6 @@ function HeroLightbox({
             />
 
             <motion.div
-                className="pointer-events-none absolute inset-0 opacity-80"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.72, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
-                style={{
-                    background: `radial-gradient(circle at 50% 50%, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.03) 28%, rgba(0,0,0,0) 62%)`,
-                }}
-            />
-
-            <motion.div
                 className="relative z-10 flex h-screen w-screen flex-col justify-center overflow-hidden px-4 py-6 sm:px-6 lg:px-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -478,7 +467,7 @@ function HeroLightbox({
                                     className="flex h-full w-full shrink-0 items-center justify-center px-2 sm:px-8 lg:px-16"
                                 >
                                     <figure
-                                        className="relative flex w-auto items-center justify-center overflow-hidden rounded-[30px] border border-white/10 bg-white/[0.045] shadow-[0_32px_110px_rgba(0,0,0,0.52)] backdrop-blur-sm"
+                                        className="relative flex w-auto items-center justify-center"
                                         style={{
                                             padding: 'clamp(4px, 0.7vw, 1.1rem)',
                                             width: 'fit-content',
@@ -490,13 +479,11 @@ function HeroLightbox({
                                             src={src}
                                             alt=""
                                             draggable={false}
-                                            className="block h-auto w-auto max-w-full rounded-[22px] object-contain select-none"
+                                            className="block h-auto w-auto max-w-full rounded-[6px] object-contain select-none"
                                             style={{
                                                 maxHeight: 'calc(82vh - clamp(8px, 1.4vw, 2.2rem))',
                                             }}
                                         />
-                                        <div className="pointer-events-none absolute inset-0 rounded-[30px] ring-1 ring-inset ring-white/7" />
-                                        <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-white/10" />
                                     </figure>
                                 </div>
                             ))}
