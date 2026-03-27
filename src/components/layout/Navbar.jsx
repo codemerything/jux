@@ -23,7 +23,7 @@ function ChevronDown() {
     );
 }
 
-export default function Navbar() {
+export default function Navbar({ hidden = false }) {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [mobileExpandedDropdown, setMobileExpandedDropdown] = useState(null);
@@ -199,7 +199,9 @@ export default function Navbar() {
 
     return (
         <nav
-            className="fixed inset-x-0 top-0 z-30 px-3 pt-3 sm:px-4 sm:pt-4"
+            className={`fixed inset-x-0 top-0 z-30 px-3 pt-3 transition-opacity duration-300 sm:px-4 sm:pt-4 ${
+                hidden ? 'pointer-events-none opacity-0' : 'opacity-100'
+            }`}
             onMouseEnter={() => {
                 if (isCompact) {
                     if (compactHoverTimeoutRef.current) {

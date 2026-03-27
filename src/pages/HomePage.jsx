@@ -15,7 +15,7 @@ export default function HomePage() {
 
     return (
         <div className="min-h-screen bg-black text-gray-900 relative flex flex-col">
-            <Navbar />
+            <Navbar hidden={isHeroPreviewOpen} />
 
             <motion.div
                 className="flex min-h-screen flex-col"
