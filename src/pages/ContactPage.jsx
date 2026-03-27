@@ -403,9 +403,6 @@ export default function ContactPage() {
                 <section className="relative z-10 px-6 pb-18 pt-40 sm:px-8 sm:pt-44 md:pb-24">
                     <div className="mx-auto max-w-[1280px]">
                         <div className="max-w-[760px]">
-                            <p className="mb-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/45">
-                                Contact
-                            </p>
                             <h1
                                 className="max-w-[14ch] font-extrabold leading-[0.98] tracking-[-0.05em] text-white"
                                 style={{ fontSize: 'clamp(2rem, 5vw, var(--text-h1))' }}
