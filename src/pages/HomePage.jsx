@@ -14,36 +14,39 @@ export default function HomePage() {
     const [isHeroPreviewOpen, setIsHeroPreviewOpen] = useState(false);
 
     return (
-        <motion.div
-            className="min-h-screen bg-black text-gray-900 relative flex flex-col"
-            animate={{
-                filter: isHeroPreviewOpen ? 'blur(18px) brightness(0.52)' : 'blur(0px) brightness(1)',
-                scale: isHeroPreviewOpen ? 0.985 : 1,
-            }}
-            transition={{ duration: 0.64, ease: [0.22, 1, 0.36, 1] }}
-            style={{ transformOrigin: 'center top' }}
-        >
-            <main className="flex-1">
-                <div className="relative overflow-hidden">
-                    <UnicornHeroBackground />
-                    <div className="absolute inset-0 z-[1] bg-black/35" />
-                    <Hero onOpenPreview={() => setIsHeroPreviewOpen(true)} />
-                    <Marquee
-                        rows="top"
-                        className="relative z-10 pt-4"
-                        isPreviewOpen={isHeroPreviewOpen}
-                        onClosePreview={() => setIsHeroPreviewOpen(false)}
-                    />
-                    <Navbar />
-                </div>
+        <div className="min-h-screen bg-black text-gray-900 relative flex flex-col">
+            <Navbar />
 
-                <Services />
-                <LaptopServices />
-                <ServicesMenu />
-                <CTA />
-            </main>
+            <motion.div
+                className="flex min-h-screen flex-col"
+                animate={{
+                    filter: isHeroPreviewOpen ? 'blur(18px) brightness(0.52)' : 'blur(0px) brightness(1)',
+                    scale: isHeroPreviewOpen ? 0.985 : 1,
+                }}
+                transition={{ duration: 0.64, ease: [0.22, 1, 0.36, 1] }}
+                style={{ transformOrigin: 'center top' }}
+            >
+                <main className="flex-1">
+                    <div className="relative overflow-hidden">
+                        <UnicornHeroBackground />
+                        <div className="absolute inset-0 z-[1] bg-black/35" />
+                        <Hero onOpenPreview={() => setIsHeroPreviewOpen(true)} />
+                        <Marquee
+                            rows="top"
+                            className="relative z-10 pt-4"
+                            isPreviewOpen={isHeroPreviewOpen}
+                            onClosePreview={() => setIsHeroPreviewOpen(false)}
+                        />
+                    </div>
 
-            <Footer />
-        </motion.div>
+                    <Services />
+                    <LaptopServices />
+                    <ServicesMenu />
+                    <CTA />
+                </main>
+
+                <Footer />
+            </motion.div>
+        </div>
     );
 }
