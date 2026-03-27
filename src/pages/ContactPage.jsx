@@ -12,6 +12,7 @@ const serviceOptions = [
 
 const budgetOptions = ['$5K', '$10K', '$20K', '$40K', '$75K+'];
 const timelineOptions = ['02 WEEKS', '04 WEEKS', '06 WEEKS', '08 WEEKS', '12 WEEKS'];
+const formspreeFormId = import.meta.env.VITE_FORMSPREE_FORM_ID;
 
 function TextField({ label, as = 'input', className = '', ...props }) {
     const Element = as;
@@ -44,14 +45,13 @@ function SliderField({ label, helper, options, value, onChange }) {
     const pillBuffer = 3;
     const [isDragging, setIsDragging] = useState(false);
     const [edgeStretch, setEdgeStretch] = useState(null);
-    const [snapNudge, setSnapNudge] = useState(false);
     const trackRef = useRef(null);
     const innerTrackRef = useRef(null);
     const pillRef = useRef(null);
-    const previousValueRef = useRef(value);
     const [pillWidth, setPillWidth] = useState(0);
     const [trackWidth, setTrackWidth] = useState(0);
     const percent = options.length > 1 ? (value / (options.length - 1)) * 100 : 0;
+    const isAtTrackEdge = value === 0 || value === options.length - 1;
     const labelAlignment = percent <= 8 ? 'start' : percent >= 92 ? 'end' : 'center';
     const anchorPx = trackWidth * (percent / 100);
     const pillLeft = labelAlignment === 'start'
@@ -115,23 +115,6 @@ function SliderField({ label, helper, options, value, onChange }) {
             window.removeEventListener('pointercancel', endDrag);
         };
     }, [isDragging, onChange, options.length, value]);
-
-    useEffect(() => {
-        if (previousValueRef.current === value) {
-            return;
-        }
-
-        previousValueRef.current = value;
-        setSnapNudge(true);
-
-        const timeoutId = window.setTimeout(() => {
-            setSnapNudge(false);
-        }, 170);
-
-        return () => {
-            window.clearTimeout(timeoutId);
-        };
-    }, [value]);
 
     useEffect(() => {
         const syncSizes = () => {
@@ -215,31 +198,32 @@ function SliderField({ label, helper, options, value, onChange }) {
 
                         <motion.div
                             className="absolute top-1/2 z-10 -translate-y-1/2 rounded-full bg-white p-[3px]"
-                            animate={{ left: pillLeft }}
-                            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                            animate={{
+                                left: pillLeft,
+                                scaleX: edgeStretch
+                                    ? 1.08
+                                    : isDragging && isAtTrackEdge
+                                        ? 1.04
+                                        : 1,
+                                scaleY: edgeStretch
+                                    ? 0.92
+                                    : isDragging && isAtTrackEdge
+                                        ? 0.96
+                                        : 1,
+                            }}
+                            transition={{
+                                left: { duration: 0.22, ease: [0.22, 1, 0.36, 1] },
+                                scaleX: { duration: 0.16, ease: 'easeOut' },
+                                scaleY: { duration: 0.16, ease: 'easeOut' },
+                            }}
+                            style={{
+                                transformOrigin: edgeStretch === 'start' ? 'left center' : edgeStretch === 'end' ? 'right center' : 'center center',
+                            }}
                         >
-                            <motion.div
+                            <div
                                 ref={pillRef}
                                 className="relative inline-flex min-h-[48px] items-center justify-center overflow-hidden whitespace-nowrap rounded-full border border-transparent bg-white px-6 py-3.5 text-sm font-semibold tracking-[-0.03em] text-slate-900"
-                                animate={{
-                                    scaleX: edgeStretch
-                                        ? 1.08
-                                        : snapNudge
-                                            ? [1, 1.08, 0.95, 1.02, 1]
-                                            : isDragging
-                                                ? 1.04
-                                                : 1,
-                                    scaleY: edgeStretch
-                                        ? 0.92
-                                        : snapNudge
-                                            ? [1, 0.92, 1.05, 0.99, 1]
-                                            : isDragging
-                                                ? 0.96
-                                                : 1,
-                                }}
-                                transition={{ duration: snapNudge ? 0.26 : 0.18, ease: 'easeOut' }}
                                 style={{
-                                    transformOrigin: edgeStretch === 'start' ? 'left center' : edgeStretch === 'end' ? 'right center' : 'center center',
                                     ...pillChromeStyle,
                                 }}
                             >
@@ -266,16 +250,12 @@ function SliderField({ label, helper, options, value, onChange }) {
                                     }}
                                 />
                                 <span className="relative z-10">{options[value]}</span>
-                            </motion.div>
+                            </div>
                         </motion.div>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-3 flex items-center justify-between px-1 text-[10px] font-medium uppercase tracking-[0.16em] text-slate-400">
-                <span>{options[0]}</span>
-                <span>{options[options.length - 1]}</span>
-            </div>
         </div>
     );
 }
@@ -291,8 +271,10 @@ export default function ContactPage() {
     });
     const [selectedServices, setSelectedServices] = useState(['3D & Packshots']);
     const [budgetIndex, setBudgetIndex] = useState(0);
-    const [timelineIndex, setTimelineIndex] = useState(2);
+    const [timelineIndex, setTimelineIndex] = useState(0);
     const [submitState, setSubmitState] = useState('idle');
+    const [submitMessage, setSubmitMessage] = useState('');
+    const [showSuccessNotice, setShowSuccessNotice] = useState(false);
 
     const updateField = (event) => {
         const { name, value, type, checked } = event.target;
@@ -311,13 +293,103 @@ export default function ContactPage() {
         ));
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        setSubmitState('submitted');
+
+        if (!formspreeFormId) {
+            setSubmitState('error');
+            setSubmitMessage('Add VITE_FORMSPREE_FORM_ID to your env file to enable submissions.');
+            setShowSuccessNotice(false);
+            return;
+        }
+
+        setSubmitState('submitting');
+        setSubmitMessage('');
+        setShowSuccessNotice(false);
+
+        try {
+            const response = await fetch(`https://formspree.io/f/${formspreeFormId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({
+                    name: formValues.name,
+                    email: formValues.email,
+                    company: formValues.company,
+                    phone: formValues.phone,
+                    message: formValues.message,
+                    services: selectedServices.join(', '),
+                    budget: budgetOptions[budgetIndex],
+                    timeline: timelineOptions[timelineIndex],
+                    subscribe: formValues.subscribe ? 'Yes' : 'No',
+                    source: 'JUX contact page',
+                    _subject: `JUX inquiry from ${formValues.name || formValues.email}`,
+                }),
+            });
+
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                const apiMessage = Array.isArray(result?.errors)
+                    ? result.errors.map((item) => item.message).join(' ')
+                    : '';
+                throw new Error(apiMessage || 'Form submission failed.');
+            }
+
+            setSubmitState('submitted');
+            setSubmitMessage('Thanks. Your project details were sent.');
+            setShowSuccessNotice(true);
+            setFormValues({
+                name: '',
+                email: '',
+                company: '',
+                phone: '',
+                message: '',
+                subscribe: false,
+            });
+            setSelectedServices(['3D & Packshots']);
+            setBudgetIndex(0);
+            setTimelineIndex(2);
+        } catch (error) {
+            setSubmitState('error');
+            setSubmitMessage(error instanceof Error ? error.message : 'Something went wrong. Please try again.');
+            setShowSuccessNotice(false);
+        }
     };
 
     return (
         <div className="min-h-screen bg-black text-white flex flex-col">
+            {showSuccessNotice && (
+                <motion.div
+                    initial={{ opacity: 0, y: 18, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                    className="fixed left-1/2 top-6 z-[80] w-[min(calc(100vw-3rem),420px)] -translate-x-1/2"
+                >
+                    <div className="rounded-[1.5rem] border border-black/8 bg-[linear-gradient(145deg,rgba(255,255,255,0.99)_0%,rgba(249,249,247,0.98)_44%,rgba(245,244,240,0.94)_100%)] p-5 text-slate-900 shadow-[0_18px_60px_rgba(15,23,42,0.16)]">
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                                    Form Submitted
+                                </p>
+                                <p className="mt-2 text-[15px] leading-relaxed text-slate-600">
+                                    Thanks. Your project details were sent.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowSuccessNotice(false)}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/8 text-slate-500 transition hover:border-black/12 hover:text-slate-900"
+                                aria-label="Close submission notice"
+                            >
+                                ×
+                            </button>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
             <div className="relative overflow-hidden">
                 <UnicornHeroBackground />
                 <div className="absolute inset-0 bg-black/52" />
@@ -490,6 +562,7 @@ export default function ContactPage() {
                                 <div className="flex flex-col items-start gap-3 md:items-end">
                                     <button
                                         type="submit"
+                                        disabled={submitState === 'submitting'}
                                         className="inline-flex items-center gap-2 rounded-[1rem] bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(15,23,42,0.18)]"
                                     >
                                         <svg
@@ -505,11 +578,11 @@ export default function ContactPage() {
                                             <path d="M21.5 3.5 10 15" />
                                             <path d="m21.5 3.5-7 17-2.5-5.5-5.5-2.5 17-8.5Z" />
                                         </svg>
-                                        Send Project Details
+                                        {submitState === 'submitting' ? 'Sending...' : 'Send Project Details'}
                                     </button>
-                                    {submitState === 'submitted' && (
-                                        <p className="text-right text-[12px] text-slate-500">
-                                            The page is live. The submit action still needs an inbox endpoint or form service hooked up.
+                                    {submitState === 'error' && (
+                                        <p className={`text-right text-[12px] ${submitState === 'error' ? 'text-rose-500' : 'text-slate-500'}`}>
+                                            {submitMessage}
                                         </p>
                                     )}
                                 </div>

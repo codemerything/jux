@@ -155,7 +155,7 @@ export default function LaptopServices() {
         <section id="laptop-services" className="relative bg-[#f5f5f0] py-24 overflow-visible" aria-labelledby="laptop-services-heading">
             <h2 id="laptop-services-heading" className="sr-only">How we work</h2>
             <div className="max-w-[1400px] mx-auto px-8">
-                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-12 items-start">
+                <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-16 xl:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)] xl:gap-20">
 
                     {/* Left: Scrolling Content */}
                     <div className="relative z-10 order-2 lg:order-1">
@@ -249,10 +249,10 @@ export default function LaptopServices() {
                     </div>
 
                     {/* Right: Sticky Glass Laptop */}
-                    <div className="hidden lg:flex sticky top-24 justify-center z-10 order-1 lg:order-2">
-                        <div className="relative w-full flex justify-center">
-                            <div className="relative w-[500px] rounded-[12px] border border-[#d8d5cc] bg-[#ece9e1] p-[5px] shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
-                                <div className="relative aspect-[16/10] overflow-hidden rounded-[8px] bg-white">
+                    <div className="order-1 z-10 hidden lg:sticky lg:top-24 lg:flex lg:order-2">
+                        <div className="relative flex w-full justify-start">
+                            <div className="relative w-full max-w-[620px] rounded-[12px] border border-[#d8d5cc] bg-[#ece9e1] p-[5px] shadow-[0_18px_50px_rgba(15,23,42,0.08)] xl:max-w-[660px]">
+                                <div className="relative aspect-[16/10.8] overflow-hidden rounded-[8px] bg-white xl:aspect-[16/11]">
                                     <div className="absolute inset-0 bg-linear-to-br from-white/18 to-transparent pointer-events-none z-10" />
 
                                     <div className="relative h-full w-full overflow-hidden bg-white">
