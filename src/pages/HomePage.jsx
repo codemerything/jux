@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import Hero from '../components/sections/Hero';
@@ -9,14 +11,29 @@ import ServicesMenu from '../components/sections/ServicesMenu';
 import UnicornHeroBackground from '../components/ui/UnicornHeroBackground';
 
 export default function HomePage() {
+    const [isHeroPreviewOpen, setIsHeroPreviewOpen] = useState(false);
+
     return (
-        <div className="min-h-screen bg-black text-gray-900 relative flex flex-col">
+        <motion.div
+            className="min-h-screen bg-black text-gray-900 relative flex flex-col"
+            animate={{
+                filter: isHeroPreviewOpen ? 'blur(18px) brightness(0.52)' : 'blur(0px) brightness(1)',
+                scale: isHeroPreviewOpen ? 0.985 : 1,
+            }}
+            transition={{ duration: 0.64, ease: [0.22, 1, 0.36, 1] }}
+            style={{ transformOrigin: 'center top' }}
+        >
             <main className="flex-1">
                 <div className="relative overflow-hidden">
                     <UnicornHeroBackground />
                     <div className="absolute inset-0 z-[1] bg-black/35" />
-                    <Hero />
-                    <Marquee rows="top" className="relative z-10 pt-4" />
+                    <Hero onOpenPreview={() => setIsHeroPreviewOpen(true)} />
+                    <Marquee
+                        rows="top"
+                        className="relative z-10 pt-4"
+                        isPreviewOpen={isHeroPreviewOpen}
+                        onClosePreview={() => setIsHeroPreviewOpen(false)}
+                    />
                     <Navbar />
                 </div>
 
@@ -27,6 +44,6 @@ export default function HomePage() {
             </main>
 
             <Footer />
-        </div>
+        </motion.div>
     );
 }
