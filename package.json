@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "generate:hero-mobile": "node scripts/generate-hero-mobile.mjs",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.1.18"
   }
 }

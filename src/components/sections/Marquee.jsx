@@ -14,6 +14,18 @@ const ringCards = Object.entries(
         src,
     }));
 
+const mobileLightboxCardSources = new Map(
+    Object.entries(
+        import.meta.glob('../../../heroImages/mobile/*-mobile.webp', {
+            eager: true,
+            import: 'default',
+        })
+    ).map(([path, src]) => [
+        path.split('/').pop()?.replace(/-mobile\.webp$/, '') ?? path,
+        src,
+    ])
+);
+
 const MARQUEE_CARD_ORDER = [
     '9slJRiUdX60eHMiQLI6Tf2AnWMU',
     'ahzChqmXkvjgw1OjVCmmejV1s',
@@ -32,7 +44,10 @@ const marqueeCardSet = MARQUEE_CARD_ORDER
     .filter(Boolean)
     .map(card => card.src);
 
-const lightboxCardSet = ringCards.map(card => card.src);
+const lightboxCardSet = ringCards.map(card => ({
+    src: card.src,
+    mobileSrc: mobileLightboxCardSources.get(card.fileName) ?? card.src,
+}));
 
 const TAU = Math.PI * 2;
 const MOBILE_DRAG_ROTATION_FACTOR = 0.0085;
@@ -545,7 +560,7 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
     const pauseAutoRotateUntilRef = useRef(0);
     const config = getViewportConfig(viewportWidth);
     const cards = marqueeCardSet.slice(0, config.cardCount);
-    const lightboxCards = lightboxCardSet;
+    const lightboxCards = lightboxCardSet.map(card => (isTouchCarousel ? card.mobileSrc : card.src));
     const isTouchCarousel = viewportWidth < 768;
     const lightboxDisplayIndex = lightboxActiveIndex;
     const isOrbitDragging = dragStateRef.current.active;
@@ -649,7 +664,7 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
         setIsLightboxTrackTransitionEnabled(false);
         const frontCarouselIndex = getFrontCardIndex(cards.length, rotationRef.current);
         const frontCarouselSrc = cards[frontCarouselIndex];
-        const lightboxStartIndex = Math.max(0, lightboxCards.indexOf(frontCarouselSrc));
+        const lightboxStartIndex = Math.max(0, lightboxCardSet.findIndex(card => card.src === frontCarouselSrc));
 
         setLightboxActiveIndex(lightboxStartIndex);
         setLightboxVisualIndex(1);
