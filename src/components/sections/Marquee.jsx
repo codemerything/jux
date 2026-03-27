@@ -363,8 +363,8 @@ function LightboxCloseButton({ onClick, className = '' }) {
 function HeroLightbox({
     cards,
     displayIndex,
-    trackIndex,
     activeIndex,
+    visualIndex,
     dragOffset,
     isDragging,
     isTrackTransitionEnabled,
@@ -377,7 +377,13 @@ function HeroLightbox({
     onNext,
     onPrevious,
 }) {
-    const loopedCards = cards.length ? [...cards, ...cards, ...cards] : cards;
+    const windowedCards = cards.length
+        ? [
+            cards[wrapCarouselIndex(activeIndex - 1, cards.length)],
+            cards[wrapCarouselIndex(activeIndex, cards.length)],
+            cards[wrapCarouselIndex(activeIndex + 1, cards.length)],
+        ]
+        : cards;
 
     return (
         <motion.div
@@ -393,12 +399,6 @@ function HeroLightbox({
                 animate={{ opacity: 0.62 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
-            />
-
-            <button
-                type="button"
-                aria-label="Close featured work gallery"
-                className="absolute inset-0 block h-full w-full"
                 onClick={onClose}
             />
 
@@ -451,13 +451,13 @@ function HeroLightbox({
                             className="flex h-full"
                             onTransitionEnd={onTrackTransitionEnd}
                             style={{
-                                transform: `translate3d(calc(${-trackIndex * 100}% + ${dragOffset}px), 0, 0)`,
+                                transform: `translate3d(calc(${-visualIndex * 100}% + ${dragOffset}px), 0, 0)`,
                                 transition: isDragging || !isTrackTransitionEnabled
                                     ? 'none'
                                     : 'transform 460ms cubic-bezier(0.22, 1, 0.36, 1)',
                             }}
                         >
-                            {loopedCards.map((src, index) => (
+                            {windowedCards.map((src, index) => (
                                 <div
                                     key={`${src}-${index}`}
                                     className="flex h-full w-full shrink-0 items-center justify-center px-2 sm:px-8 lg:px-16"
@@ -516,10 +516,12 @@ function HeroLightbox({
 export default function Marquee({ className = '', isPreviewOpen = false, onClosePreview }) {
     const [rotation, setRotation] = useState(0);
     const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1440 : window.innerWidth));
-    const [lightboxTrackIndex, setLightboxTrackIndex] = useState(0);
+    const [lightboxActiveIndex, setLightboxActiveIndex] = useState(0);
+    const [lightboxVisualIndex, setLightboxVisualIndex] = useState(1);
     const [lightboxDragOffset, setLightboxDragOffset] = useState(0);
     const [isLightboxDragging, setIsLightboxDragging] = useState(false);
     const [isLightboxTrackTransitionEnabled, setIsLightboxTrackTransitionEnabled] = useState(true);
+    const [lightboxPendingDirection, setLightboxPendingDirection] = useState(0);
     const stageRef = useRef(null);
     const frameRef = useRef(null);
     const lastTimeRef = useRef(null);
@@ -545,16 +547,19 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
     const cards = marqueeCardSet.slice(0, config.cardCount);
     const lightboxCards = lightboxCardSet;
     const isTouchCarousel = viewportWidth < 768;
-    const lightboxDisplayIndex = wrapCarouselIndex(lightboxTrackIndex, lightboxCards.length);
-    const lightboxMiddleBandStart = lightboxCards.length;
-    const lightboxMiddleBandEnd = lightboxCards.length * 2;
+    const lightboxDisplayIndex = lightboxActiveIndex;
     const isOrbitDragging = dragStateRef.current.active;
     const orbitDragRotationFactor = isTouchCarousel ? MOBILE_DRAG_ROTATION_FACTOR : DESKTOP_DRAG_ROTATION_FACTOR;
     const orbitInertiaBlend = isTouchCarousel ? 0.7 : 0.45;
 
     const moveLightboxTrack = direction => {
+        if (lightboxCards.length <= 1 || lightboxPendingDirection !== 0) {
+            return;
+        }
+
         setIsLightboxTrackTransitionEnabled(true);
-        setLightboxTrackIndex(current => current + direction);
+        setLightboxPendingDirection(direction);
+        setLightboxVisualIndex(direction > 0 ? 2 : 0);
     };
 
     const handleLightboxNext = () => {
@@ -631,6 +636,8 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
             setLightboxDragOffset(0);
             setIsLightboxDragging(false);
             setIsLightboxTrackTransitionEnabled(true);
+            setLightboxPendingDirection(0);
+            setLightboxVisualIndex(1);
             lightboxDragStateRef.current = {
                 active: false,
                 pointerId: null,
@@ -644,7 +651,9 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
         const frontCarouselSrc = cards[frontCarouselIndex];
         const lightboxStartIndex = Math.max(0, lightboxCards.indexOf(frontCarouselSrc));
 
-        setLightboxTrackIndex(lightboxMiddleBandStart + lightboxStartIndex);
+        setLightboxActiveIndex(lightboxStartIndex);
+        setLightboxVisualIndex(1);
+        setLightboxPendingDirection(0);
 
         const previousBodyOverflow = document.body.style.overflow;
         const previousHtmlOverflow = document.documentElement.style.overflow;
@@ -655,7 +664,7 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
             document.body.style.overflow = previousBodyOverflow;
             document.documentElement.style.overflow = previousHtmlOverflow;
         };
-    }, [config.cardCount, isPreviewOpen, lightboxCards.length, lightboxMiddleBandStart]);
+    }, [config.cardCount, isPreviewOpen, lightboxCards.length]);
 
     useEffect(() => {
         if (!isPreviewOpen) {
@@ -772,11 +781,13 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
             lastTime: 0,
         };
         pauseAutoRotateUntilRef.current = performance.now() + 700;
-        stageRef.current?.releasePointerCapture?.(event.pointerId);
+        if (stageRef.current?.hasPointerCapture?.(event.pointerId)) {
+            stageRef.current.releasePointerCapture(event.pointerId);
+        }
     };
 
     const handleLightboxPointerDown = event => {
-        if (lightboxCards.length <= 1) {
+        if (lightboxCards.length <= 1 || lightboxPendingDirection !== 0) {
             return;
         }
 
@@ -821,24 +832,20 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
         };
         setLightboxDragOffset(0);
         setIsLightboxDragging(false);
-        event.currentTarget.releasePointerCapture?.(event.pointerId);
+        if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+        }
     };
 
     const handleLightboxTrackTransitionEnd = () => {
-        if (lightboxCards.length <= 1) {
+        if (lightboxCards.length <= 1 || lightboxPendingDirection === 0) {
             return;
         }
 
-        if (lightboxTrackIndex >= lightboxMiddleBandEnd) {
-            setIsLightboxTrackTransitionEnabled(false);
-            setLightboxTrackIndex(current => current - lightboxCards.length);
-            return;
-        }
-
-        if (lightboxTrackIndex < lightboxMiddleBandStart) {
-            setIsLightboxTrackTransitionEnabled(false);
-            setLightboxTrackIndex(current => current + lightboxCards.length);
-        }
+        setLightboxActiveIndex(current => wrapCarouselIndex(current + lightboxPendingDirection, lightboxCards.length));
+        setLightboxPendingDirection(0);
+        setIsLightboxTrackTransitionEnabled(false);
+        setLightboxVisualIndex(1);
     };
 
     useEffect(() => {
@@ -934,8 +941,8 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
                         <HeroLightbox
                             cards={lightboxCards}
                             displayIndex={lightboxDisplayIndex}
-                            trackIndex={lightboxTrackIndex}
-                            activeIndex={lightboxDisplayIndex}
+                            activeIndex={lightboxActiveIndex}
+                            visualIndex={lightboxVisualIndex}
                             dragOffset={lightboxDragOffset}
                             isDragging={isLightboxDragging}
                             isTrackTransitionEnabled={isLightboxTrackTransitionEnabled}
