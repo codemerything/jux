@@ -560,8 +560,8 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
     const pauseAutoRotateUntilRef = useRef(0);
     const config = getViewportConfig(viewportWidth);
     const cards = marqueeCardSet.slice(0, config.cardCount);
-    const lightboxCards = lightboxCardSet.map(card => (isTouchCarousel ? card.mobileSrc : card.src));
     const isTouchCarousel = viewportWidth < 768;
+    const lightboxCards = lightboxCardSet.map(card => (isTouchCarousel ? card.mobileSrc : card.src));
     const lightboxDisplayIndex = lightboxActiveIndex;
     const isOrbitDragging = dragStateRef.current.active;
     const orbitDragRotationFactor = isTouchCarousel ? MOBILE_DRAG_ROTATION_FACTOR : DESKTOP_DRAG_ROTATION_FACTOR;
