@@ -401,7 +401,7 @@ export default function ContactPage() {
                 <Navbar />
 
                 <section className="relative z-10 px-6 pb-18 pt-40 sm:px-8 sm:pt-44 md:pb-24">
-                    <div className="mx-auto max-w-[1280px]">
+                    <div className="mx-auto w-full max-w-4xl lg:translate-x-5 xl:translate-x-8" style={{ maxWidth: '56rem' }}>
                         <div className="max-w-[760px]">
                             <h1
                                 className="max-w-[14ch] font-extrabold leading-[0.98] tracking-[-0.05em] text-white"
