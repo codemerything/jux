@@ -1,76 +1,50 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { laptopServices } from '../../data/services';
 import UnicornScene from '../ui/UnicornScene';
+import ServiceGlyph from '../ui/ServiceGlyph';
 
 const laptopWideSlides = Object.fromEntries(
     Object.entries(
-    import.meta.glob('../../../heroImages/wideslides/*.{png,jpg,jpeg,webp,avif,mp4,webm,mov}', {
-        eager: true,
-        import: 'default',
-    })
-)
-        .map(([path, src]) => {
-            const fileName = path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? path;
-            return [fileName, src];
+        import.meta.glob('../../../heroImages/wideslides/*.{png,jpg,jpeg,webp,avif,mp4,webm,mov}', {
+            eager: true,
+            import: 'default',
         })
+    ).map(([path, src]) => {
+        const fileName = path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? path;
+        return [fileName, src];
+    })
 );
 
 const laptopServiceCallouts = {
     1: {
-        title: 'Stop breaking the stack every time content changes.',
-        detail: 'We build the publishing and asset flow so launches, updates, and experiments stop creating technical debt.',
+        summary: 'CMS, assets, and deployment move through one stable operating layer.',
+        chips: ['Schemas', 'Asset flow', 'Deploy hooks'],
+        solutionTitle: 'Stop breaking the stack every time content changes.',
+        solutionDetail: 'We build the publishing and asset flow so launches, updates, and experiments stop creating technical debt.',
     },
     2: {
-        title: 'You know the work is off, but not why yet.',
-        detail: 'This is the strategy pass that turns scattered feedback into a clear visual direction, system, and execution plan.',
+        summary: 'Reference drift gets tightened into a clear visual direction and execution track.',
+        chips: ['References', 'Visual rules', 'Execution map'],
+        solutionTitle: 'You know the work is off, but not why yet.',
+        solutionDetail: 'This is the strategy pass that turns scattered feedback into a clear visual direction, system, and execution plan.',
     },
     3: {
-        title: 'Let customers interact before they commit.',
-        detail: 'Use 3D, configurators, and guided product views to answer questions earlier and raise buying confidence.',
+        summary: 'Interfaces that answer product questions before the customer needs support.',
+        chips: ['Hotspots', '3D states', 'Guided motion'],
+        solutionTitle: 'Let customers interact before they commit.',
+        solutionDetail: 'Use 3D, configurators, and guided product views to answer questions earlier and raise buying confidence.',
     },
     4: {
-        title: 'Make every brand touchpoint feel like the same company.',
-        detail: 'We turn visual decisions into a repeatable system so site, campaigns, decks, and launches stay aligned.',
+        summary: 'A modular brand language that holds together across launches, decks, and campaigns.',
+        chips: ['Type scale', 'Color tokens', 'Launch kits'],
+        solutionTitle: 'Make every brand touchpoint feel like the same company.',
+        solutionDetail: 'We turn visual decisions into a repeatable system so site, campaigns, decks, and launches stay aligned.',
     },
 };
-
-const mobilePreviewSlides = {
-    1: {
-        key: 'wideslide1',
-        position: 'top',
-    },
-    2: {
-        key: 'wideslide2',
-        position: 'center',
-    },
-    4: {
-        key: 'wideslide4',
-        position: 'top',
-    },
-};
-
-function MobilePreviewBadge({ expanded = false }) {
-    return (
-        <div className="inline-flex items-center gap-2 rounded-full border border-sky-200/90 bg-sky-50 px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-sky-700 lg:hidden">
-            <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden="true">
-                <path
-                    d="M1.75 10s3.05-5 8.25-5 8.25 5 8.25 5-3.05 5-8.25 5-8.25-5-8.25-5Z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
-                <circle cx="10" cy="10" r="2.35" fill="currentColor" />
-            </svg>
-            <span>{expanded ? 'Tap to hide' : 'Tap to preview'}</span>
-        </div>
-    );
-}
 
 export default function LaptopServices() {
     const [activeService, setActiveService] = useState(0);
-    const [mobilePreviewServiceId, setMobilePreviewServiceId] = useState(null);
     const cardRefs = useRef([]);
 
     useEffect(() => {
@@ -96,7 +70,7 @@ export default function LaptopServices() {
                 }
             });
 
-            setActiveService(current => (current === nextActive ? current : nextActive));
+            setActiveService((current) => (current === nextActive ? current : nextActive));
             frameId = null;
         };
 
@@ -122,34 +96,8 @@ export default function LaptopServices() {
         };
     }, []);
 
-    useEffect(() => {
-        const syncMobilePreviewState = () => {
-            if (window.innerWidth >= 1024) {
-                setMobilePreviewServiceId(null);
-            }
-        };
-
-        syncMobilePreviewState();
-        window.addEventListener('resize', syncMobilePreviewState);
-
-        return () => {
-            window.removeEventListener('resize', syncMobilePreviewState);
-        };
-    }, []);
-
     const currentService = laptopServices[activeService];
     const slideKey = `laptop-slide-${activeService}`;
-    const toggleMobilePreview = serviceId => {
-        if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
-            return;
-        }
-
-        if (!mobilePreviewSlides[serviceId]) {
-            return;
-        }
-
-        setMobilePreviewServiceId(current => (current === serviceId ? null : serviceId));
-    };
 
     return (
         <section id="laptop-services" className="relative overflow-visible bg-[#f5f5f0] py-24" aria-labelledby="laptop-services-heading">
@@ -164,103 +112,61 @@ export default function LaptopServices() {
             <div className="mx-auto max-w-[1400px] px-4 sm:px-8">
                 <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-16 xl:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)] xl:gap-20">
 
-                    {/* Left: Scrolling Content */}
                     <div className="relative z-10 order-2 lg:order-1">
                         <div className="space-y-8 pb-40">
-                            {laptopServices.map((service, index) => (
-                                <div
-                                    key={service.id}
-                                    id={service.anchorId}
-                                    ref={el => cardRefs.current[index] = el}
-                                    onClick={() => toggleMobilePreview(service.id)}
-                                    className={`rounded-2xl border transition-all duration-500 ${activeService === index
-                                        ? 'bg-white border-gray-200 shadow-lg'
-                                        : 'bg-transparent border-gray-100'
-                                        } ${mobilePreviewSlides[service.id] ? 'cursor-pointer lg:cursor-default' : ''}`}
-                                    style={{ scrollMarginTop: '7rem' }}
-                                >
-                                    <div className="px-4 pt-8 sm:px-8">
-                                        <h3 className="font-bold mb-4 text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>{service.title}</h3>
-                                        <p
-                                            className={`text-gray-500 leading-relaxed ${mobilePreviewSlides[service.id] ? 'mb-0' : 'mb-4 sm:mb-6'}`}
-                                            style={{ fontSize: 'var(--text-sm)' }}
-                                        >
-                                            {service.description}
-                                        </p>
-                                    </div>
+                            {laptopServices.map((service, index) => {
+                                const cardData = laptopServiceCallouts[service.id];
+                                const isActive = activeService === index;
 
-                                    {mobilePreviewSlides[service.id] ? (
-                                        <div className="space-y-0">
-                                            <div
-                                                className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-300 ease-out ${
-                                                    mobilePreviewServiceId === service.id ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100'
-                                                }`}
-                                            >
-                                                <div className="min-h-0 px-4 pb-8 sm:px-8">
-                                                    <div className="flex h-[84px] items-center justify-center">
-                                                        <MobilePreviewBadge expanded={mobilePreviewServiceId === service.id} />
-                                                    </div>
+                                return (
+                                    <div
+                                        key={service.id}
+                                        id={service.anchorId}
+                                        ref={(el) => {
+                                            cardRefs.current[index] = el;
+                                        }}
+                                        className={`rounded-[1.8rem] border transition-[transform,box-shadow,border-color,background-color] duration-500 ${
+                                            isActive
+                                                ? 'border-gray-200 bg-white shadow-[0_22px_54px_rgba(15,23,42,0.08)]'
+                                                : 'border-white/70 bg-white/55 shadow-[0_12px_26px_rgba(15,23,42,0.035)]'
+                                        }`}
+                                        style={{ scrollMarginTop: '7rem' }}
+                                    >
+                                        <div className="px-4 pt-5 sm:px-7 sm:pt-6">
+                                            <h3 className="font-bold text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>
+                                                {service.title}
+                                            </h3>
 
-                                                    {laptopServiceCallouts[service.id] && (
-                                                        <div className="border-t border-gray-100 pt-6">
-                                                            <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
-                                                                {laptopServiceCallouts[service.id].title}
-                                                            </p>
-                                                            <p className="max-w-[560px] leading-[1.5] text-gray-500" style={{ fontSize: 'var(--text-xs)' }}>
-                                                                {laptopServiceCallouts[service.id].detail}
-                                                            </p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div
-                                                className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin] duration-300 ease-out ${
-                                                    mobilePreviewServiceId === service.id && laptopWideSlides[mobilePreviewSlides[service.id].key]
-                                                        ? 'mt-2 grid-rows-[1fr] opacity-100'
-                                                        : 'mt-0 grid-rows-[0fr] opacity-0'
-                                                }`}
-                                            >
-                                                <div className="min-h-0 px-2 pb-2">
-                                                    <div className="overflow-hidden rounded-[12px] border border-gray-200 bg-white">
-                                                        <div
-                                                            className="aspect-[16/10] bg-white bg-cover bg-top bg-no-repeat"
-                                                            style={{
-                                                                backgroundImage: `url(${laptopWideSlides[mobilePreviewSlides[service.id].key]})`,
-                                                                backgroundPosition: mobilePreviewSlides[service.id].position,
-                                                            }}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <p className="mt-3 text-gray-500 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>
+                                                {cardData?.summary ?? service.description}
+                                            </p>
                                         </div>
-                                    ) : (
-                                        <div className="px-4 pb-5 sm:px-8 sm:pb-8">
-                                            <div className="mb-6 hidden h-[21px] lg:block" aria-hidden="true" />
 
-                                            {laptopServiceCallouts[service.id] && (
-                                                <div className="border-t border-gray-100 pt-5 sm:pt-6">
+                                        <div className="px-4 pb-6 pt-6 sm:px-7 sm:pb-7">
+                                            <ServiceGlyph serviceId={service.id} isActive={isActive} chips={cardData?.chips} />
+
+                                            {cardData?.solutionTitle ? (
+                                                <div className="mt-5 border-t border-gray-100 pt-5">
                                                     <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
-                                                        {laptopServiceCallouts[service.id].title}
+                                                        {cardData.solutionTitle}
                                                     </p>
                                                     <p className="max-w-[560px] leading-[1.5] text-gray-500" style={{ fontSize: 'var(--text-xs)' }}>
-                                                        {laptopServiceCallouts[service.id].detail}
+                                                        {cardData.solutionDetail}
                                                     </p>
                                                 </div>
-                                            )}
+                                            ) : null}
                                         </div>
-                                    )}
-                                </div>
-                            ))}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
-                    {/* Right: Sticky Glass Laptop */}
                     <div className="order-1 z-10 hidden lg:sticky lg:top-24 lg:flex lg:order-2">
                         <div className="relative flex w-full justify-start">
                             <div className="relative w-full max-w-[620px] rounded-[12px] border border-[#d8d5cc] bg-[#ece9e1] p-[5px] shadow-[0_18px_50px_rgba(15,23,42,0.08)] xl:max-w-[660px]">
                                 <div className="relative aspect-[16/10.8] overflow-hidden rounded-[8px] bg-white xl:aspect-[16/11]">
-                                    <div className="absolute inset-0 bg-linear-to-br from-white/18 to-transparent pointer-events-none z-10" />
+                                    <div className="pointer-events-none absolute inset-0 z-10 bg-linear-to-br from-white/18 to-transparent" />
 
                                     <div className="relative h-full w-full overflow-hidden bg-white">
                                         <AnimatePresence mode="sync">
@@ -305,8 +211,8 @@ export default function LaptopServices() {
                                                         className="h-auto w-full self-start"
                                                     />
                                                 ) : (
-                                                    <div className="text-center p-8 transition-all duration-500">
-                                                        <div className="font-bold tracking-[0.2em] text-accent mb-4" style={{ fontSize: 'var(--text-xs)' }}>
+                                                    <div className="p-8 text-center transition-all duration-500">
+                                                        <div className="mb-4 font-bold tracking-[0.2em] text-accent" style={{ fontSize: 'var(--text-xs)' }}>
                                                             {currentService.displayLabel}
                                                         </div>
 
