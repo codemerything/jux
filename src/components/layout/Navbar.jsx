@@ -253,7 +253,7 @@ export default function Navbar({ hidden = false }) {
                 >
                     <div
                         ref={navRef}
-                        className="relative min-h-[60px] overflow-hidden rounded-[1.7rem] border px-3 py-2.5 backdrop-blur-xl sm:px-4"
+                        className="relative min-h-[60px] overflow-hidden rounded-[1.7rem] border py-2.5 pl-4 pr-3 backdrop-blur-xl sm:px-4"
                         style={{ borderColor: shellBorderColor }}
                     >
                         <motion.div
