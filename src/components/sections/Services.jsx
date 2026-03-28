@@ -169,11 +169,13 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
     const lastScrollYRef = useRef(0);
     const lastServiceChangeScrollYRef = useRef(0);
     const previewOpenFrameRef = useRef(null);
+    const sectionSnapTimeoutRef = useRef(null);
     const serviceSnapTimeoutRef = useRef(null);
     const sectionSnapReleaseTimeoutRef = useRef(null);
     const sectionSnapStateRef = useRef({
         isProgrammaticScroll: false,
         lastObservedScrollY: 0,
+        lastScrollDirection: 1,
         lastSnapScrollY: Number.NEGATIVE_INFINITY,
         lastSnapTimestamp: 0,
     });
@@ -274,9 +276,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
 
             const viewportHeight = getViewportHeight();
             const currentScrollY = window.scrollY;
-            const scrollDelta = currentScrollY - snapState.lastObservedScrollY;
-            const scrollingDown = scrollDelta >= -1;
-            snapState.lastObservedScrollY = currentScrollY;
+            const scrollingDown = snapState.lastScrollDirection >= 0;
 
             if (!scrollingDown || snapState.isProgrammaticScroll) {
                 return;
@@ -290,19 +290,40 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             const isWithinSnapZone = rect.top <= snapThreshold && rect.top >= -overshootAllowance;
 
             if (isWithinSnapZone && snapCooldownElapsed && travelSinceLastSnap > 80) {
+                const targetScrollTop = Math.max(0, Math.round(currentScrollY + rect.top));
                 snapState.lastSnapScrollY = currentScrollY;
                 snapState.lastSnapTimestamp = Date.now();
-                lockSectionSnap(980);
-                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                lockSectionSnap(760);
+                window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
             }
         };
 
-        window.addEventListener('scroll', maybeSnapSectionToTop, { passive: true });
-        const unsubscribeViewportChanges = subscribeViewportChanges(maybeSnapSectionToTop);
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            snapState.lastScrollDirection = currentScrollY - snapState.lastObservedScrollY >= -1 ? 1 : -1;
+            snapState.lastObservedScrollY = currentScrollY;
+
+            if (sectionSnapTimeoutRef.current !== null) {
+                window.clearTimeout(sectionSnapTimeoutRef.current);
+            }
+
+            sectionSnapTimeoutRef.current = window.setTimeout(() => {
+                sectionSnapTimeoutRef.current = null;
+                maybeSnapSectionToTop();
+            }, 130);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        const unsubscribeViewportChanges = subscribeViewportChanges(handleScroll);
 
         return () => {
-            window.removeEventListener('scroll', maybeSnapSectionToTop);
+            window.removeEventListener('scroll', handleScroll);
             unsubscribeViewportChanges();
+
+            if (sectionSnapTimeoutRef.current !== null) {
+                window.clearTimeout(sectionSnapTimeoutRef.current);
+                sectionSnapTimeoutRef.current = null;
+            }
         };
     }, [isPreviewOpen]);
 
@@ -362,8 +383,8 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             const targetTitleTop = getCardTitleTop(nearestCard);
             const targetScrollTop = Math.max(0, window.scrollY + targetTitleTop - snapLine);
 
-            lockSectionSnap(720);
-            window.scrollTo({ top: targetScrollTop, behavior: 'auto' });
+            lockSectionSnap(460);
+            window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
         };
 
         const handleScroll = () => {
@@ -461,6 +482,10 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
     useEffect(() => () => {
         if (previewOpenFrameRef.current !== null) {
             window.cancelAnimationFrame(previewOpenFrameRef.current);
+        }
+
+        if (sectionSnapTimeoutRef.current !== null) {
+            window.clearTimeout(sectionSnapTimeoutRef.current);
         }
 
         if (serviceSnapTimeoutRef.current !== null) {
