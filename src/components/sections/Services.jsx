@@ -382,7 +382,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         ? 'max(8dvh, 72px)'
         : '42dvh';
     const mobilePhoneStickyTop = '40dvh';
-    const mobilePhoneViewportHeight = '60dvh';
+    const mobilePhoneViewportHeight = 'calc(60dvh + 100px)';
     const handleOpenPhonePreview = () => {
         const section = sectionRef.current;
         if (!section) {
@@ -429,6 +429,13 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             className="relative overflow-x-clip bg-[#ffffff] text-gray-900 py-24"
             aria-labelledby="services-heading"
         >
+            <div
+                className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[8.5rem] md:hidden"
+                aria-hidden="true"
+                style={{
+                    background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.16) 38%, rgba(255,255,255,0.46) 66%, rgba(255,255,255,0.82) 86%, rgba(255,255,255,1) 100%)',
+                }}
+            />
             <motion.div
                 animate={{
                     filter: isPreviewOpen ? 'blur(18px) brightness(0.52)' : 'blur(0px) brightness(1)',
@@ -454,7 +461,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                         </div>
 
                         <div className="relative z-0 flex flex-col">
-                            <div ref={headerRef} className="sticky top-0 z-30 -mt-24 bg-[#ffffff] pt-24">
+                            <div ref={headerRef} className="hidden md:block sticky top-0 z-30 -mt-24 bg-[#ffffff] pt-24">
                                 <h2
                                     id="services-heading"
                                     className="mb-4 font-medium leading-[1.06] tracking-[-0.04em] text-gray-900"
@@ -527,7 +534,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                         }}
                     >
                         <div
-                            className="relative overflow-hidden rounded-t-[1.9rem] bg-transparent"
+                            className="relative overflow-visible rounded-t-[1.9rem] bg-transparent"
                             style={{
                                 height: mobilePhoneViewportHeight,
                                 transform: 'translateZ(0)',
@@ -551,7 +558,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                                     />
                                 </div>
                             </div>
-                            <div className="pointer-events-auto absolute bottom-4 right-4 z-30">
+                            <div className="pointer-events-auto absolute bottom-[164px] right-4 z-30">
                                 <PhonePreviewButton onClick={handleOpenPhonePreview} compact />
                             </div>
                         </div>
@@ -565,6 +572,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 initialIndex={Math.max(0, activeService - 1)}
                 onClose={onClosePreview}
                 title="Phone Preview"
+                showTitle={false}
                 closeLabel="Close phone preview gallery"
                 zIndexClassName="z-50"
                 bounds={previewBounds}
@@ -951,7 +959,7 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
                 }
             }}
             data-service={service.id}
-            className={`service-card transition-opacity duration-300 ease-out ${isFirst ? 'pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
+            className={`service-card transition-opacity duration-300 ease-out ${isFirst ? 'pt-2 md:pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
             style={{
                 opacity: opacity,
                 transform: isActive ? 'translateY(0)' : 'translateY(5px)',

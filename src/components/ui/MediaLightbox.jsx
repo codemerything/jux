@@ -155,6 +155,7 @@ export default function MediaLightbox({
     bounds = null,
     lockScroll = true,
     trapScroll = false,
+    showTitle = true,
 }) {
     const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1440 : window.innerWidth));
     const [activeIndex, setActiveIndex] = useState(0);
@@ -479,7 +480,7 @@ export default function MediaLightbox({
                 >
                     <div className="mb-4 flex items-center justify-between gap-4 sm:mb-6">
                         <div className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/56">
-                            {title}
+                            {showTitle ? title : null}
                         </div>
                         <LightboxCloseButton onClick={onClose} className="hidden sm:flex" label={closeLabel} />
                     </div>

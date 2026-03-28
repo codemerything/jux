@@ -152,7 +152,14 @@ export default function LaptopServices() {
     };
 
     return (
-        <section id="laptop-services" className="relative bg-[#f5f5f0] py-24 overflow-visible" aria-labelledby="laptop-services-heading">
+        <section id="laptop-services" className="relative overflow-visible bg-[#f5f5f0] py-24" aria-labelledby="laptop-services-heading">
+            <div
+                className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[19.2rem] lg:hidden"
+                aria-hidden="true"
+                style={{
+                    background: 'linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(250,250,248,0.99) 22%, rgba(247,247,243,0.96) 50%, rgba(245,245,240,0.84) 78%, rgba(245,245,240,0) 100%)',
+                }}
+            />
             <h2 id="laptop-services-heading" className="sr-only">How we work</h2>
             <div className="mx-auto max-w-[1400px] px-4 sm:px-8">
                 <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-16 xl:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)] xl:gap-20">
