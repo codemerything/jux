@@ -169,6 +169,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
     const lastScrollYRef = useRef(0);
     const lastServiceChangeScrollYRef = useRef(0);
     const previewOpenFrameRef = useRef(null);
+    const serviceSnapTimeoutRef = useRef(null);
     const sectionSnapReleaseTimeoutRef = useRef(null);
     const sectionSnapStateRef = useRef({
         isProgrammaticScroll: false,
@@ -271,8 +272,10 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 return;
             }
 
+            const viewportHeight = getViewportHeight();
             const currentScrollY = window.scrollY;
-            const scrollingDown = currentScrollY >= snapState.lastObservedScrollY - 1;
+            const scrollDelta = currentScrollY - snapState.lastObservedScrollY;
+            const scrollingDown = scrollDelta >= -1;
             snapState.lastObservedScrollY = currentScrollY;
 
             if (!scrollingDown || snapState.isProgrammaticScroll) {
@@ -280,14 +283,16 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             }
 
             const rect = section.getBoundingClientRect();
-            const snapThreshold = Math.min(220, getViewportHeight() * 0.22);
-            const snapCooldownElapsed = Date.now() - snapState.lastSnapTimestamp > 900;
+            const snapThreshold = Math.min(360, viewportHeight * 0.38);
+            const overshootAllowance = Math.min(96, viewportHeight * 0.11);
+            const snapCooldownElapsed = Date.now() - snapState.lastSnapTimestamp > 1200;
             const travelSinceLastSnap = Math.abs(currentScrollY - snapState.lastSnapScrollY);
+            const isWithinSnapZone = rect.top <= snapThreshold && rect.top >= -overshootAllowance;
 
-            if (rect.top <= snapThreshold && rect.top > 0 && snapCooldownElapsed && travelSinceLastSnap > 140) {
+            if (isWithinSnapZone && snapCooldownElapsed && travelSinceLastSnap > 80) {
                 snapState.lastSnapScrollY = currentScrollY;
                 snapState.lastSnapTimestamp = Date.now();
-                lockSectionSnap();
+                lockSectionSnap(980);
                 section.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         };
@@ -298,6 +303,82 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         return () => {
             window.removeEventListener('scroll', maybeSnapSectionToTop);
             unsubscribeViewportChanges();
+        };
+    }, [isPreviewOpen]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return undefined;
+        }
+
+        const maybeSnapNearestServiceCard = () => {
+            if (window.innerWidth >= 768 || isPreviewOpen || sectionSnapStateRef.current.isProgrammaticScroll) {
+                return;
+            }
+
+            const section = sectionRef.current;
+            const header = headerRef.current;
+            const cards = cardsRef.current.filter(Boolean);
+            if (!section || !header || !cards.length) {
+                return;
+            }
+
+            const sectionRect = section.getBoundingClientRect();
+            const headerRect = header.getBoundingClientRect();
+            const viewportHeight = getViewportHeight();
+            const sectionAtSetPoint = sectionRect.top <= 4;
+            const headerIsPinned = headerRect.top <= 0.5;
+            const sectionStillActive = sectionRect.bottom > viewportHeight * 0.38;
+
+            if (!sectionAtSetPoint || !headerIsPinned || !sectionStillActive) {
+                return;
+            }
+
+            const snapLine = ruleRef.current
+                ? ruleRef.current.getBoundingClientRect().bottom + 44
+                : viewportHeight * 0.56;
+
+            let nearestCard = cards[0];
+            let nearestDistance = Math.abs(cards[0].getBoundingClientRect().top - snapLine);
+
+            cards.forEach(card => {
+                const distance = Math.abs(card.getBoundingClientRect().top - snapLine);
+                if (distance < nearestDistance) {
+                    nearestCard = card;
+                    nearestDistance = distance;
+                }
+            });
+
+            if (!nearestCard || nearestDistance < 20 || nearestDistance > viewportHeight * 0.42) {
+                return;
+            }
+
+            lockSectionSnap(720);
+            nearestCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
+        const handleScroll = () => {
+            if (serviceSnapTimeoutRef.current !== null) {
+                window.clearTimeout(serviceSnapTimeoutRef.current);
+            }
+
+            serviceSnapTimeoutRef.current = window.setTimeout(() => {
+                serviceSnapTimeoutRef.current = null;
+                maybeSnapNearestServiceCard();
+            }, 120);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        const unsubscribeViewportChanges = subscribeViewportChanges(handleScroll);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            unsubscribeViewportChanges();
+
+            if (serviceSnapTimeoutRef.current !== null) {
+                window.clearTimeout(serviceSnapTimeoutRef.current);
+                serviceSnapTimeoutRef.current = null;
+            }
         };
     }, [isPreviewOpen]);
 
@@ -371,6 +452,10 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
     useEffect(() => () => {
         if (previewOpenFrameRef.current !== null) {
             window.cancelAnimationFrame(previewOpenFrameRef.current);
+        }
+
+        if (serviceSnapTimeoutRef.current !== null) {
+            window.clearTimeout(serviceSnapTimeoutRef.current);
         }
 
         if (sectionSnapReleaseTimeoutRef.current !== null) {
@@ -461,7 +546,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                         </div>
 
                         <div className="relative z-0 flex flex-col">
-                            <div ref={headerRef} className="hidden md:block sticky top-0 z-30 -mt-24 bg-[#ffffff] pt-24">
+                            <div ref={headerRef} className="sticky top-0 z-30 -mt-24 bg-[#ffffff] pt-24">
                                 <h2
                                     id="services-heading"
                                     className="mb-4 font-medium leading-[1.06] tracking-[-0.04em] text-gray-900"
@@ -558,7 +643,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                                     />
                                 </div>
                             </div>
-                            <div className="pointer-events-auto absolute bottom-[164px] right-4 z-30">
+                            <div className="pointer-events-auto absolute bottom-[114px] right-4 z-30">
                                 <PhonePreviewButton onClick={handleOpenPhonePreview} compact />
                             </div>
                         </div>
@@ -959,7 +1044,7 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
                 }
             }}
             data-service={service.id}
-            className={`service-card transition-opacity duration-300 ease-out ${isFirst ? 'pt-2 md:pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
+            className={`service-card transition-opacity duration-300 ease-out ${isFirst ? 'pt-8 md:pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
             style={{
                 opacity: opacity,
                 transform: isActive ? 'translateY(0)' : 'translateY(5px)',
