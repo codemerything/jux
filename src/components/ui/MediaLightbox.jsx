@@ -159,12 +159,14 @@ export default function MediaLightbox({
     const safeInitialIndex = wrapCarouselIndex(initialIndex, slides.length);
     const displayIndex = activeIndex;
     const windowedSlides = slides.length
-        ? [
-            slides[wrapCarouselIndex(activeIndex - 1, slides.length)],
-            slides[wrapCarouselIndex(activeIndex, slides.length)],
-            slides[wrapCarouselIndex(activeIndex + 1, slides.length)],
-        ]
-        : slides;
+        ? [-1, 0, 1].map(offset => {
+            const slideIndex = wrapCarouselIndex(activeIndex + offset, slides.length);
+            return {
+                slide: slides[slideIndex],
+                slideIndex,
+            };
+        })
+        : [];
 
     const moveTrack = direction => {
         if (slides.length <= 1 || pendingDirection !== 0) {
@@ -494,9 +496,9 @@ export default function MediaLightbox({
                                         : 'transform 460ms cubic-bezier(0.22, 1, 0.36, 1)',
                                 }}
                             >
-                                {windowedSlides.map((slide, index) => (
+                                {windowedSlides.map(({ slide, slideIndex }, index) => (
                                     <div
-                                        key={`${slide?.src ?? 'empty'}-${index}`}
+                                        key={slides.length > 2 ? `${slideIndex}` : `${slideIndex}-${index}`}
                                         className="flex h-full w-full shrink-0 items-center justify-center px-2 sm:px-8 lg:px-16"
                                     >
                                         <MediaLightboxSlide
