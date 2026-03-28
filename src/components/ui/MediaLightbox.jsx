@@ -136,6 +136,7 @@ export default function MediaLightbox({
     zIndexClassName = '',
     bounds = null,
     lockScroll = true,
+    trapScroll = false,
 }) {
     const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1440 : window.innerWidth));
     const [activeIndex, setActiveIndex] = useState(0);
@@ -144,6 +145,7 @@ export default function MediaLightbox({
     const [isDragging, setIsDragging] = useState(false);
     const [isTrackTransitionEnabled, setIsTrackTransitionEnabled] = useState(true);
     const [pendingDirection, setPendingDirection] = useState(0);
+    const lightboxRef = useRef(null);
     const viewportRef = useRef(null);
     const preloadedImagesRef = useRef(new Set());
     const wheelNavigationLockRef = useRef(0);
@@ -276,9 +278,13 @@ export default function MediaLightbox({
         }
 
         const handleWheel = event => {
-            const target = viewportRef.current;
-            if (!target || !target.contains(event.target)) {
+            const overlay = lightboxRef.current;
+            if (!overlay || !overlay.contains(event.target)) {
                 return;
+            }
+
+            if (lockScroll || trapScroll) {
+                event.preventDefault();
             }
 
             const now = performance.now();
@@ -294,11 +300,32 @@ export default function MediaLightbox({
             moveTrack(horizontalIntent > 0 ? 1 : -1);
         };
 
-        window.addEventListener('wheel', handleWheel, { passive: true });
+        window.addEventListener('wheel', handleWheel, { passive: false });
         return () => {
             window.removeEventListener('wheel', handleWheel);
         };
-    }, [isOpen, pendingDirection, slides.length]);
+    }, [isOpen, lockScroll, pendingDirection, slides.length, trapScroll]);
+
+    useEffect(() => {
+        if (!isOpen || !trapScroll) {
+            return undefined;
+        }
+
+        const overlay = lightboxRef.current;
+        if (!overlay) {
+            return undefined;
+        }
+
+        const preventTouchScroll = event => {
+            event.preventDefault();
+        };
+
+        overlay.addEventListener('touchmove', preventTouchScroll, { passive: false });
+
+        return () => {
+            overlay.removeEventListener('touchmove', preventTouchScroll);
+        };
+    }, [isOpen, trapScroll]);
 
     useEffect(() => {
         if (isTrackTransitionEnabled) {
@@ -390,6 +417,7 @@ export default function MediaLightbox({
 
     const lightboxContent = (
         <motion.div
+            ref={lightboxRef}
             className={`${renderInline ? 'absolute inset-0' : bounds ? 'fixed overflow-hidden' : 'fixed inset-0 overflow-hidden'} ${zIndexClassName || (renderInline ? 'z-40' : 'z-[240]')}`}
             style={renderInline
                 ? undefined
@@ -399,8 +427,11 @@ export default function MediaLightbox({
                         left: `${bounds.left}px`,
                         width: `${bounds.width}px`,
                         height: `${bounds.height}px`,
+                        overscrollBehavior: 'none',
                     }
-                    : undefined}
+                    : {
+                        overscrollBehavior: 'none',
+                    }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

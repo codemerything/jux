@@ -568,6 +568,8 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 closeLabel="Close phone preview gallery"
                 zIndexClassName="z-50"
                 bounds={previewBounds}
+                lockScroll={false}
+                trapScroll
             />
         </section>
     );
