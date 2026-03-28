@@ -58,8 +58,19 @@ function LightboxCloseButton({ onClick, className = '', label }) {
     );
 }
 
-function MediaLightboxSlide({ slide, shouldPlay }) {
+function MediaLightboxSlide({ slide, shouldPlay, shouldPreload = false }) {
     const videoRef = useRef(null);
+    const [isVideoReady, setIsVideoReady] = useState(false);
+
+    useEffect(() => {
+        if (slide?.type !== 'video') {
+            setIsVideoReady(false);
+            return;
+        }
+
+        const video = videoRef.current;
+        setIsVideoReady(Boolean(video && video.readyState >= 2));
+    }, [slide]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -93,19 +104,26 @@ function MediaLightboxSlide({ slide, shouldPlay }) {
             }}
         >
             {slide.type === 'video' ? (
-                <video
-                    ref={videoRef}
-                    src={slide.src}
-                    poster={slide.poster}
-                    muted
-                    loop
-                    playsInline
-                    preload={shouldPlay ? 'auto' : 'metadata'}
-                    className="block h-auto w-auto max-w-full rounded-[6px] object-contain select-none"
-                    style={{
-                        maxHeight: '100%',
-                    }}
-                />
+                <>
+                    <div
+                        className={`absolute inset-0 rounded-[6px] bg-black transition-opacity duration-300 ${isVideoReady ? 'opacity-0' : 'opacity-100'}`}
+                        aria-hidden="true"
+                    />
+                    <video
+                        ref={videoRef}
+                        src={slide.src}
+                        poster={slide.poster}
+                        muted
+                        loop
+                        playsInline
+                        preload={shouldPreload ? 'auto' : 'metadata'}
+                        onLoadedData={() => setIsVideoReady(true)}
+                        className={`block h-auto w-auto max-w-full rounded-[6px] object-contain select-none transition-opacity duration-300 ${isVideoReady ? 'opacity-100' : 'opacity-0'}`}
+                        style={{
+                            maxHeight: '100%',
+                        }}
+                    />
+                </>
             ) : (
                 <img
                     src={slide.src}
@@ -504,6 +522,7 @@ export default function MediaLightbox({
                                         <MediaLightboxSlide
                                             slide={slide}
                                             shouldPlay={index === 1 && pendingDirection === 0 && !isDragging}
+                                            shouldPreload={slide?.type === 'video'}
                                         />
                                     </div>
                                 ))}
