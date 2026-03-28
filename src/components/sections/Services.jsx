@@ -172,6 +172,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
     const sectionSnapTimeoutRef = useRef(null);
     const serviceSnapTimeoutRef = useRef(null);
     const sectionSnapReleaseTimeoutRef = useRef(null);
+    const sectionSnapSettleTimeoutRef = useRef(null);
     const sectionSnapStateRef = useRef({
         isProgrammaticScroll: false,
         lastObservedScrollY: 0,
@@ -196,6 +197,33 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             sectionSnapStateRef.current.isProgrammaticScroll = false;
             sectionSnapReleaseTimeoutRef.current = null;
         }, duration);
+    };
+
+    const settleSectionFlushToTop = (expectedScrollTop) => {
+        if (sectionSnapSettleTimeoutRef.current !== null) {
+            window.clearTimeout(sectionSnapSettleTimeoutRef.current);
+        }
+
+        sectionSnapSettleTimeoutRef.current = window.setTimeout(() => {
+            const section = sectionRef.current;
+            if (!section) {
+                sectionSnapSettleTimeoutRef.current = null;
+                return;
+            }
+
+            const rect = section.getBoundingClientRect();
+            const closeEnoughToSettle = Math.abs(rect.top) <= 28;
+
+            if (closeEnoughToSettle && Math.abs(rect.top) > 1.5) {
+                const correctedScrollTop = Math.max(0, Math.round(window.scrollY + rect.top));
+                window.scrollTo({ top: correctedScrollTop, behavior: 'auto' });
+                sectionSnapStateRef.current.lastSnapScrollY = correctedScrollTop;
+            } else if (typeof expectedScrollTop === 'number') {
+                sectionSnapStateRef.current.lastSnapScrollY = expectedScrollTop;
+            }
+
+            sectionSnapSettleTimeoutRef.current = null;
+        }, 420);
     };
 
     useEffect(() => {
@@ -295,6 +323,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 snapState.lastSnapTimestamp = Date.now();
                 lockSectionSnap(760);
                 window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+                settleSectionFlushToTop(targetScrollTop);
             }
         };
 
@@ -494,6 +523,10 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
 
         if (sectionSnapReleaseTimeoutRef.current !== null) {
             window.clearTimeout(sectionSnapReleaseTimeoutRef.current);
+        }
+
+        if (sectionSnapSettleTimeoutRef.current !== null) {
+            window.clearTimeout(sectionSnapSettleTimeoutRef.current);
         }
     }, []);
 
