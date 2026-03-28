@@ -12,10 +12,12 @@ import UnicornHeroBackground from '../components/ui/UnicornHeroBackground';
 
 export default function HomePage() {
     const [isHeroPreviewOpen, setIsHeroPreviewOpen] = useState(false);
+    const [isPhonePreviewOpen, setIsPhonePreviewOpen] = useState(false);
+    const isAnyPreviewOpen = isHeroPreviewOpen || isPhonePreviewOpen;
 
     return (
         <div className="min-h-screen bg-black text-gray-900 relative flex flex-col">
-            <Navbar hidden={isHeroPreviewOpen} />
+            <Navbar hidden={isAnyPreviewOpen} />
 
             <motion.div
                 className="flex min-h-screen flex-col"
@@ -30,7 +32,12 @@ export default function HomePage() {
                     <div className="relative overflow-hidden">
                         <UnicornHeroBackground />
                         <div className="absolute inset-0 z-[1] bg-black/35" />
-                        <Hero onOpenPreview={() => setIsHeroPreviewOpen(true)} />
+                        <Hero
+                            onOpenPreview={() => {
+                                setIsPhonePreviewOpen(false);
+                                setIsHeroPreviewOpen(true);
+                            }}
+                        />
                         <Marquee
                             rows="top"
                             className="relative z-10 pt-4"
@@ -39,7 +46,14 @@ export default function HomePage() {
                         />
                     </div>
 
-                    <Services />
+                    <Services
+                        isPreviewOpen={isPhonePreviewOpen}
+                        onOpenPreview={() => {
+                            setIsHeroPreviewOpen(false);
+                            setIsPhonePreviewOpen(true);
+                        }}
+                        onClosePreview={() => setIsPhonePreviewOpen(false)}
+                    />
                     <LaptopServices />
                     <ServicesMenu />
                     <CTA />

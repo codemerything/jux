@@ -194,7 +194,7 @@ function PageContent({ pageIndex, side }) {
                     <p className="text-sm text-white/50 mb-8">Join the standard of digital excellence.</p>
                     <SmartLink
                         href="/contact"
-                        className="bg-white text-gray-900 px-10 py-4 font-bold text-[11px] tracking-[0.1em] hover:bg-gray-100 transition-colors rounded-lg"
+                        className="bg-white text-gray-900 px-10 py-4 font-bold text-[11px] tracking-[0.1em] hover:bg-gray-100 transition-colors rounded-full"
                     >
                         START A PROJECT
                     </SmartLink>

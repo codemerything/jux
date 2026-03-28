@@ -8,7 +8,7 @@ export default function Button({
     className = '',
     ...props
 }) {
-    const baseClasses = 'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-300 cursor-pointer';
+    const baseClasses = 'inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-all duration-300 cursor-pointer';
 
     const variants = {
         primary: 'bg-white text-gray-900 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(255,255,255,0.2)]',

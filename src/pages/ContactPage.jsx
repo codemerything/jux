@@ -560,7 +560,7 @@ export default function ContactPage() {
                                     <button
                                         type="submit"
                                         disabled={submitState === 'submitting'}
-                                        className="inline-flex items-center gap-2 rounded-[1rem] bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(15,23,42,0.18)]"
+                                        className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(15,23,42,0.18)]"
                                     >
                                         <svg
                                             aria-hidden="true"

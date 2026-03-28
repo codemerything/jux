@@ -49,7 +49,7 @@ export default function Hero({ onOpenPreview }) {
                 >
                     <SmartLink
                         href="/contact"
-                        className="flex h-11 min-w-0 flex-1 items-center justify-center gap-2 bg-white text-black px-3 rounded-lg text-[13px] font-semibold whitespace-nowrap
+                        className="flex h-11 min-w-0 flex-1 items-center justify-center gap-2 bg-white text-black px-3 rounded-full text-[13px] font-semibold whitespace-nowrap
                             sm:flex-none sm:px-5 sm:text-sm
                             transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10"
                     >
@@ -60,7 +60,7 @@ export default function Hero({ onOpenPreview }) {
                         type="button"
                         onClick={onOpenPreview}
                         aria-label="Open featured work gallery"
-                        className="flex h-11 min-w-0 flex-1 items-center justify-center rounded-lg border border-gray-700 text-gray-400
+                        className="flex h-11 min-w-0 flex-1 items-center justify-center rounded-full border border-gray-700 text-gray-400
                             sm:w-11 sm:flex-none sm:shrink-0
                             transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-500 hover:bg-white/5 hover:text-white"
                     >

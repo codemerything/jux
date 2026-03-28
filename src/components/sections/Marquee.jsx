@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { createPortal } from 'react-dom';
+import MediaLightbox from '../ui/MediaLightbox';
 
 const ringCards = Object.entries(
     import.meta.glob('../../../heroImages/*.{webp,png,jpg,jpeg,avif}', {
@@ -319,225 +319,13 @@ function OrbitCard({ src, index, total, rotation, config, isDragging }) {
     );
 }
 
-function wrapCarouselIndex(index, total) {
-    if (!total) {
-        return 0;
-    }
-
-    return (index + total) % total;
-}
-
-function LightboxArrow({ direction = 'next', onClick }) {
-    const isNext = direction === 'next';
-
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/14 bg-white/6 text-white/88 backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:bg-white/12 sm:h-12 sm:w-12"
-            aria-label={isNext ? 'Next image' : 'Previous image'}
-        >
-            <svg
-                viewBox="0 0 20 20"
-                className={`h-4 w-4 sm:h-5 sm:w-5 ${isNext ? '' : 'rotate-180'}`}
-                fill="none"
-                aria-hidden="true"
-            >
-                <path
-                    d="M7.5 4.5 13 10l-5.5 5.5"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
-            </svg>
-        </button>
-    );
-}
-
-function LightboxCloseButton({ onClick, className = '' }) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/14 bg-white/6 text-white/82 backdrop-blur-xl transition-all duration-300 hover:bg-white/12 sm:h-11 sm:w-11 ${className}`}
-            aria-label="Close featured work gallery"
-        >
-            <svg viewBox="0 0 20 20" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" aria-hidden="true">
-                <path
-                    d="M5 5 15 15M15 5 5 15"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                />
-            </svg>
-        </button>
-    );
-}
-
-function HeroLightbox({
-    cards,
-    displayIndex,
-    activeIndex,
-    visualIndex,
-    dragOffset,
-    isDragging,
-    isTrackTransitionEnabled,
-    onPointerDown,
-    onPointerMove,
-    onPointerUp,
-    onPointerCancel,
-    onTrackTransitionEnd,
-    onClose,
-    onNext,
-    onPrevious,
-}) {
-    const windowedCards = cards.length
-        ? [
-            cards[wrapCarouselIndex(activeIndex - 1, cards.length)],
-            cards[wrapCarouselIndex(activeIndex, cards.length)],
-            cards[wrapCarouselIndex(activeIndex + 1, cards.length)],
-        ]
-        : cards;
-
-    return (
-        <motion.div
-            className="fixed inset-0 z-[240] flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
-        >
-            <motion.div
-                className="absolute inset-0 bg-black"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.62 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
-                onClick={onClose}
-            />
-
-            <motion.div
-                className="relative z-10 flex h-screen w-screen flex-col justify-center overflow-hidden px-4 py-6 sm:px-6 lg:px-10"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.68, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            >
-                <div className="mb-4 flex items-center justify-between gap-4 sm:mb-6">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/56">
-                        Featured Work
-                    </div>
-                    <LightboxCloseButton onClick={onClose} className="hidden sm:flex" />
-                </div>
-
-                <div className="relative flex min-h-0 flex-1 items-center justify-center">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden items-center lg:flex">
-                        <LightboxArrow direction="previous" onClick={onPrevious} />
-                    </div>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden items-center lg:flex">
-                        <LightboxArrow direction="next" onClick={onNext} />
-                    </div>
-
-                    <div
-                        className="relative h-full w-full overflow-hidden"
-                        onPointerDown={onPointerDown}
-                        onPointerMove={onPointerMove}
-                        onPointerUp={onPointerUp}
-                        onPointerCancel={onPointerCancel}
-                        onLostPointerCapture={onPointerCancel}
-                        style={{
-                            touchAction: 'none',
-                            overscrollBehavior: 'none',
-                        }}
-                    >
-                        <div
-                            className="flex h-full"
-                            onTransitionEnd={onTrackTransitionEnd}
-                            style={{
-                                transform: `translate3d(calc(${-visualIndex * 100}% + ${dragOffset}px), 0, 0)`,
-                                transition: isDragging || !isTrackTransitionEnabled
-                                    ? 'none'
-                                    : 'transform 460ms cubic-bezier(0.22, 1, 0.36, 1)',
-                            }}
-                        >
-                            {windowedCards.map((src, index) => (
-                                <div
-                                    key={index}
-                                    className="flex h-full w-full shrink-0 items-center justify-center px-2 sm:px-8 lg:px-16"
-                                >
-                                    <figure
-                                        className="relative flex w-auto items-center justify-center"
-                                        style={{
-                                            padding: 'clamp(4px, 0.7vw, 1.1rem)',
-                                            width: 'fit-content',
-                                            maxWidth: 'min(1400px, calc(100vw - 1rem))',
-                                            maxHeight: '82vh',
-                                        }}
-                                    >
-                                        <img
-                                            src={src}
-                                            alt=""
-                                            draggable={false}
-                                            loading="eager"
-                                            decoding="async"
-                                            className="block h-auto w-auto max-w-full rounded-[6px] object-contain select-none"
-                                            style={{
-                                                maxHeight: 'calc(82vh - clamp(8px, 1.4vw, 2.2rem))',
-                                            }}
-                                        />
-                                    </figure>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-5 flex flex-col gap-3 sm:mt-6 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-center text-[12px] text-white/44 sm:text-left sm:text-sm">
-                        <span className="sm:hidden">Swipe to browse</span>
-                        <span className="hidden sm:inline">Swipe, scroll, or use the arrow keys.</span>
-                    </div>
-                    <div className="relative flex w-full items-center justify-center sm:w-auto sm:justify-end">
-                        <div className="flex items-center gap-2 lg:hidden">
-                            <LightboxArrow direction="previous" onClick={onPrevious} />
-                            <div className="rounded-full border border-white/10 bg-white/6 px-3 py-2 text-[11px] font-semibold tracking-[0.18em] text-white/72">
-                                {String(displayIndex + 1).padStart(2, '0')} / {String(cards.length).padStart(2, '0')}
-                            </div>
-                            <LightboxArrow direction="next" onClick={onNext} />
-                        </div>
-                        <LightboxCloseButton onClick={onClose} className="absolute right-0 sm:hidden" />
-                        <div className="hidden rounded-full border border-white/10 bg-white/6 px-4 py-2 text-xs font-semibold tracking-[0.22em] text-white/72 lg:block">
-                            {String(displayIndex + 1).padStart(2, '0')} / {String(cards.length).padStart(2, '0')}
-                        </div>
-                    </div>
-                </div>
-            </motion.div>
-        </motion.div>
-    );
-}
-
 export default function Marquee({ className = '', isPreviewOpen = false, onClosePreview }) {
     const [rotation, setRotation] = useState(0);
     const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1440 : window.innerWidth));
-    const [lightboxActiveIndex, setLightboxActiveIndex] = useState(0);
-    const [lightboxVisualIndex, setLightboxVisualIndex] = useState(1);
-    const [lightboxDragOffset, setLightboxDragOffset] = useState(0);
-    const [isLightboxDragging, setIsLightboxDragging] = useState(false);
-    const [isLightboxTrackTransitionEnabled, setIsLightboxTrackTransitionEnabled] = useState(true);
-    const [lightboxPendingDirection, setLightboxPendingDirection] = useState(0);
     const stageRef = useRef(null);
     const frameRef = useRef(null);
     const lastTimeRef = useRef(null);
     const rotationRef = useRef(0);
-    const lightboxViewportRef = useRef(null);
-    const preloadedLightboxImagesRef = useRef(new Set());
-    const wheelNavigationLockRef = useRef(0);
-    const lightboxDragStateRef = useRef({
-        active: false,
-        pointerId: null,
-        startX: 0,
-    });
     const dragStateRef = useRef({
         active: false,
         pointerId: null,
@@ -551,29 +339,13 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
     const config = getViewportConfig(viewportWidth);
     const cards = marqueeCardSet.slice(0, config.cardCount);
     const isTouchCarousel = viewportWidth < 768;
-    const lightboxCards = lightboxCardSet.map(card => (isTouchCarousel ? card.mobileSrc : card.src));
-    const lightboxDisplayIndex = lightboxActiveIndex;
+    const lightboxSlides = lightboxCardSet.map(card => ({
+        type: 'image',
+        src: isTouchCarousel ? card.mobileSrc : card.src,
+    }));
     const isOrbitDragging = dragStateRef.current.active;
     const orbitDragRotationFactor = isTouchCarousel ? MOBILE_DRAG_ROTATION_FACTOR : DESKTOP_DRAG_ROTATION_FACTOR;
     const orbitInertiaBlend = isTouchCarousel ? 0.7 : 0.45;
-
-    const moveLightboxTrack = direction => {
-        if (lightboxCards.length <= 1 || lightboxPendingDirection !== 0) {
-            return;
-        }
-
-        setIsLightboxTrackTransitionEnabled(true);
-        setLightboxPendingDirection(direction);
-        setLightboxVisualIndex(direction > 0 ? 2 : 0);
-    };
-
-    const handleLightboxNext = () => {
-        moveLightboxTrack(1);
-    };
-
-    const handleLightboxPrevious = () => {
-        moveLightboxTrack(-1);
-    };
 
     useEffect(() => {
         const handleResize = () => {
@@ -636,116 +408,6 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
         };
     }, [config.speed]);
 
-    useLayoutEffect(() => {
-        if (!isPreviewOpen) {
-            setLightboxDragOffset(0);
-            setIsLightboxDragging(false);
-            setIsLightboxTrackTransitionEnabled(true);
-            setLightboxPendingDirection(0);
-            setLightboxVisualIndex(1);
-            lightboxDragStateRef.current = {
-                active: false,
-                pointerId: null,
-                startX: 0,
-            };
-            return;
-        }
-
-        setIsLightboxTrackTransitionEnabled(false);
-        const frontCarouselIndex = getFrontCardIndex(cards.length, rotationRef.current);
-        const frontCarouselSrc = cards[frontCarouselIndex];
-        const lightboxStartIndex = Math.max(0, lightboxCardSet.findIndex(card => card.src === frontCarouselSrc));
-
-        setLightboxActiveIndex(lightboxStartIndex);
-        setLightboxVisualIndex(1);
-        setLightboxPendingDirection(0);
-
-        const previousBodyOverflow = document.body.style.overflow;
-        const previousHtmlOverflow = document.documentElement.style.overflow;
-        document.body.style.overflow = 'hidden';
-        document.documentElement.style.overflow = 'hidden';
-
-        return () => {
-            document.body.style.overflow = previousBodyOverflow;
-            document.documentElement.style.overflow = previousHtmlOverflow;
-        };
-    }, [config.cardCount, isPreviewOpen, lightboxCards.length]);
-
-    useEffect(() => {
-        if (!isPreviewOpen) {
-            return undefined;
-        }
-
-        if (typeof Image !== 'undefined' && lightboxCards.length) {
-            [-1, 0, 1, 2].forEach(offset => {
-                const preloadIndex = wrapCarouselIndex(lightboxActiveIndex + offset, lightboxCards.length);
-                const preloadSrc = lightboxCards[preloadIndex];
-
-                if (!preloadSrc || preloadedLightboxImagesRef.current.has(preloadSrc)) {
-                    return;
-                }
-
-                const image = new Image();
-                image.decoding = 'async';
-                image.src = preloadSrc;
-                preloadedLightboxImagesRef.current.add(preloadSrc);
-            });
-        }
-
-        const handleKeyDown = event => {
-            if (event.key === 'Escape') {
-                onClosePreview?.();
-                return;
-            }
-
-            if (event.key === 'ArrowRight') {
-                event.preventDefault();
-                moveLightboxTrack(1);
-            }
-
-            if (event.key === 'ArrowLeft') {
-                event.preventDefault();
-                moveLightboxTrack(-1);
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [isPreviewOpen, lightboxActiveIndex, lightboxCards, onClosePreview]);
-
-    useEffect(() => {
-        if (!isPreviewOpen) {
-            return undefined;
-        }
-
-        const handleWheel = event => {
-            const target = lightboxViewportRef.current;
-            if (!target || !target.contains(event.target)) {
-                return;
-            }
-
-            const now = performance.now();
-            const horizontalIntent = Math.abs(event.deltaX) > Math.abs(event.deltaY)
-                ? event.deltaX
-                : event.deltaY;
-
-            if (Math.abs(horizontalIntent) < 18 || now - wheelNavigationLockRef.current < 420) {
-                return;
-            }
-
-            wheelNavigationLockRef.current = now;
-
-            moveLightboxTrack(horizontalIntent > 0 ? 1 : -1);
-        };
-
-        window.addEventListener('wheel', handleWheel, { passive: true });
-        return () => {
-            window.removeEventListener('wheel', handleWheel);
-        };
-    }, [isPreviewOpen]);
-
     const handlePointerDown = event => {
         if (event.pointerType === 'mouse' && event.button !== 0) {
             return;
@@ -806,82 +468,6 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
             stageRef.current.releasePointerCapture(event.pointerId);
         }
     };
-
-    const handleLightboxPointerDown = event => {
-        if (lightboxCards.length <= 1 || lightboxPendingDirection !== 0) {
-            return;
-        }
-
-        event.preventDefault();
-        lightboxDragStateRef.current = {
-            active: true,
-            pointerId: event.pointerId,
-            startX: event.clientX,
-        };
-        setIsLightboxDragging(true);
-        event.currentTarget.setPointerCapture?.(event.pointerId);
-    };
-
-    const handleLightboxPointerMove = event => {
-        const dragState = lightboxDragStateRef.current;
-        if (!dragState.active || dragState.pointerId !== event.pointerId) {
-            return;
-        }
-
-        setLightboxDragOffset(event.clientX - dragState.startX);
-    };
-
-    const handleLightboxPointerRelease = event => {
-        const dragState = lightboxDragStateRef.current;
-        if (!dragState.active || dragState.pointerId !== event.pointerId) {
-            return;
-        }
-
-        const nextDragOffset = event.clientX - dragState.startX;
-        const swipeThreshold = Math.min(140, viewportWidth * 0.12);
-
-        if (nextDragOffset <= -swipeThreshold) {
-            moveLightboxTrack(1);
-        } else if (nextDragOffset >= swipeThreshold) {
-            moveLightboxTrack(-1);
-        }
-
-        lightboxDragStateRef.current = {
-            active: false,
-            pointerId: null,
-            startX: 0,
-        };
-        setLightboxDragOffset(0);
-        setIsLightboxDragging(false);
-        if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
-            event.currentTarget.releasePointerCapture(event.pointerId);
-        }
-    };
-
-    const handleLightboxTrackTransitionEnd = () => {
-        if (lightboxCards.length <= 1 || lightboxPendingDirection === 0) {
-            return;
-        }
-
-        setLightboxActiveIndex(current => wrapCarouselIndex(current + lightboxPendingDirection, lightboxCards.length));
-        setLightboxPendingDirection(0);
-        setIsLightboxTrackTransitionEnabled(false);
-        setLightboxVisualIndex(1);
-    };
-
-    useEffect(() => {
-        if (isLightboxTrackTransitionEnabled) {
-            return undefined;
-        }
-
-        const frameId = window.requestAnimationFrame(() => {
-            setIsLightboxTrackTransitionEnabled(true);
-        });
-
-        return () => {
-            window.cancelAnimationFrame(frameId);
-        };
-    }, [isLightboxTrackTransitionEnabled]);
 
     return (
         <>
@@ -956,30 +542,14 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
                 </div>
             </motion.section>
 
-            {isPreviewOpen && typeof document !== 'undefined'
-                ? createPortal(
-                    <div ref={lightboxViewportRef}>
-                        <HeroLightbox
-                            cards={lightboxCards}
-                            displayIndex={lightboxDisplayIndex}
-                            activeIndex={lightboxActiveIndex}
-                            visualIndex={lightboxVisualIndex}
-                            dragOffset={lightboxDragOffset}
-                            isDragging={isLightboxDragging}
-                            isTrackTransitionEnabled={isLightboxTrackTransitionEnabled}
-                            onPointerDown={handleLightboxPointerDown}
-                            onPointerMove={handleLightboxPointerMove}
-                            onPointerUp={handleLightboxPointerRelease}
-                            onPointerCancel={handleLightboxPointerRelease}
-                            onTrackTransitionEnd={handleLightboxTrackTransitionEnd}
-                            onClose={onClosePreview}
-                            onNext={handleLightboxNext}
-                            onPrevious={handleLightboxPrevious}
-                        />
-                    </div>,
-                    document.body
-                )
-                : null}
+            <MediaLightbox
+                isOpen={isPreviewOpen}
+                slides={lightboxSlides}
+                initialIndex={Math.max(0, lightboxCardSet.findIndex(card => card.src === cards[getFrontCardIndex(cards.length, rotationRef.current)]))}
+                onClose={onClosePreview}
+                title="Featured Work"
+                closeLabel="Close featured work gallery"
+            />
         </>
     );
 }

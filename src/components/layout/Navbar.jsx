@@ -253,7 +253,7 @@ export default function Navbar({ hidden = false }) {
                 >
                     <div
                         ref={navRef}
-                        className="relative min-h-[60px] overflow-hidden rounded-2xl border px-3 py-2.5 backdrop-blur-xl sm:px-4"
+                        className="relative min-h-[60px] overflow-hidden rounded-[1.7rem] border px-3 py-2.5 backdrop-blur-xl sm:px-4"
                         style={{ borderColor: shellBorderColor }}
                     >
                         <motion.div
@@ -273,7 +273,7 @@ export default function Navbar({ hidden = false }) {
                             transition={{ duration: 0.28, ease: 'easeOut' }}
                             style={{
                                 backgroundImage:
-                                    'linear-gradient(rgba(255,255,255,0.46), rgba(255,255,255,0.46)), linear-gradient(135deg, rgba(255,255,255,0.76) 0%, rgba(255,255,255,0.56) 24%, rgba(255,255,255,0.28) 54%, rgba(255,255,255,0.12) 100%)',
+                                    'linear-gradient(rgba(255,255,255,0.23), rgba(255,255,255,0.23)), linear-gradient(135deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.28) 24%, rgba(255,255,255,0.14) 54%, rgba(255,255,255,0.06) 100%)',
                                 backgroundOrigin: 'border-box',
                                 backgroundClip: 'padding-box, border-box',
                             }}
@@ -401,7 +401,7 @@ export default function Navbar({ hidden = false }) {
 
                         <SmartLink
                             href="/contact"
-                            className={`absolute right-3 top-1/2 z-20 hidden h-9 -translate-y-1/2 items-center gap-1.5 rounded-lg px-4 text-[13px] font-semibold transition-all duration-300 hover:scale-105 xl:inline-flex sm:right-4 ${ctaClassName}`}
+                            className={`absolute right-[7px] top-1/2 z-20 hidden h-9 -translate-y-1/2 items-center gap-1.5 rounded-full px-4 text-[13px] font-semibold transition-all duration-300 hover:scale-105 xl:inline-flex sm:right-[11px] ${ctaClassName}`}
                         >
                             <PulseDot />
                             Book a Call
@@ -483,7 +483,7 @@ export default function Navbar({ hidden = false }) {
                                     })}
                                     <SmartLink
                                         href="/contact"
-                                        className={`mt-1 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold ${ctaClassName}`}
+                                        className={`mt-1 inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold ${ctaClassName}`}
                                         onClick={() => {
                                             setIsMobileMenuOpen(false);
                                             setMobileExpandedDropdown(null);
