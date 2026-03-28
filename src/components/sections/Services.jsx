@@ -568,7 +568,6 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 closeLabel="Close phone preview gallery"
                 zIndexClassName="z-50"
                 bounds={previewBounds}
-                lockScroll={false}
             />
         </section>
     );
@@ -736,12 +735,31 @@ function PhoneScreen({ service, screenStyle, isActive, shouldPrime, shouldLoadMe
     const fitWidthTop = Boolean(screenStyle.fitWidthTop);
     const videoRef = useRef(null);
     const [hasAttachedMedia, setHasAttachedMedia] = useState(false);
+    const [isVideoReady, setIsVideoReady] = useState(false);
 
     useEffect(() => {
         if (shouldLoadMedia && shouldPrime) {
             setHasAttachedMedia(true);
         }
     }, [shouldLoadMedia, shouldPrime]);
+
+    useEffect(() => {
+        if (!hasVideoBackground) {
+            return;
+        }
+
+        if (!hasAttachedMedia) {
+            setIsVideoReady(false);
+            return;
+        }
+
+        const video = videoRef.current;
+        if (!video) {
+            return;
+        }
+
+        setIsVideoReady(video.readyState >= 2);
+    }, [hasAttachedMedia, hasVideoBackground]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -764,7 +782,7 @@ function PhoneScreen({ service, screenStyle, isActive, shouldPrime, shouldLoadMe
         <div
             className={`absolute inset-0 flex flex-col items-center justify-center text-center transition-all duration-700 ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
                 }`}
-            style={hasMediaBackground ? undefined : screenStyle}
+            style={hasMediaBackground ? { backgroundColor: hasVideoBackground ? '#000000' : undefined } : screenStyle}
         >
             {hasImageBackground && (
                 <img
@@ -778,15 +796,22 @@ function PhoneScreen({ service, screenStyle, isActive, shouldPrime, shouldLoadMe
                 />
             )}
             {hasVideoBackground && (
-                <video
-                    ref={videoRef}
-                    src={hasAttachedMedia ? screenStyle.video : undefined}
-                    className="absolute inset-0 h-full w-full object-cover object-center"
-                    muted
-                    loop
-                    playsInline
-                    preload={isActive && !suspendPlayback ? 'metadata' : 'none'}
-                />
+                <>
+                    <div
+                        className={`absolute inset-0 bg-black transition-opacity duration-300 ${isVideoReady ? 'opacity-0' : 'opacity-100'}`}
+                        aria-hidden="true"
+                    />
+                    <video
+                        ref={videoRef}
+                        src={hasAttachedMedia ? screenStyle.video : undefined}
+                        className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-300 ${isVideoReady ? 'opacity-100' : 'opacity-0'}`}
+                        muted
+                        loop
+                        playsInline
+                        preload={hasAttachedMedia ? 'auto' : 'none'}
+                        onLoadedData={() => setIsVideoReady(true)}
+                    />
+                </>
             )}
             {/* Decorative content inside the phone screen */}
             {!hasMediaBackground && (

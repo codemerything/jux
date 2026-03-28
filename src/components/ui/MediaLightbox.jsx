@@ -84,12 +84,12 @@ function MediaLightboxSlide({ slide, shouldPlay }) {
 
     return (
         <figure
-            className="relative flex w-auto items-center justify-center"
+            className="relative flex h-full w-auto items-center justify-center"
             style={{
                 padding: 'clamp(4px, 0.7vw, 1.1rem)',
                 width: 'fit-content',
                 maxWidth: 'min(1400px, calc(100vw - 1rem))',
-                maxHeight: '82vh',
+                maxHeight: '100%',
             }}
         >
             {slide.type === 'video' ? (
@@ -103,7 +103,7 @@ function MediaLightboxSlide({ slide, shouldPlay }) {
                     preload={shouldPlay ? 'auto' : 'metadata'}
                     className="block h-auto w-auto max-w-full rounded-[6px] object-contain select-none"
                     style={{
-                        maxHeight: 'calc(82vh - clamp(8px, 1.4vw, 2.2rem))',
+                        maxHeight: '100%',
                     }}
                 />
             ) : (
@@ -115,7 +115,7 @@ function MediaLightboxSlide({ slide, shouldPlay }) {
                     decoding="async"
                     className="block h-auto w-auto max-w-full rounded-[6px] object-contain select-none"
                     style={{
-                        maxHeight: 'calc(82vh - clamp(8px, 1.4vw, 2.2rem))',
+                        maxHeight: '100%',
                     }}
                 />
             )}
