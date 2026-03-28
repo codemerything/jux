@@ -337,12 +337,18 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             const snapLine = ruleRef.current
                 ? ruleRef.current.getBoundingClientRect().bottom + 44
                 : viewportHeight * 0.56;
+            const getCardTitleTop = (card) => {
+                const title = card.querySelector('[data-service-title]');
+                return title
+                    ? title.getBoundingClientRect().top
+                    : card.getBoundingClientRect().top;
+            };
 
             let nearestCard = cards[0];
-            let nearestDistance = Math.abs(cards[0].getBoundingClientRect().top - snapLine);
+            let nearestDistance = Math.abs(getCardTitleTop(cards[0]) - snapLine);
 
             cards.forEach(card => {
-                const distance = Math.abs(card.getBoundingClientRect().top - snapLine);
+                const distance = Math.abs(getCardTitleTop(card) - snapLine);
                 if (distance < nearestDistance) {
                     nearestCard = card;
                     nearestDistance = distance;
@@ -353,8 +359,11 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 return;
             }
 
+            const targetTitleTop = getCardTitleTop(nearestCard);
+            const targetScrollTop = Math.max(0, window.scrollY + targetTitleTop - snapLine);
+
             lockSectionSnap(720);
-            nearestCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.scrollTo({ top: targetScrollTop, behavior: 'auto' });
         };
 
         const handleScroll = () => {
@@ -965,6 +974,7 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
     ));
     const cardRef = React.useRef(null);
     const revealProgress = useMobileRevealProgress(cardRef, { start: 0.62, end: 0.34 });
+    const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 768;
 
     React.useEffect(() => {
         const card = cardRef.current;
@@ -1034,7 +1044,6 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
 
     return (
         <div
-            id={service.anchorId}
             ref={(el) => {
                 cardRef.current = el;
                 if (typeof ref === 'function') {
@@ -1047,10 +1056,9 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
             className={`service-card transition-opacity duration-300 ease-out ${isFirst ? 'pt-8 md:pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
             style={{
                 opacity: opacity,
-                transform: isActive ? 'translateY(0)' : 'translateY(5px)',
+                transform: isMobileViewport || isActive ? 'translateY(0)' : 'translateY(5px)',
                 scrollSnapAlign: 'start',
                 scrollSnapStop: 'normal',
-                scrollMarginTop: '15rem',
             }}
         >
             <CardContent service={service} revealProgress={revealProgress} />
@@ -1065,18 +1073,26 @@ function CardContent({ service, revealProgress }) {
     const titleProgress = getStaggeredProgress(revealProgress, 0);
     const descriptionProgress = getStaggeredProgress(revealProgress, 0.16);
     const utilityProgress = getStaggeredProgress(revealProgress, 0.32);
+    const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 768;
+    const getCardRevealStyle = (progress, distance) => (
+        isMobileViewport
+            ? { opacity: progress }
+            : getRevealStyle(progress, distance)
+    );
 
     return (
         <>
             <h3
-                className="mb-4 font-medium leading-[1.08] tracking-[-0.03em] text-gray-900 transition-[opacity,transform] duration-300 ease-out"
-                style={{ ...getRevealStyle(titleProgress, 28), fontSize: 'var(--text-h4)' }}
+                id={service.anchorId}
+                data-service-title
+                className="mb-4 scroll-mt-28 font-medium leading-[1.08] tracking-[-0.03em] text-gray-900 transition-opacity duration-200 ease-out md:scroll-mt-[15rem] md:transition-[opacity,transform] md:duration-300"
+                style={{ ...getCardRevealStyle(titleProgress, 28), fontSize: 'var(--text-h4)' }}
             >
                 {service.title}
             </h3>
             <p
-                className="mb-6 max-w-[500px] leading-[1.8] text-gray-500 transition-[opacity,transform] duration-300 ease-out"
-                style={{ ...getRevealStyle(descriptionProgress, 22), fontSize: 'var(--text-sm)' }}
+                className="mb-6 max-w-[500px] leading-[1.8] text-gray-500 transition-opacity duration-200 ease-out md:transition-[opacity,transform] md:duration-300"
+                style={{ ...getCardRevealStyle(descriptionProgress, 22), fontSize: 'var(--text-sm)' }}
             >
                 {service.description}
             </p>
