@@ -168,7 +168,6 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
     const ruleRef = useRef(null);
     const lastScrollYRef = useRef(0);
     const lastServiceChangeScrollYRef = useRef(0);
-    const previewOpenFrameRef = useRef(null);
     const sectionSnapTimeoutRef = useRef(null);
     const serviceSnapTimeoutRef = useRef(null);
     const sectionSnapReleaseTimeoutRef = useRef(null);
@@ -509,10 +508,6 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
     }, []);
 
     useEffect(() => () => {
-        if (previewOpenFrameRef.current !== null) {
-            window.cancelAnimationFrame(previewOpenFrameRef.current);
-        }
-
         if (sectionSnapTimeoutRef.current !== null) {
             window.clearTimeout(sectionSnapTimeoutRef.current);
         }
@@ -536,42 +531,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
     const mobilePhoneStickyTop = '40dvh';
     const mobilePhoneViewportHeight = 'calc(60dvh + 100px)';
     const handleOpenPhonePreview = () => {
-        const section = sectionRef.current;
-        if (!section) {
-            onOpenPreview?.();
-            return;
-        }
-
-        if (previewOpenFrameRef.current !== null) {
-            window.cancelAnimationFrame(previewOpenFrameRef.current);
-            previewOpenFrameRef.current = null;
-        }
-
-        const rect = section.getBoundingClientRect();
-        if (Math.abs(rect.top) <= 4) {
-            onOpenPreview?.();
-            return;
-        }
-
-        const startTime = Date.now();
-        lockSectionSnap(1100);
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        const waitForSectionAlignment = () => {
-            const nextRect = section.getBoundingClientRect();
-            const hasAligned = Math.abs(nextRect.top) <= 4;
-            const hasTimedOut = Date.now() - startTime > 1150;
-
-            if (hasAligned || hasTimedOut) {
-                previewOpenFrameRef.current = null;
-                onOpenPreview?.();
-                return;
-            }
-
-            previewOpenFrameRef.current = window.requestAnimationFrame(waitForSectionAlignment);
-        };
-
-        previewOpenFrameRef.current = window.requestAnimationFrame(waitForSectionAlignment);
+        onOpenPreview?.();
     };
 
     return (
@@ -590,8 +550,8 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             />
             <motion.div
                 animate={{
-                    filter: isPreviewOpen ? 'blur(18px) brightness(0.52)' : 'blur(0px) brightness(1)',
-                    scale: isPreviewOpen ? 0.985 : 1,
+                    filter: 'blur(0px) brightness(1)',
+                    scale: 1,
                 }}
                 transition={{ duration: 0.64, ease: [0.22, 1, 0.36, 1] }}
                 style={{ transformOrigin: 'center top' }}
@@ -730,6 +690,8 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 bounds={previewBounds}
                 lockScroll={false}
                 trapScroll
+                overlayBackgroundColor="rgba(255, 255, 255, 0.53125)"
+                chromeTone="dark"
             />
         </section>
     );

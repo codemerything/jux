@@ -22,8 +22,8 @@ export default function HomePage() {
             <motion.div
                 className="flex min-h-screen flex-col"
                 animate={{
-                    filter: isHeroPreviewOpen ? 'blur(18px) brightness(0.52)' : 'blur(0px) brightness(1)',
-                    scale: isHeroPreviewOpen ? 0.985 : 1,
+                    filter: isAnyPreviewOpen ? 'blur(18px) brightness(0.52)' : 'blur(0px) brightness(1)',
+                    scale: 1,
                 }}
                 transition={{ duration: 0.64, ease: [0.22, 1, 0.36, 1] }}
                 style={{ transformOrigin: 'center top' }}

@@ -10,14 +10,17 @@ export function wrapCarouselIndex(index, total) {
     return (index + total) % total;
 }
 
-function LightboxArrow({ direction = 'next', onClick }) {
+function LightboxArrow({ direction = 'next', onClick, tone = 'light' }) {
     const isNext = direction === 'next';
+    const buttonToneClassName = tone === 'dark'
+        ? 'border-slate-900/12 bg-white/72 text-slate-800 hover:bg-white/88'
+        : 'border-white/14 bg-white/6 text-white/88 hover:bg-white/12';
 
     return (
         <button
             type="button"
             onClick={onClick}
-            className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/14 bg-white/6 text-white/88 backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] hover:bg-white/12 sm:h-12 sm:w-12"
+            className={`pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-xl transition-all duration-300 hover:scale-[1.03] sm:h-12 sm:w-12 ${buttonToneClassName}`}
             aria-label={isNext ? 'Next slide' : 'Previous slide'}
         >
             <svg
@@ -38,12 +41,16 @@ function LightboxArrow({ direction = 'next', onClick }) {
     );
 }
 
-function LightboxCloseButton({ onClick, className = '', label }) {
+function LightboxCloseButton({ onClick, className = '', label, tone = 'light' }) {
+    const buttonToneClassName = tone === 'dark'
+        ? 'border-slate-900/12 bg-white/72 text-slate-800 hover:bg-white/88'
+        : 'border-white/14 bg-white/6 text-white/82 hover:bg-white/12';
+
     return (
         <button
             type="button"
             onClick={onClick}
-            className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/14 bg-white/6 text-white/82 backdrop-blur-xl transition-all duration-300 hover:bg-white/12 sm:h-11 sm:w-11 ${className}`}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-xl transition-all duration-300 sm:h-11 sm:w-11 ${buttonToneClassName} ${className}`}
             aria-label={label}
         >
             <svg viewBox="0 0 20 20" className="h-4 w-4 sm:h-5 sm:w-5" fill="none" aria-hidden="true">
@@ -156,6 +163,10 @@ export default function MediaLightbox({
     lockScroll = true,
     trapScroll = false,
     showTitle = true,
+    overlayClassName = '',
+    overlayStyle = undefined,
+    overlayBackgroundColor = 'rgba(0, 0, 0, 0.62)',
+    chromeTone = 'light',
 }) {
     const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1440 : window.innerWidth));
     const [activeIndex, setActiveIndex] = useState(0);
@@ -459,11 +470,12 @@ export default function MediaLightbox({
             transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
         >
             <motion.div
-                className="absolute inset-0 bg-black"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.62 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.56, ease: [0.22, 1, 0.36, 1] }}
+                className={`absolute inset-0 ${overlayClassName}`}
+                style={overlayStyle}
+                initial={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
+                animate={{ backgroundColor: overlayBackgroundColor }}
+                exit={{ backgroundColor: 'rgba(0, 0, 0, 0)' }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 onClick={onClose}
             />
 
@@ -479,18 +491,18 @@ export default function MediaLightbox({
                     transition={{ duration: 0.68, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
                 >
                     <div className="mb-4 flex items-center justify-between gap-4 sm:mb-6">
-                        <div className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/56">
+                        <div className={`text-[11px] font-semibold uppercase tracking-[0.26em] ${chromeTone === 'dark' ? 'text-slate-700/70' : 'text-white/56'}`}>
                             {showTitle ? title : null}
                         </div>
-                        <LightboxCloseButton onClick={onClose} className="hidden sm:flex" label={closeLabel} />
+                        <LightboxCloseButton onClick={onClose} className="hidden sm:flex" label={closeLabel} tone={chromeTone} />
                     </div>
 
                     <div className="relative flex min-h-0 flex-1 items-center justify-center">
                         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden items-center lg:flex">
-                            <LightboxArrow direction="previous" onClick={handlePrevious} />
+                            <LightboxArrow direction="previous" onClick={handlePrevious} tone={chromeTone} />
                         </div>
                         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden items-center lg:flex">
-                            <LightboxArrow direction="next" onClick={handleNext} />
+                            <LightboxArrow direction="next" onClick={handleNext} tone={chromeTone} />
                         </div>
 
                         <div
@@ -532,20 +544,20 @@ export default function MediaLightbox({
                     </div>
 
                     <div className="mt-5 flex flex-col gap-3 sm:mt-6 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="text-center text-[12px] text-white/44 sm:text-left sm:text-sm">
+                        <div className={`text-center text-[12px] sm:text-left sm:text-sm ${chromeTone === 'dark' ? 'text-slate-700/60' : 'text-white/44'}`}>
                             <span className="sm:hidden">{mobileHint}</span>
                             <span className="hidden sm:inline">{desktopHint}</span>
                         </div>
                         <div className="relative flex w-full items-center justify-center sm:w-auto sm:justify-end">
                             <div className="flex items-center gap-2 lg:hidden">
-                                <LightboxArrow direction="previous" onClick={handlePrevious} />
-                                <div className="rounded-full border border-white/10 bg-white/6 px-3 py-2 text-[11px] font-semibold tracking-[0.18em] text-white/72">
+                                <LightboxArrow direction="previous" onClick={handlePrevious} tone={chromeTone} />
+                                <div className={`rounded-full border px-3 py-2 text-[11px] font-semibold tracking-[0.18em] backdrop-blur-xl ${chromeTone === 'dark' ? 'border-slate-900/10 bg-white/72 text-slate-700' : 'border-white/10 bg-white/6 text-white/72'}`}>
                                     {String(displayIndex + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
                                 </div>
-                                <LightboxArrow direction="next" onClick={handleNext} />
+                                <LightboxArrow direction="next" onClick={handleNext} tone={chromeTone} />
                             </div>
-                            <LightboxCloseButton onClick={onClose} className="absolute right-0 sm:hidden" label={closeLabel} />
-                            <div className="hidden rounded-full border border-white/10 bg-white/6 px-4 py-2 text-xs font-semibold tracking-[0.22em] text-white/72 lg:block">
+                            <LightboxCloseButton onClick={onClose} className="absolute right-0 sm:hidden" label={closeLabel} tone={chromeTone} />
+                            <div className={`hidden rounded-full border px-4 py-2 text-xs font-semibold tracking-[0.22em] backdrop-blur-xl lg:block ${chromeTone === 'dark' ? 'border-slate-900/10 bg-white/72 text-slate-700' : 'border-white/10 bg-white/6 text-white/72'}`}>
                                 {String(displayIndex + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')}
                             </div>
                         </div>
