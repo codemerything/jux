@@ -160,16 +160,25 @@ export default function Navbar({ hidden = false }) {
     const contentRightPadding = !isCompact
         ? 'xl:pr-[8.75rem] 2xl:pr-[9.25rem]'
         : compactPreviewOpen
-            ? 'xl:pr-[8.75rem] 2xl:pr-[9.25rem]'
+            ? ''
             : 'xl:pr-[7rem] 2xl:pr-[7.5rem]';
     const contentGap = isCompact && !compactPreviewOpen ? 'gap-3' : 'gap-2.5';
     const shellWidth = !isCompact ? '100%' : compactPreviewOpen ? COMPACT_PREVIEW_WIDTH : COMPACT_WIDTH;
-    const shellBorderColor = isLightOverlay ? 'rgba(15, 23, 42, 0.08)' : 'transparent';
+    const shellBorderColor = 'transparent';
+    const shellStyle = isLightOverlay
+        ? {
+            borderColor: shellBorderColor,
+            backgroundImage:
+                'linear-gradient(rgba(255,255,255,0), rgba(255,255,255,0)), linear-gradient(90deg, rgba(15,23,42,0.04) 0%, rgba(255,255,255,0.4) 28%, rgba(255,255,255,0.88) 72%, rgba(255,255,255,0.98) 100%)',
+            backgroundOrigin: 'border-box',
+            backgroundClip: 'padding-box, border-box',
+        }
+        : { borderColor: shellBorderColor };
     const logoClassName = isLightOverlay
         ? 'bg-[radial-gradient(circle_at_18%_18%,#d7d3c7_0%,#bdb8aa_34%,#979181_68%,#716c5f_100%)] bg-clip-text text-transparent [text-shadow:0_0_0.01px_rgba(113,108,95,0.18)]'
         : 'text-white';
-    const desktopLinkClassName = isLightOverlay ? 'text-slate-700 hover:text-slate-950' : 'text-white/70 hover:text-white';
-    const mobileLinkClassName = isLightOverlay ? 'text-slate-700 hover:text-slate-950' : 'text-white/70 hover:text-white';
+    const desktopLinkClassName = isLightOverlay ? 'text-black hover:text-black' : 'text-white/70 hover:text-white';
+    const mobileLinkClassName = isLightOverlay ? 'text-black hover:text-black' : 'text-white/70 hover:text-white';
     const mobileDividerClassName = isLightOverlay ? 'border-black/10' : 'border-white/10';
     const mobileChipClassName = isLightOverlay
         ? 'border border-black/10 bg-black/[0.03] text-slate-700 hover:border-black/20 hover:bg-black/[0.06] hover:text-slate-950'
@@ -254,7 +263,7 @@ export default function Navbar({ hidden = false }) {
                     <div
                         ref={navRef}
                         className="relative min-h-[60px] overflow-hidden rounded-[1.7rem] border py-2.5 pl-4 pr-3 backdrop-blur-xl sm:px-4"
-                        style={{ borderColor: shellBorderColor }}
+                        style={shellStyle}
                     >
                         <motion.div
                             className="pointer-events-none absolute inset-0"
@@ -273,9 +282,7 @@ export default function Navbar({ hidden = false }) {
                             transition={{ duration: 0.28, ease: 'easeOut' }}
                             style={{
                                 backgroundImage:
-                                    'linear-gradient(rgba(255,255,255,0.23), rgba(255,255,255,0.23)), linear-gradient(135deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.28) 24%, rgba(255,255,255,0.14) 54%, rgba(255,255,255,0.06) 100%)',
-                                backgroundOrigin: 'border-box',
-                                backgroundClip: 'padding-box, border-box',
+                                    'linear-gradient(180deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.24) 100%)',
                             }}
                         />
                         <div className={`relative z-10 flex min-h-9 items-center ${contentGap} ${contentRightPadding}`}>
@@ -341,44 +348,53 @@ export default function Navbar({ hidden = false }) {
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: 16, transition: { duration: 0.22, ease: 'easeOut' } }}
                                         transition={{ duration: 0.24, ease: 'easeOut' }}
-                                        className="hidden items-center gap-1.5 xl:flex"
+                                        className="hidden flex-1 items-center justify-center xl:flex"
                                     >
-                                        {headerLinks.map((link, index) => (
-                                            <div
-                                                key={index}
-                                                className="relative"
-                                                ref={element => {
-                                                    triggerRefs.current[index] = element;
-                                                }}
-                                                onMouseEnter={() => {
-                                                    if (link.dropdown) {
-                                                        handleDropdownEnter(index);
-                                                    } else {
-                                                        cancelDropdownClose();
-                                                        setOpenDropdown(null);
-                                                        setDropdownLeft(null);
-                                                    }
-                                                }}
-                                                onMouseLeave={() => {
-                                                    if (link.dropdown) {
-                                                        scheduleDropdownClose();
-                                                    }
-                                                }}
-                                            >
-                                                <SmartLink
-                                                    href={resolveHref(link.href)}
-                                                    className={`flex items-center gap-1 py-1.5 pr-2.5 text-[13px] font-medium transition-all duration-150 ${desktopLinkClassName} ${index === 0 ? 'pl-0' : 'pl-2.5'}`}
+                                        <div className="flex items-center gap-1.5">
+                                            {headerLinks.map((link, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="relative"
+                                                    ref={element => {
+                                                        triggerRefs.current[index] = element;
+                                                    }}
+                                                    onMouseEnter={() => {
+                                                        if (link.dropdown) {
+                                                            handleDropdownEnter(index);
+                                                        } else {
+                                                            cancelDropdownClose();
+                                                            setOpenDropdown(null);
+                                                            setDropdownLeft(null);
+                                                        }
+                                                    }}
+                                                    onMouseLeave={() => {
+                                                        if (link.dropdown) {
+                                                            scheduleDropdownClose();
+                                                        }
+                                                    }}
                                                 >
-                                                    {link.label}
-                                                    <ChevronDown />
-                                                </SmartLink>
-                                            </div>
-                                        ))}
+                                                    <SmartLink
+                                                        href={resolveHref(link.href)}
+                                                        className={`flex items-center gap-1 py-1.5 pr-2.5 text-[13px] font-medium transition-all duration-150 ${desktopLinkClassName} ${index === 0 ? 'pl-0' : 'pl-2.5'}`}
+                                                    >
+                                                        {link.label}
+                                                        <ChevronDown />
+                                                    </SmartLink>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
 
                             {!isCompact && <div className="flex-1" />}
+
+                            {compactPreviewOpen && (
+                                <div
+                                    aria-hidden="true"
+                                    className="hidden shrink-0 xl:block xl:w-[8.75rem] 2xl:w-[9.25rem]"
+                                />
+                            )}
 
                             <button
                                 className="flex flex-col gap-1.5 p-1.5 xl:hidden"

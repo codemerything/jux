@@ -514,6 +514,13 @@ function VisualSystemGlyph({ palette, isActive, prefix, chips }) {
     const rampThree = ['#66c98a', '#45bb70', '#239f56', '#147f40', '#66c98a'];
     const rampDotXs = [218, 240, 262];
     const rampDotRadius = 5.5;
+    const outlineWidths = [1.6, 2.2, 3.4, 4.6];
+    const outlineOpacityKeyframes = [
+        [1, 0.18, 0, 0, 1],
+        [0, 0.88, 0.14, 0, 0],
+        [0, 0, 0.9, 0.16, 0],
+        [0, 0, 0, 0.96, 0],
+    ];
 
     return (
         <SignalFrame palette={palette} chips={chips}>
@@ -554,26 +561,30 @@ function VisualSystemGlyph({ palette, isActive, prefix, chips }) {
                 <rect x="24" y="148" width="272" height="28" rx="16" fill="rgba(255,255,255,0.5)" stroke="rgba(66, 123, 84, 0.08)" />
 
                 <g clipPath={`url(#${typeClipId})`}>
-                    <motion.text
-                        initial={false}
-                        x="92"
-                        y="79"
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        fontSize="58"
-                        fontFamily="'Iowan Old Style', Georgia, serif"
-                        fontWeight="500"
-                        fill="none"
-                        stroke={greenStroke[0]}
-                        strokeLinejoin="round"
-                        animate={{
-                            stroke: greenStroke,
-                            strokeWidth: [1.6, 2.2, 3.4, 4.6, 1.6],
-                        }}
-                        transition={loopTransition}
-                    >
-                        A
-                    </motion.text>
+                    {outlineWidths.map((width, index) => (
+                        <motion.text
+                            key={`outline-${width}`}
+                            initial={false}
+                            x="92"
+                            y="79"
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fontSize="58"
+                            fontFamily="'Iowan Old Style', Georgia, serif"
+                            fontWeight="500"
+                            fill="none"
+                            stroke={greenStroke[0]}
+                            strokeWidth={width}
+                            strokeLinejoin="round"
+                            animate={{
+                                stroke: greenStroke,
+                                opacity: outlineOpacityKeyframes[index],
+                            }}
+                            transition={loopTransition}
+                        >
+                            A
+                        </motion.text>
+                    ))}
                     <motion.text
                         initial={false}
                         x="92"
