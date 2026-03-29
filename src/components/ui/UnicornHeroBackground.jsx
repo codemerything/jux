@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import UnicornScene from './UnicornScene';
+import mobileHeroVideoMp4 from '../../../heroImages/unicorn/trailtest1.mp4';
 import mobileHeroVideo from '../../../heroImages/unicorn/trailtest1.webm';
 
 export default function UnicornHeroBackground() {
@@ -31,6 +32,7 @@ export default function UnicornHeroBackground() {
                 preload="auto"
                 aria-hidden="true"
             >
+                <source src={mobileHeroVideoMp4} type="video/mp4" />
                 <source src={mobileHeroVideo} type="video/webm" />
             </video>
         );
