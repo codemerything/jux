@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import UnicornScene from './UnicornScene';
-import mobileHeroVideoMp4 from '../../../heroImages/unicorn/trailtest1.mp4';
-import mobileHeroVideo from '../../../heroImages/unicorn/trailtest1.webm';
+import mobileHeroVideoMp4 from '../../../heroImages/unicorn/inverted_trail_remix.mp4';
 
 export default function UnicornHeroBackground() {
     const [viewportWidth, setViewportWidth] = useState(() => (
@@ -33,7 +32,6 @@ export default function UnicornHeroBackground() {
                 aria-hidden="true"
             >
                 <source src={mobileHeroVideoMp4} type="video/mp4" />
-                <source src={mobileHeroVideo} type="video/webm" />
             </video>
         );
     }
