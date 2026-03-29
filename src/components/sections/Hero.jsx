@@ -28,18 +28,17 @@ export default function Hero({ onOpenPreview }) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.55, ease: 'easeOut' }}
                 >
-                    The product is the<br />
-                    first impression.{' '}
-                    <span className="text-accent">We build both.</span>
+                    When everything looks<br />
+                    generated, <span className="text-accent">make it human.</span>
                 </motion.h1>
                 <motion.p
                     className="text-gray-300 font-medium max-w-[580px] mb-8 leading-relaxed text-left"
-                    style={{ fontSize: 'var(--text-base)' }}
+                    style={{ fontSize: 'var(--text-base)', textWrap: 'pretty' }}
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.55, delay: 0.13, ease: 'easeOut' }}
                 >
-                    The gap between a product and a purchase is almost always visual. We close it through 3D, motion, and the digital experiences built around them.
+                    For the part of the project you can't prompt. We shape the interactive layers, micro-animation, and visual decisions that make a product or campaign feel real.
                 </motion.p>
                 <motion.div
                     className="flex w-full max-w-[26rem] items-stretch gap-2 justify-start sm:w-auto sm:max-w-none sm:gap-3"
