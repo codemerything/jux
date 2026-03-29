@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import UnicornScene from './UnicornScene';
+import mobileHeroVideo from '../../../heroImages/unicorn/trailtest1.webm';
 
 export default function UnicornHeroBackground() {
     const [viewportWidth, setViewportWidth] = useState(() => (
@@ -20,7 +21,19 @@ export default function UnicornHeroBackground() {
     }, []);
 
     if (viewportWidth < 768) {
-        return null;
+        return (
+            <video
+                className="absolute inset-0 z-0 h-full w-full object-cover object-right"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                aria-hidden="true"
+            >
+                <source src={mobileHeroVideo} type="video/webm" />
+            </video>
+        );
     }
 
     const isTablet = viewportWidth < 1280;
