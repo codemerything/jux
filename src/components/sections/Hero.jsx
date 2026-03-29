@@ -23,13 +23,13 @@ export default function Hero({ onOpenPreview }) {
             <div className="relative z-10 flex flex-col items-start justify-center text-left px-8 w-full max-w-4xl mx-auto" style={{ maxWidth: '56rem' }}>
                 <motion.h1
                     className="font-extrabold leading-[1.05] tracking-tight mb-5 text-white"
-                    style={{ fontSize: 'clamp(2rem, 5vw, var(--text-h1))' }}
+                    style={{ fontSize: 'clamp(1.5rem, 6.5vw, var(--text-h1))' }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.55, ease: 'easeOut' }}
                 >
-                    When everything looks<br />
-                    generated, <span className="text-accent">make it human.</span>
+                    When everything looks<br className="hidden sm:block" />{' '}
+                    generated, <span className="whitespace-nowrap text-accent">make it human.</span>
                 </motion.h1>
                 <motion.p
                     className="text-gray-300 font-medium max-w-[580px] mb-8 leading-relaxed text-left"
