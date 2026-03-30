@@ -127,6 +127,7 @@ const VIEWPORTS = {
         overlayHeight: '61%',
         overlayBaseFillHeight: '26%',
         overlayWidth: '182%',
+        overlayBottomOffset: -10,
         overlayGradient:
             'radial-gradient(176% 88% at 50% 108%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.99) 23%, rgba(0,0,0,0.9) 39%, rgba(0,0,0,0.58) 52%, rgba(0,0,0,0.24) 62%, rgba(0,0,0,0) 72%)',
         speed: 0.000084,
@@ -171,6 +172,7 @@ const VIEWPORTS = {
         overlayHeight: '66%',
         overlayBaseFillHeight: '22%',
         overlayWidth: '156%',
+        overlayBottomOffset: 0,
         overlayGradient:
             'radial-gradient(180% 96% at 50% 108%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.99) 23%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.62) 54%, rgba(0,0,0,0.24) 64%, rgba(0,0,0,0) 76%)',
         speed: 0.000112,
@@ -215,6 +217,7 @@ const VIEWPORTS = {
         overlayHeight: '73%',
         overlayBaseFillHeight: '19%',
         overlayWidth: '144%',
+        overlayBottomOffset: 0,
         overlayGradient:
             'radial-gradient(182% 102% at 50% 107%, rgba(0,0,0,1) 0%, rgba(0,0,0,0.995) 24%, rgba(0,0,0,0.92) 40%, rgba(0,0,0,0.64) 53%, rgba(0,0,0,0.24) 63%, rgba(0,0,0,0) 73%)',
         speed: 0.00014,
@@ -522,6 +525,7 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
                 <div
                     className="pointer-events-none absolute bottom-0 left-1/2 z-[200] -translate-x-1/2 overflow-hidden"
                     style={{
+                        bottom: `${config.overlayBottomOffset ?? 0}px`,
                         height: config.overlayHeight,
                         width: config.overlayWidth,
                     }}

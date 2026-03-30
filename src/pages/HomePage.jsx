@@ -29,7 +29,10 @@ export default function HomePage() {
                 style={{ transformOrigin: 'center top' }}
             >
                 <main className="flex-1">
-                    <div className="relative overflow-hidden">
+                    <div
+                        className="relative min-h-screen overflow-hidden"
+                        style={{ minHeight: '100dvh' }}
+                    >
                         <UnicornHeroBackground />
                         <div className="absolute inset-0 z-[1] bg-black/35" />
                         <Hero
