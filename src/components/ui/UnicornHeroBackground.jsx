@@ -65,7 +65,7 @@ export default function UnicornHeroBackground() {
                     className={`absolute inset-0 z-0 h-full w-full object-cover object-right transition-opacity duration-500 ${
                         isMobileVideoReady ? 'opacity-100' : 'opacity-0'
                     }`}
-                    src="/unicorn/inverted_trail_remix.mp4"
+                    src="/unicorn/newtrail1.mp4"
                     autoPlay
                     loop
                     muted
