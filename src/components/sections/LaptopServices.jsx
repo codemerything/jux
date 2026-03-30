@@ -100,7 +100,7 @@ export default function LaptopServices() {
     const slideKey = `laptop-slide-${activeService}`;
 
     return (
-        <section id="laptop-services" className="relative overflow-visible bg-[#f5f5f0] py-24" aria-labelledby="laptop-services-heading">
+        <section id="laptop-services" className="relative overflow-visible bg-[#f5f5f0] py-24 snap-section" aria-labelledby="laptop-services-heading">
             <div
                 className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[19.2rem] lg:hidden"
                 aria-hidden="true"
@@ -130,7 +130,7 @@ export default function LaptopServices() {
                                                 ? 'border-gray-200 bg-white shadow-[0_22px_54px_rgba(15,23,42,0.08)]'
                                                 : 'border-white/70 bg-white/55 shadow-[0_12px_26px_rgba(15,23,42,0.035)]'
                                         }`}
-                                        style={{ scrollMarginTop: '7rem' }}
+                                        style={{ scrollMarginTop: '5rem' }}
                                     >
                                         <div className="px-4 pt-5 sm:px-7 sm:pt-6">
                                             <h3 className="font-bold text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>

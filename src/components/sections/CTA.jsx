@@ -39,7 +39,7 @@ export default function CTA() {
     const [openIndex, setOpenIndex] = useState(null);
 
     return (
-        <section id="faq" className="relative bg-[#fafafa] py-24" aria-labelledby="cta-heading">
+        <section id="faq" className="relative bg-[#fafafa] py-24 snap-section" aria-labelledby="cta-heading">
             <div className="max-w-[1400px] mx-auto px-8">
                 <div className="max-w-2xl mx-auto text-left">
                     <h2 id="cta-heading" className="font-bold text-gray-900 leading-tight mb-12" style={{ fontSize: 'var(--text-h2)' }}>

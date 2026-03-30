@@ -296,6 +296,11 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         snapState.lastObservedScrollY = window.scrollY;
 
         const maybeSnapSectionToTop = () => {
+            // On mobile, CSS scroll-snap handles section snapping natively
+            if (window.innerWidth < 768) {
+                return;
+            }
+
             const section = sectionRef.current;
             if (!section || isPreviewOpen) {
                 return;
@@ -361,6 +366,10 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         }
 
         const maybeSnapNearestServiceCard = () => {
+            // CSS scroll-snap handles card snapping on mobile now
+            if (window.innerWidth < 768) {
+                return;
+            }
             if (window.innerWidth >= 768 || isPreviewOpen || sectionSnapStateRef.current.isProgrammaticScroll) {
                 return;
             }
@@ -538,7 +547,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         <section
             id="services"
             ref={sectionRef}
-            className="relative overflow-x-clip bg-[#ffffff] text-gray-900 py-24"
+            className="relative overflow-x-clip bg-[#ffffff] text-gray-900 py-24 snap-section"
             aria-labelledby="services-heading"
         >
             <div
@@ -612,7 +621,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                             </div>
 
                             <div className="services-content">
-                                <div className="flex flex-col gap-[20vh] pb-64">
+                                <div className="flex flex-col gap-[45dvh] md:gap-[20vh] pb-64">
                                     {phoneServices.map((service, index) => (
                                         <ServiceCard
                                             key={service.id}
@@ -1073,12 +1082,13 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
                 }
             }}
             data-service={service.id}
-            className={`service-card transition-opacity duration-300 ease-out ${isFirst ? 'pt-8 md:pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
+            className={`service-card transition-opacity duration-300 ease-out snap-section ${isFirst ? 'pt-8 md:pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
             style={{
                 opacity: opacity,
                 transform: isMobileViewport || isActive ? 'translateY(0)' : 'translateY(5px)',
-                scrollSnapAlign: 'start',
-                scrollSnapStop: 'normal',
+                scrollMarginTop: isMobileViewport
+                    ? (isFirst ? '6.5rem' : '10.5rem')
+                    : undefined,
             }}
         >
             <CardContent service={service} revealProgress={revealProgress} />

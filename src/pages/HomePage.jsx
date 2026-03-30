@@ -30,7 +30,7 @@ export default function HomePage() {
             >
                 <main className="flex-1">
                     <div
-                        className="relative min-h-screen overflow-hidden"
+                        className="relative min-h-screen overflow-hidden snap-section"
                         style={{ minHeight: '100dvh' }}
                     >
                         <UnicornHeroBackground />

@@ -96,7 +96,7 @@ export default function ServicesMenu() {
 
             <section
                 id="pricing"
-                className="bg-[#0d0d0d] py-24"
+                className="bg-[#0d0d0d] py-24 snap-section"
                 aria-labelledby="services-menu-heading"
             >
                 <div className="max-w-[1400px] mx-auto px-8">
