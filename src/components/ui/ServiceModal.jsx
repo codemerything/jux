@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import SmartLink from './SmartLink';
 
@@ -231,14 +232,18 @@ export default function ServiceModal({ service, onClose }) {
         return () => window.removeEventListener('keydown', handler);
     }, [onClose]);
 
-    return (
+    if (typeof document === 'undefined') {
+        return null;
+    }
+
+    return createPortal((
         <AnimatePresence>
             {service && data && (
                 <>
                     {/* Backdrop */}
                     <motion.div
                         key="backdrop"
-                        className="fixed inset-0 z-9990 bg-black/80 backdrop-blur-sm"
+                        className="fixed inset-0 z-[9990] bg-black/80 backdrop-blur-sm"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -246,15 +251,17 @@ export default function ServiceModal({ service, onClose }) {
                     />
 
                     {/* Modal panel */}
+                    <div className="fixed inset-0 z-[9991] flex items-end justify-center lg:items-center lg:p-6">
                     <motion.div
                         key="modal"
-                        className="fixed inset-x-0 bottom-0 z-9991 max-h-[90vh] overflow-y-auto
-                            bg-[#111] border-t border-white/10 rounded-t-3xl
-                            lg:inset-0 lg:m-auto lg:rounded-3xl lg:max-w-3xl lg:max-h-[60vh] lg:border lg:border-white/10"
+                        className="w-full max-h-[90vh] overflow-y-auto
+                            bg-[#111] border-t border-white/10 rounded-t-3xl shadow-[0_32px_90px_rgba(0,0,0,0.45)]
+                            lg:max-w-3xl lg:max-h-[60vh] lg:rounded-3xl lg:border"
                         initial={{ y: '100%', opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: '100%', opacity: 0 }}
                         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                        onClick={(e) => e.stopPropagation()}
                     >
                         {/* Handle bar (mobile) */}
                         <div className="lg:hidden flex justify-center pt-3 pb-1">
@@ -374,8 +381,9 @@ export default function ServiceModal({ service, onClose }) {
                             </div>
                         </div>
                     </motion.div>
+                    </div>
                 </>
             )}
         </AnimatePresence>
-    );
+    ), document.body);
 }

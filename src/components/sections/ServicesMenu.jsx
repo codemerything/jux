@@ -75,6 +75,20 @@ export default function ServicesMenu() {
     // Track pointer-start position to distinguish a scratch-drag from a tap
     const pointerStart = useRef(null);
     const DRAG_THRESHOLD = 6; // px; anything larger is a drag, not a click
+    const handleCardOpen = (service, event) => {
+        if (!pointerStart.current) {
+            setActiveService(service);
+            return;
+        }
+
+        const dx = event.clientX - pointerStart.current.x;
+        const dy = event.clientY - pointerStart.current.y;
+        if (Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+            return;
+        }
+
+        setActiveService(service);
+    };
 
     return (
         <>
@@ -146,12 +160,11 @@ export default function ServicesMenu() {
                                     onPointerDown={(e) => {
                                         pointerStart.current = { x: e.clientX, y: e.clientY };
                                     }}
+                                    onPointerUp={(e) => {
+                                        handleCardOpen(s, e);
+                                    }}
                                     onClick={(e) => {
-                                        if (!pointerStart.current) return;
-                                        const dx = e.clientX - pointerStart.current.x;
-                                        const dy = e.clientY - pointerStart.current.y;
-                                        if (Math.hypot(dx, dy) > DRAG_THRESHOLD) return; // was a scratch
-                                        setActiveService(s);
+                                        handleCardOpen(s, e);
                                     }}
                                     initial={{ opacity: 0, y: 12 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -194,16 +207,6 @@ export default function ServicesMenu() {
                                         <ScratchPrice price={s.price} />
                                     </div>
 
-                                    {/* Tooltip hint */}
-                                    <div className="flex items-center gap-1.5 text-white/25 group-hover:text-accent/60 transition-colors duration-200">
-                                        <svg viewBox="0 0 14 14" className="w-3 h-3 shrink-0" fill="none">
-                                            <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.25" />
-                                            <path d="M7 6.5v3.5M7 4.5v.5" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-                                        </svg>
-                                        <span className="font-medium" style={{ fontSize: 'var(--text-xs)' }}>
-                                            Click to see our process
-                                        </span>
-                                    </div>
                                 </motion.button>
                             ))}
                         </motion.div>

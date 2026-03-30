@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from 'react';
 export default function ScratchPrice({ price }) {
     const canvasRef = useRef(null);
     const textRef = useRef(null);
+    const wrapperRef = useRef(null);
     const [revealed, setRevealed] = useState(false);
     const [overlaySize, setOverlaySize] = useState({ width: 176, height: 48 });
     const isDrawing = useRef(false);
@@ -14,13 +15,15 @@ export default function ScratchPrice({ price }) {
         if (isEnquiry) return;
 
         const textElement = textRef.current;
-        if (!textElement) return;
+        const wrapperElement = wrapperRef.current;
+        if (!textElement || !wrapperElement) return;
 
         const syncOverlaySize = () => {
-            const rect = textElement.getBoundingClientRect();
+            const textRect = textElement.getBoundingClientRect();
+            const wrapperRect = wrapperElement.getBoundingClientRect();
             setOverlaySize({
-                width: Math.ceil(rect.width + 32),
-                height: Math.ceil(rect.height + 16),
+                width: Math.ceil(wrapperRect.width),
+                height: Math.ceil(textRect.height + 16),
             });
         };
 
@@ -28,6 +31,7 @@ export default function ScratchPrice({ price }) {
 
         const resizeObserver = new ResizeObserver(syncOverlaySize);
         resizeObserver.observe(textElement);
+        resizeObserver.observe(wrapperElement);
 
         return () => {
             resizeObserver.disconnect();
@@ -116,7 +120,7 @@ export default function ScratchPrice({ price }) {
     if (isEnquiry) {
         return (
             <span
-                className="text-white/30 italic font-normal"
+                className="block w-full text-center text-white/30 italic font-normal"
                 style={{ fontSize: 'var(--text-h6)' }}
             >
                 {price}
@@ -126,16 +130,16 @@ export default function ScratchPrice({ price }) {
 
     return (
         <div
-            className="relative inline-flex items-center justify-center"
+            ref={wrapperRef}
+            className="relative flex w-full items-center justify-center"
             style={{
-                width: `${overlaySize.width}px`,
                 minHeight: `${overlaySize.height}px`,
             }}
         >
             {/* Price sits underneath, large and white so it's clearly readable once scratched */}
             <span
                 ref={textRef}
-                className="font-extrabold text-white"
+                className="block w-full text-center font-extrabold text-white"
                 style={{ fontSize: 'var(--text-h5)' }}
             >
                 {price}
