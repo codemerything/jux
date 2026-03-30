@@ -131,6 +131,10 @@ html, body {
         scroll-behavior: auto;
     }
 
+    .hero-shell {
+        min-height: calc(100svh + 24px) !important;
+    }
+
     .snap-section {
         scroll-snap-align: start;
         scroll-snap-stop: always;
