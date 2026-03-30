@@ -213,13 +213,13 @@ export default function ServicesMenu() {
                     </AnimatePresence>
 
                     {/* ── Footer CTA ── */}
-                    <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                    <div className="mt-10 flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-white/40 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>
                             Tell us what you're building, and we'll tell you what it takes.
                         </p>
                         <SmartLink
                             href="/contact"
-                            className="shrink-0 inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full font-semibold
+                            className="shrink-0 inline-flex items-center gap-2 self-center bg-white text-black px-5 py-2.5 rounded-full font-semibold
                             transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10"
                             style={{ fontSize: 'var(--text-sm)' }}
                         >
