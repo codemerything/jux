@@ -132,7 +132,7 @@ export default function LaptopServices() {
                                         }`}
                                         style={{ scrollMarginTop: '7rem' }}
                                     >
-                                        <div className="px-4 pt-5 sm:px-7 sm:pt-6">
+                                        <div className="px-[21px] pt-5 sm:px-[33px] sm:pt-6">
                                             <h3 className="font-normal leading-[1.12] tracking-[-0.02em] text-gray-900" style={{ fontSize: 'var(--text-h5)' }}>
                                                 {service.title}
                                             </h3>
@@ -146,7 +146,7 @@ export default function LaptopServices() {
                                             <ServiceGlyph serviceId={service.id} isActive={isActive} chips={cardData?.chips} />
 
                                             {cardData?.solutionTitle ? (
-                                                <div className="mt-5 border-t border-gray-100 pt-5">
+                                                <div className="mt-5 border-t border-gray-100 px-[5px] pt-5">
                                                     <p className="mb-2 font-medium leading-[1.32] tracking-[-0.01em] text-gray-900" style={{ fontSize: 'var(--text-sm)' }}>
                                                         {cardData.solutionTitle}
                                                     </p>

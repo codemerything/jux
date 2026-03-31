@@ -40,7 +40,7 @@ const sharedTransition = {
 function SignalFrame({ palette, chips = [], children }) {
     return (
         <div
-            className="relative overflow-hidden rounded-[26px] border border-gray-200 bg-white shadow-[0_18px_44px_rgba(15,23,42,0.06)]"
+            className="relative overflow-hidden rounded-[26px] border border-gray-200 bg-white shadow-[inset_1px_1px_0_rgba(255,255,255,0.9),inset_-5px_-5px_10px_rgba(15,23,42,0.045)]"
         >
             <div
                 className="relative aspect-[320/192] w-full overflow-hidden"
@@ -162,7 +162,7 @@ function InfrastructureGlyph({ palette, isActive, prefix, chips }) {
                             <stop offset="1" stopColor={palette.primary} stopOpacity="1" />
                         </linearGradient>
                     ))}
-                    <radialGradient id={pulseId} cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(176 102) rotate(90) scale(96 156)">
+                    <radialGradient id={pulseId} cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(220 132) rotate(90) scale(96 156)">
                         <stop stopColor={palette.glow} />
                         <stop offset="1" stopColor="white" stopOpacity="0" />
                     </radialGradient>
