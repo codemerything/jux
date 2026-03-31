@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import SmartLink from './SmartLink';
@@ -215,56 +215,40 @@ const processData = {
 };
 
 export default function ServiceModal({ service, onClose }) {
-    const data = processData[service?.name];
+    const [renderedService, setRenderedService] = useState(service ?? null);
     const panelRef = useRef(null);
+    const viewportRef = useRef(null);
+    const openScrollYRef = useRef(0);
     const touchStartYRef = useRef(0);
+    const isOpen = Boolean(service);
+    const data = processData[renderedService?.name];
 
-    // Freeze the page behind the modal so touch scroll stays inside the panel.
     useEffect(() => {
         if (!service) {
             return undefined;
         }
 
-        const scrollY = window.scrollY;
-        const previousBodyStyles = {
-            overflow: document.body.style.overflow,
-            position: document.body.style.position,
-            top: document.body.style.top,
-            left: document.body.style.left,
-            right: document.body.style.right,
-            width: document.body.style.width,
-        };
-        const previousHtmlOverflow = document.documentElement.style.overflow;
-
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.top = `-${scrollY}px`;
-        document.body.style.left = '0';
-        document.body.style.right = '0';
-        document.body.style.width = '100%';
-
-        return () => {
-            document.documentElement.style.overflow = previousHtmlOverflow;
-            document.body.style.overflow = previousBodyStyles.overflow;
-            document.body.style.position = previousBodyStyles.position;
-            document.body.style.top = previousBodyStyles.top;
-            document.body.style.left = previousBodyStyles.left;
-            document.body.style.right = previousBodyStyles.right;
-            document.body.style.width = previousBodyStyles.width;
-            window.scrollTo(0, scrollY);
-        };
+        setRenderedService(service);
+        openScrollYRef.current = window.scrollY;
+        return undefined;
     }, [service]);
 
     useEffect(() => {
-        if (!service) {
+        if (!renderedService) {
             return undefined;
         }
 
+        const viewport = viewportRef.current;
         const panel = panelRef.current;
-        if (!panel) {
+        if (!viewport || !panel) {
             return undefined;
         }
+
+        const preventBackgroundScroll = (event) => {
+            if (!panel.contains(event.target)) {
+                event.preventDefault();
+            }
+        };
 
         const handleTouchStart = (event) => {
             touchStartYRef.current = event.touches[0]?.clientY ?? 0;
@@ -290,29 +274,82 @@ export default function ServiceModal({ service, onClose }) {
             }
         };
 
+        const handleWheel = (event) => {
+            const canScroll = panel.scrollHeight > panel.clientHeight + 1;
+
+            if (!canScroll) {
+                event.preventDefault();
+                return;
+            }
+
+            const atTop = panel.scrollTop <= 0;
+            const atBottom = panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 1;
+            const scrollingUp = event.deltaY < 0;
+            const scrollingDown = event.deltaY > 0;
+
+            if ((atTop && scrollingUp) || (atBottom && scrollingDown)) {
+                event.preventDefault();
+            }
+        };
+
+        viewport.addEventListener('touchmove', preventBackgroundScroll, { passive: false });
+        viewport.addEventListener('wheel', preventBackgroundScroll, { passive: false });
         panel.addEventListener('touchstart', handleTouchStart, { passive: true });
         panel.addEventListener('touchmove', handleTouchMove, { passive: false });
+        panel.addEventListener('wheel', handleWheel, { passive: false });
 
         return () => {
+            viewport.removeEventListener('touchmove', preventBackgroundScroll);
+            viewport.removeEventListener('wheel', preventBackgroundScroll);
             panel.removeEventListener('touchstart', handleTouchStart);
             panel.removeEventListener('touchmove', handleTouchMove);
+            panel.removeEventListener('wheel', handleWheel);
         };
-    }, [service]);
+    }, [renderedService]);
 
     // Close on Escape
     useEffect(() => {
-        const handler = (e) => { if (e.key === 'Escape') onClose(); };
+        const handler = (e) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
         window.addEventListener('keydown', handler);
         return () => window.removeEventListener('keydown', handler);
     }, [onClose]);
 
-    if (typeof document === 'undefined') {
+    const handleRequestClose = (event) => {
+        event?.preventDefault?.();
+        event?.stopPropagation?.();
+
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+
+        onClose();
+    };
+
+    const handleExitComplete = () => {
+        if (service) {
+            return;
+        }
+
+        const targetScrollY = openScrollYRef.current;
+        setRenderedService(null);
+
+        if (typeof targetScrollY === 'number' && Math.abs(window.scrollY - targetScrollY) > 2) {
+            window.scrollTo({ top: targetScrollY, left: 0, behavior: 'auto' });
+        }
+    };
+
+    if (typeof document === 'undefined' || !renderedService || !data) {
         return null;
     }
 
     return createPortal((
-        <AnimatePresence>
-            {service && data && (
+        <AnimatePresence onExitComplete={handleExitComplete}>
+            {isOpen && (
                 <>
                     {/* Backdrop */}
                     <motion.div
@@ -321,11 +358,14 @@ export default function ServiceModal({ service, onClose }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={handleRequestClose}
                     />
 
                     {/* Modal panel */}
-                    <div className="fixed inset-0 z-[9991] overscroll-none flex items-end justify-center lg:items-center lg:p-6">
+                    <div
+                        ref={viewportRef}
+                        className="fixed inset-0 z-[9991] overscroll-none touch-none flex items-end justify-center lg:items-center lg:p-6"
+                    >
                     <motion.div
                         ref={panelRef}
                         key="modal"
@@ -355,13 +395,13 @@ export default function ServiceModal({ service, onClose }) {
                                         className="text-white/30 uppercase tracking-widest font-semibold mb-2"
                                         style={{ fontSize: 'var(--text-xs)' }}
                                     >
-                                        {service.category} · {data.timeline}
+                                        {renderedService.category} · {data.timeline}
                                     </p>
                                     <h3
                                         className="font-bold text-white leading-tight"
                                         style={{ fontSize: 'var(--text-h3)' }}
                                     >
-                                        {service.name}
+                                        {renderedService.name}
                                     </h3>
                                     <p
                                         className="text-white/50 mt-2"
@@ -371,7 +411,8 @@ export default function ServiceModal({ service, onClose }) {
                                     </p>
                                 </div>
                                 <button
-                                    onClick={onClose}
+                                    type="button"
+                                    onClick={handleRequestClose}
                                     className="ml-4 mt-1 shrink-0 w-9 h-9 rounded-full bg-white/8 hover:bg-white/15
                                         flex items-center justify-center text-white/60 hover:text-white
                                         transition-colors duration-150"
@@ -445,12 +486,12 @@ export default function ServiceModal({ service, onClose }) {
                                         className="font-extrabold text-white"
                                         style={{ fontSize: 'var(--text-h4)' }}
                                     >
-                                        {service.price}
+                                        {renderedService.price}
                                     </p>
                                 </div>
                                 <SmartLink
                                     href="/contact"
-                                    onClick={onClose}
+                                    onClick={handleRequestClose}
                                     className="inline-flex items-center gap-2 bg-white text-black px-5 py-2.5 rounded-full font-semibold
                                         transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10"
                                     style={{ fontSize: 'var(--text-sm)' }}
