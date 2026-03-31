@@ -19,7 +19,7 @@ const faqItems = [
     },
     {
         question: "How long does a project take?",
-        answer: "Rendering projects typically run 2–4 weeks from briefing to delivery. Your launch is happening either way, and the question is whether you go in with the right visuals. We'll give you a realistic timeline after the first call, not a number designed to win the pitch.",
+        answer: "Rendering projects typically run 2-4 weeks from briefing to delivery. Your launch is happening either way, and the question is whether you go in with the right visuals. We'll give you a realistic timeline after the first call, not a number designed to win the pitch.",
     },
     {
         question: "An AI can build a page in an hour. Why would I pay for development?",
@@ -39,12 +39,19 @@ export default function CTA() {
     const [openIndex, setOpenIndex] = useState(null);
 
     return (
-        <section id="faq" className="relative bg-[#fafafa] py-24 snap-section" aria-labelledby="cta-heading">
+        <section id="faq" className="relative bg-[#fafafa] py-24" aria-labelledby="cta-heading">
             <div className="max-w-[1400px] mx-auto px-8">
                 <div className="max-w-2xl mx-auto text-left">
-                    <h2 id="cta-heading" className="font-bold text-gray-900 leading-tight mb-12" style={{ fontSize: 'var(--text-h2)' }}>
+                    <h2
+                        id="cta-heading"
+                        className="font-bold text-gray-900 leading-tight mb-12"
+                        style={{ fontSize: 'clamp(2rem, 7.5vw, var(--text-h2))' }}
+                    >
                         Questions we hear
-                        <span className="block font-bold text-gray-900 leading-tight" style={{ fontSize: 'var(--text-h2)' }}>
+                        <span
+                            className="block font-bold text-gray-900 leading-tight"
+                            style={{ fontSize: 'clamp(2rem, 7.5vw, var(--text-h2))' }}
+                        >
                             most often.
                         </span>
                     </h2>
@@ -60,8 +67,8 @@ export default function CTA() {
                                     onClick={() =>
                                         setOpenIndex(openIndex === index ? null : index)
                                     }
-                                    className={`w-full text-left font-semibold transition-colors ${openIndex === index ? 'text-gray-900' : 'text-gray-800 hover:text-gray-900'}`}
-                                    style={{ fontSize: 'var(--text-h6)' }}
+                                    className={`w-full text-left font-medium md:font-semibold leading-[1.32] transition-colors ${openIndex === index ? 'text-gray-900' : 'text-gray-800 hover:text-gray-900'}`}
+                                    style={{ fontSize: 'clamp(1.05rem, 4.6vw, var(--text-h6))' }}
                                 >
                                     {item.question}
                                 </button>

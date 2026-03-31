@@ -52,6 +52,41 @@ const getViewportHeight = () => {
     return window.visualViewport?.height ?? window.innerHeight;
 };
 
+/**
+ * Custom smooth scroll that uses requestAnimationFrame instead of
+ * the browser's native smooth scrolling. This avoids the Chrome mobile
+ * bug where address-bar show/hide triggers a viewport resize that
+ * causes scrollTo({ behavior: 'smooth' }) to recalculate and "pop"
+ * to a new position mid-animation.
+ */
+let _rafScrollId = null;
+const rafSmoothScroll = (targetY, duration = 420) => {
+    if (_rafScrollId !== null) {
+        cancelAnimationFrame(_rafScrollId);
+        _rafScrollId = null;
+    }
+
+    const startY = window.scrollY;
+    const distance = targetY - startY;
+    if (Math.abs(distance) < 2) return;
+
+    const startTime = performance.now();
+    const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+    const step = (now) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        window.scrollTo(0, Math.round(startY + distance * easeOutCubic(progress)));
+
+        if (progress < 1) {
+            _rafScrollId = requestAnimationFrame(step);
+        } else {
+            _rafScrollId = null;
+        }
+    };
+
+    _rafScrollId = requestAnimationFrame(step);
+};
+
 const subscribeViewportChanges = (callback) => {
     if (typeof window === 'undefined') {
         return () => {};
@@ -198,26 +233,23 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         }, duration);
     };
 
-    const settleSectionFlushToTop = (expectedScrollTop) => {
+    const settleSectionScrollToTarget = (expectedScrollTop) => {
         if (sectionSnapSettleTimeoutRef.current !== null) {
             window.clearTimeout(sectionSnapSettleTimeoutRef.current);
         }
 
         sectionSnapSettleTimeoutRef.current = window.setTimeout(() => {
-            const section = sectionRef.current;
-            if (!section) {
+            if (typeof expectedScrollTop !== 'number') {
                 sectionSnapSettleTimeoutRef.current = null;
                 return;
             }
 
-            const rect = section.getBoundingClientRect();
-            const closeEnoughToSettle = Math.abs(rect.top) <= 28;
+            const deltaToTarget = expectedScrollTop - window.scrollY;
 
-            if (closeEnoughToSettle && Math.abs(rect.top) > 1.5) {
-                const correctedScrollTop = Math.max(0, Math.round(window.scrollY + rect.top));
-                window.scrollTo({ top: correctedScrollTop, behavior: 'auto' });
-                sectionSnapStateRef.current.lastSnapScrollY = correctedScrollTop;
-            } else if (typeof expectedScrollTop === 'number') {
+            if (Math.abs(deltaToTarget) > 1.5) {
+                window.scrollTo({ top: expectedScrollTop, behavior: 'auto' });
+                sectionSnapStateRef.current.lastSnapScrollY = expectedScrollTop;
+            } else {
                 sectionSnapStateRef.current.lastSnapScrollY = expectedScrollTop;
             }
 
@@ -296,10 +328,6 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         snapState.lastObservedScrollY = window.scrollY;
 
         const maybeSnapSectionToTop = () => {
-            // On mobile, CSS scroll-snap handles section snapping natively
-            if (window.innerWidth < 768) {
-                return;
-            }
 
             const section = sectionRef.current;
             if (!section || isPreviewOpen) {
@@ -323,11 +351,11 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
 
             if (isWithinSnapZone && snapCooldownElapsed && travelSinceLastSnap > 80) {
                 const targetScrollTop = Math.max(0, Math.round(currentScrollY + rect.top));
-                snapState.lastSnapScrollY = currentScrollY;
+                snapState.lastSnapScrollY = targetScrollTop;
                 snapState.lastSnapTimestamp = Date.now();
                 lockSectionSnap(760);
-                window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
-                settleSectionFlushToTop(targetScrollTop);
+                rafSmoothScroll(targetScrollTop, 420);
+                settleSectionScrollToTarget(targetScrollTop);
             }
         };
 
@@ -343,7 +371,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             sectionSnapTimeoutRef.current = window.setTimeout(() => {
                 sectionSnapTimeoutRef.current = null;
                 maybeSnapSectionToTop();
-            }, 130);
+            }, 300);
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
@@ -366,10 +394,6 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         }
 
         const maybeSnapNearestServiceCard = () => {
-            // CSS scroll-snap handles card snapping on mobile now
-            if (window.innerWidth < 768) {
-                return;
-            }
             if (window.innerWidth >= 768 || isPreviewOpen || sectionSnapStateRef.current.isProgrammaticScroll) {
                 return;
             }
@@ -417,11 +441,17 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 return;
             }
 
+            if (nearestCard === cards[0]) {
+                return;
+            }
+
             const targetTitleTop = getCardTitleTop(nearestCard);
-            const targetScrollTop = Math.max(0, window.scrollY + targetTitleTop - snapLine);
+            const sectionTopAlignedScrollTop = Math.max(0, Math.round(window.scrollY + sectionRect.top));
+            const rawTargetScrollTop = Math.max(0, Math.round(window.scrollY + targetTitleTop - snapLine));
+            const targetScrollTop = Math.max(sectionTopAlignedScrollTop, rawTargetScrollTop);
 
             lockSectionSnap(460);
-            window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+            rafSmoothScroll(targetScrollTop, 420);
         };
 
         const handleScroll = () => {
@@ -432,7 +462,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             serviceSnapTimeoutRef.current = window.setTimeout(() => {
                 serviceSnapTimeoutRef.current = null;
                 maybeSnapNearestServiceCard();
-            }, 120);
+            }, 300);
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
@@ -547,7 +577,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         <section
             id="services"
             ref={sectionRef}
-            className="relative overflow-x-clip bg-[#ffffff] text-gray-900 py-24 snap-section"
+            className="relative overflow-x-clip bg-[#ffffff] text-gray-900 py-24"
             aria-labelledby="services-heading"
         >
             <div
@@ -1082,13 +1112,10 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
                 }
             }}
             data-service={service.id}
-            className={`service-card transition-opacity duration-300 ease-out snap-section ${isFirst ? 'pt-8 md:pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
+            className={`service-card transition-opacity duration-300 ease-out ${isFirst ? 'pt-8 md:pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
             style={{
                 opacity: opacity,
                 transform: isMobileViewport || isActive ? 'translateY(0)' : 'translateY(5px)',
-                scrollMarginTop: isMobileViewport
-                    ? (isFirst ? '6.5rem' : '10.5rem')
-                    : undefined,
             }}
         >
             <CardContent service={service} revealProgress={revealProgress} />

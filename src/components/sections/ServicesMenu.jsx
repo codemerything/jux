@@ -96,12 +96,11 @@ export default function ServicesMenu() {
 
             <section
                 id="pricing"
-                className="bg-[#0d0d0d] py-24 snap-section"
+                className="bg-[#0d0d0d] py-24"
                 aria-labelledby="services-menu-heading"
             >
                 <div className="max-w-[1400px] mx-auto px-8">
-
-                    {/* ── Header + Tab switcher ── */}
+                    {/* Header + Tab switcher */}
                     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8 mb-14">
                         <div>
                             <p
@@ -118,16 +117,16 @@ export default function ServicesMenu() {
                                 Services
                             </h2>
 
-                            {/* Tab pills */}
                             <div className="inline-flex gap-1 bg-white/6 rounded-xl p-1">
                                 {['Visual', 'Digital'].map((tab) => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
-                                        className={`px-5 py-2 rounded-lg font-semibold transition-all duration-200 ${activeTab === tab
-                                            ? 'bg-white text-black shadow-sm'
-                                            : 'text-white/50 hover:text-white'
-                                            }`}
+                                        className={`px-5 py-2 rounded-lg font-semibold transition-all duration-200 ${
+                                            activeTab === tab
+                                                ? 'bg-white text-black shadow-sm'
+                                                : 'text-white/50 hover:text-white'
+                                        }`}
                                         style={{ fontSize: 'var(--text-sm)' }}
                                     >
                                         {tab}
@@ -144,7 +143,6 @@ export default function ServicesMenu() {
                         </p>
                     </div>
 
-                    {/* ── Card grid (4 at a time) ── */}
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}
@@ -154,21 +152,21 @@ export default function ServicesMenu() {
                             exit={{ opacity: 0, y: -8 }}
                             transition={{ duration: 0.28, ease: 'easeOut' }}
                         >
-                            {services.map((s, i) => (
+                            {services.map((service, index) => (
                                 <motion.button
-                                    key={s.name}
-                                    onPointerDown={(e) => {
-                                        pointerStart.current = { x: e.clientX, y: e.clientY };
+                                    key={service.name}
+                                    onPointerDown={(event) => {
+                                        pointerStart.current = { x: event.clientX, y: event.clientY };
                                     }}
-                                    onPointerUp={(e) => {
-                                        handleCardOpen(s, e);
+                                    onPointerUp={(event) => {
+                                        handleCardOpen(service, event);
                                     }}
-                                    onClick={(e) => {
-                                        handleCardOpen(s, e);
+                                    onClick={(event) => {
+                                        handleCardOpen(service, event);
                                     }}
                                     initial={{ opacity: 0, y: 12 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.32, delay: i * 0.06, ease: 'easeOut' }}
+                                    transition={{ duration: 0.32, delay: index * 0.06, ease: 'easeOut' }}
                                     className="group relative flex flex-col text-left
                                         bg-white/4 hover:bg-white/8
                                         border border-white/6 hover:border-white/15
@@ -176,43 +174,37 @@ export default function ServicesMenu() {
                                         transition-all duration-200
                                         cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                                 >
-                                    {/* Tag, hidden if null */}
-                                    {s.tag && (
+                                    {service.tag && (
                                         <span
                                             className="absolute top-5 right-5 bg-accent/15 text-accent font-semibold px-2.5 py-0.5 rounded-full"
                                             style={{ fontSize: 'var(--text-xs)' }}
                                         >
-                                            {s.tag}
+                                            {service.tag}
                                         </span>
                                     )}
 
-                                    {/* Name */}
                                     <h3
                                         className="font-bold text-white mb-3 group-hover:text-accent transition-colors duration-200 leading-snug"
                                         style={{ fontSize: 'var(--text-h4)' }}
                                     >
-                                        {s.name}
+                                        {service.name}
                                     </h3>
 
-                                    {/* Description */}
                                     <p
                                         className="text-white/50 leading-relaxed mb-8 flex-1"
                                         style={{ fontSize: 'var(--text-sm)' }}
                                     >
-                                        {s.description}
+                                        {service.description}
                                     </p>
 
-                                    {/* Price */}
                                     <div className="border-t border-white/6 pt-5 mb-4">
-                                        <ScratchPrice price={s.price} />
+                                        <ScratchPrice price={service.price} />
                                     </div>
-
                                 </motion.button>
                             ))}
                         </motion.div>
                     </AnimatePresence>
 
-                    {/* ── Footer CTA ── */}
                     <div className="mt-10 flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-white/40 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>
                             Tell us what you're building, and we'll tell you what it takes.

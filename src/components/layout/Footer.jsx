@@ -1,6 +1,6 @@
 export default function Footer() {
     return (
-        <footer className="bg-transparent border-t border-white/5 py-5 snap-section-end">
+        <footer className="bg-transparent border-t border-white/5 py-5">
             <div className="max-w-[1400px] mx-auto px-8 flex items-center justify-between gap-8 flex-wrap">
                 <p className="text-white/30 whitespace-nowrap" style={{ fontSize: 'var(--text-xs)' }}>
                     &copy; 2026 Jux Studio
