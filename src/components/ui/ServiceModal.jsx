@@ -473,13 +473,13 @@ export default function ServiceModal({ service, onClose }) {
                             <div className="border-t border-white/8 pt-6 flex items-center justify-between gap-4">
                                 <div>
                                     <p
-                                        className="text-white/30 uppercase tracking-widest font-semibold mb-1"
+                                        className="text-white/30 uppercase tracking-widest font-semibold leading-none mb-0"
                                         style={{ fontSize: 'var(--text-xs)' }}
                                     >
                                         Starting from
                                     </p>
                                     <p
-                                        className="font-extrabold text-white"
+                                        className="-mt-1 font-bold leading-[0.92] text-white"
                                         style={{ fontSize: 'var(--text-h4)' }}
                                     >
                                         {modalPrice}
