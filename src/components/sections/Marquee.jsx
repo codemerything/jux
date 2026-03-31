@@ -552,6 +552,7 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
                 initialIndex={Math.max(0, lightboxCardSet.findIndex(card => card.src === cards[getFrontCardIndex(cards.length, rotationRef.current)]))}
                 onClose={onClosePreview}
                 title="Featured Work"
+                showTitle={false}
                 closeLabel="Close featured work gallery"
             />
         </>

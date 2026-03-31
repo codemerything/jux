@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import SmartLink from './SmartLink';
@@ -216,13 +216,87 @@ const processData = {
 
 export default function ServiceModal({ service, onClose }) {
     const data = processData[service?.name];
+    const panelRef = useRef(null);
+    const touchStartYRef = useRef(0);
 
-    // Lock body scroll
+    // Freeze the page behind the modal so touch scroll stays inside the panel.
     useEffect(() => {
-        if (service) {
-            document.body.style.overflow = 'hidden';
+        if (!service) {
+            return undefined;
         }
-        return () => { document.body.style.overflow = ''; };
+
+        const scrollY = window.scrollY;
+        const previousBodyStyles = {
+            overflow: document.body.style.overflow,
+            position: document.body.style.position,
+            top: document.body.style.top,
+            left: document.body.style.left,
+            right: document.body.style.right,
+            width: document.body.style.width,
+        };
+        const previousHtmlOverflow = document.documentElement.style.overflow;
+
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+
+        return () => {
+            document.documentElement.style.overflow = previousHtmlOverflow;
+            document.body.style.overflow = previousBodyStyles.overflow;
+            document.body.style.position = previousBodyStyles.position;
+            document.body.style.top = previousBodyStyles.top;
+            document.body.style.left = previousBodyStyles.left;
+            document.body.style.right = previousBodyStyles.right;
+            document.body.style.width = previousBodyStyles.width;
+            window.scrollTo(0, scrollY);
+        };
+    }, [service]);
+
+    useEffect(() => {
+        if (!service) {
+            return undefined;
+        }
+
+        const panel = panelRef.current;
+        if (!panel) {
+            return undefined;
+        }
+
+        const handleTouchStart = (event) => {
+            touchStartYRef.current = event.touches[0]?.clientY ?? 0;
+        };
+
+        const handleTouchMove = (event) => {
+            const currentY = event.touches[0]?.clientY ?? touchStartYRef.current;
+            const deltaY = currentY - touchStartYRef.current;
+            const canScroll = panel.scrollHeight > panel.clientHeight + 1;
+
+            if (!canScroll) {
+                event.preventDefault();
+                return;
+            }
+
+            const atTop = panel.scrollTop <= 0;
+            const atBottom = panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 1;
+            const pullingDown = deltaY > 0;
+            const pushingUp = deltaY < 0;
+
+            if ((atTop && pullingDown) || (atBottom && pushingUp)) {
+                event.preventDefault();
+            }
+        };
+
+        panel.addEventListener('touchstart', handleTouchStart, { passive: true });
+        panel.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+        return () => {
+            panel.removeEventListener('touchstart', handleTouchStart);
+            panel.removeEventListener('touchmove', handleTouchMove);
+        };
     }, [service]);
 
     // Close on Escape
@@ -251,10 +325,11 @@ export default function ServiceModal({ service, onClose }) {
                     />
 
                     {/* Modal panel */}
-                    <div className="fixed inset-0 z-[9991] flex items-end justify-center lg:items-center lg:p-6">
+                    <div className="fixed inset-0 z-[9991] overscroll-none flex items-end justify-center lg:items-center lg:p-6">
                     <motion.div
+                        ref={panelRef}
                         key="modal"
-                        className="w-full max-h-[90vh] overflow-y-auto
+                        className="w-full max-h-[90vh] overflow-y-auto overscroll-contain
                             bg-[#111] border-t border-white/10 rounded-t-3xl shadow-[0_32px_90px_rgba(0,0,0,0.45)]
                             lg:max-w-3xl lg:max-h-[60vh] lg:rounded-3xl lg:border"
                         initial={{ y: '100%', opacity: 0 }}
@@ -262,6 +337,10 @@ export default function ServiceModal({ service, onClose }) {
                         exit={{ y: '100%', opacity: 0 }}
                         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
                         onClick={(e) => e.stopPropagation()}
+                        style={{
+                            WebkitOverflowScrolling: 'touch',
+                            touchAction: 'pan-y',
+                        }}
                     >
                         {/* Handle bar (mobile) */}
                         <div className="lg:hidden flex justify-center pt-3 pb-1">
