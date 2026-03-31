@@ -133,7 +133,7 @@ export default function LaptopServices() {
                                         style={{ scrollMarginTop: '7rem' }}
                                     >
                                         <div className="px-4 pt-5 sm:px-7 sm:pt-6">
-                                            <h3 className="font-bold text-gray-900" style={{ fontSize: 'var(--text-h4)' }}>
+                                            <h3 className="font-normal leading-[1.12] tracking-[-0.02em] text-gray-900" style={{ fontSize: 'var(--text-h5)' }}>
                                                 {service.title}
                                             </h3>
 

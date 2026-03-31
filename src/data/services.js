@@ -94,7 +94,7 @@ export const laptopServices = [
     },
     {
         id: 3,
-        title: 'Interactive Product Experiences',
+        title: 'Interactive Experiences',
         anchorId: 'service-interactive-product-experiences',
         description: 'Configurators, 3D viewers, and AR-ready assets. Let your customer explore the product before they buy it.',
         price: 'Project basis',
@@ -143,7 +143,7 @@ export const navLinks = [
                 items: [
                     { label: 'Web & App Development', href: '#service-web-and-app-development' },
                     { label: 'Digital Infrastructure', href: '#service-digital-infrastructure' },
-                    { label: 'Interactive Product Experiences', href: '#service-interactive-product-experiences' },
+                    { label: 'Interactive Experiences', href: '#service-interactive-product-experiences' },
                     { label: 'Brand Visual Systems', href: '#service-brand-visual-systems' },
                 ]
             }

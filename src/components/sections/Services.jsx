@@ -49,7 +49,7 @@ const getViewportHeight = () => {
         return 0;
     }
 
-    return window.visualViewport?.height ?? window.innerHeight;
+    return window.innerHeight || document.documentElement.clientHeight || 0;
 };
 
 /**
@@ -95,13 +95,9 @@ const subscribeViewportChanges = (callback) => {
     window.addEventListener('resize', callback);
     window.addEventListener('orientationchange', callback);
 
-    const viewport = window.visualViewport;
-    viewport?.addEventListener('resize', callback);
-
     return () => {
         window.removeEventListener('resize', callback);
         window.removeEventListener('orientationchange', callback);
-        viewport?.removeEventListener('resize', callback);
     };
 };
 
@@ -570,10 +566,10 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
     }, []);
 
     const mobilePhoneSpacerHeight = activeService === lastServiceId
-        ? 'max(8dvh, 72px)'
-        : '42dvh';
-    const mobilePhoneStickyTop = '40dvh';
-    const mobilePhoneViewportHeight = 'calc(60dvh + 100px)';
+        ? 'max(8svh, 72px)'
+        : '42svh';
+    const mobilePhoneStickyTop = '40svh';
+    const mobilePhoneViewportHeight = 'calc(60svh + 100px)';
     const handleOpenPhonePreview = () => {
         onOpenPreview?.();
     };
@@ -624,13 +620,13 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                                     style={{ fontSize: 'clamp(1.25rem, 2.5vw, var(--text-h2))' }}
                                 >
                                     <span
-                                        className="block transition-[opacity,transform] duration-300 ease-out"
+                                        className="block transition-none md:transition-[opacity,transform] md:duration-300 md:ease-out"
                                         style={getRevealStyle(headerLineOneProgress, 32)}
                                     >
                                         Our services extend the
                                     </span>
                                     <span
-                                        className="block transition-[opacity,transform] duration-300 ease-out"
+                                        className="block transition-none md:transition-[opacity,transform] md:duration-300 md:ease-out"
                                         style={getRevealStyle(headerLineTwoProgress, 32)}
                                     >
                                         entire customer journey.
@@ -639,7 +635,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                                 <div className="relative">
                                     <div
                                         ref={ruleRef}
-                                        className="relative z-10 h-px w-full transition-[opacity,transform] duration-300 ease-out"
+                                        className="relative z-10 h-px w-full transition-none md:transition-[opacity,transform] md:duration-300 md:ease-out"
                                         style={{
                                             ...getRevealStyle(headerRuleProgress, 20),
                                             background: 'linear-gradient(90deg, rgba(156,163,175,0.9) 0%, rgba(156,163,175,0.5) 45%, rgba(156,163,175,0.15) 75%, rgba(156,163,175,0) 100%)',
@@ -656,7 +652,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                             </div>
 
                             <div className="services-content">
-                                <div className="flex flex-col gap-[45dvh] md:gap-[20vh] pb-64">
+                                <div className="flex flex-col gap-[45svh] md:gap-[20vh] pb-64">
                                     {phoneServices.map((service, index) => (
                                         <ServiceCard
                                             key={service.id}
@@ -1147,8 +1143,8 @@ function CardContent({ service, revealProgress }) {
             <h3
                 id={service.anchorId}
                 data-service-title
-                className="mb-4 scroll-mt-28 font-medium leading-[1.08] tracking-[-0.03em] text-gray-900 transition-opacity duration-200 ease-out md:scroll-mt-[15rem] md:transition-[opacity,transform] md:duration-300"
-                style={{ ...getCardRevealStyle(titleProgress, 28), fontSize: 'var(--text-h4)' }}
+                className="mb-4 scroll-mt-28 font-normal leading-[1.12] tracking-[-0.02em] text-gray-900 transition-opacity duration-200 ease-out md:scroll-mt-[15rem] md:transition-[opacity,transform] md:duration-300"
+                style={{ ...getCardRevealStyle(titleProgress, 28), fontSize: 'var(--text-h5)' }}
             >
                 {service.title}
             </h3>
