@@ -280,7 +280,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         };
     }, [shouldLoadPhoneMedia]);
 
-    useEffect(() => {
+    React.useLayoutEffect(() => {
         if (!isPreviewOpen) {
             setPreviewBounds(null);
             return undefined;
@@ -307,11 +307,11 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
 
         syncPreviewBounds();
         window.addEventListener('resize', syncPreviewBounds);
-        window.addEventListener('scroll', syncPreviewBounds, { passive: true });
+        window.addEventListener('orientationchange', syncPreviewBounds);
 
         return () => {
             window.removeEventListener('resize', syncPreviewBounds);
-            window.removeEventListener('scroll', syncPreviewBounds);
+            window.removeEventListener('orientationchange', syncPreviewBounds);
         };
     }, [isPreviewOpen]);
 

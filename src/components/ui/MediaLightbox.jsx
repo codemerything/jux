@@ -535,7 +535,7 @@ export default function MediaLightbox({
                                         <MediaLightboxSlide
                                             slide={slide}
                                             shouldPlay={index === 1 && pendingDirection === 0 && !isDragging}
-                                            shouldPreload={slide?.type === 'video'}
+                                            shouldPreload={slide?.type === 'video' && index === 1}
                                         />
                                     </div>
                                 ))}
