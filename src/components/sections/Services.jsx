@@ -60,7 +60,7 @@ const getViewportHeight = () => {
  * to a new position mid-animation.
  */
 let _rafScrollId = null;
-const rafSmoothScroll = (targetY, duration = 420) => {
+const rafSmoothScroll = (targetY, duration = 340) => {
     if (_rafScrollId !== null) {
         cancelAnimationFrame(_rafScrollId);
         _rafScrollId = null;
@@ -343,18 +343,23 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             }
 
             const rect = section.getBoundingClientRect();
-            const snapThreshold = Math.min(360, viewportHeight * 0.38);
-            const overshootAllowance = Math.min(96, viewportHeight * 0.11);
+            const isMobileViewport = window.innerWidth < 768;
+            const snapThreshold = isMobileViewport
+                ? Math.min(420, viewportHeight * 0.46)
+                : Math.min(360, viewportHeight * 0.38);
+            const overshootAllowance = isMobileViewport
+                ? Math.min(120, viewportHeight * 0.14)
+                : Math.min(96, viewportHeight * 0.11);
             const snapCooldownElapsed = Date.now() - snapState.lastSnapTimestamp > 1200;
             const travelSinceLastSnap = Math.abs(currentScrollY - snapState.lastSnapScrollY);
             const isWithinSnapZone = rect.top <= snapThreshold && rect.top >= -overshootAllowance;
 
-            if (isWithinSnapZone && snapCooldownElapsed && travelSinceLastSnap > 80) {
+            if (isWithinSnapZone && snapCooldownElapsed && travelSinceLastSnap > 56) {
                 const targetScrollTop = Math.max(0, Math.round(currentScrollY + rect.top));
                 snapState.lastSnapScrollY = targetScrollTop;
                 snapState.lastSnapTimestamp = Date.now();
-                lockSectionSnap(760);
-                rafSmoothScroll(targetScrollTop, 420);
+                lockSectionSnap(680);
+                rafSmoothScroll(targetScrollTop, 340);
                 settleSectionScrollToTarget(targetScrollTop);
             }
         };
@@ -371,7 +376,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             sectionSnapTimeoutRef.current = window.setTimeout(() => {
                 sectionSnapTimeoutRef.current = null;
                 maybeSnapSectionToTop();
-            }, 300);
+            }, 220);
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
@@ -437,7 +442,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 }
             });
 
-            if (!nearestCard || nearestDistance < 20 || nearestDistance > viewportHeight * 0.42) {
+            if (!nearestCard || nearestDistance < 16 || nearestDistance > viewportHeight * 0.34) {
                 return;
             }
 
@@ -450,8 +455,8 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             const rawTargetScrollTop = Math.max(0, Math.round(window.scrollY + targetTitleTop - snapLine));
             const targetScrollTop = Math.max(sectionTopAlignedScrollTop, rawTargetScrollTop);
 
-            lockSectionSnap(460);
-            rafSmoothScroll(targetScrollTop, 420);
+            lockSectionSnap(400);
+            rafSmoothScroll(targetScrollTop, 340);
         };
 
         const handleScroll = () => {
@@ -462,7 +467,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             serviceSnapTimeoutRef.current = window.setTimeout(() => {
                 serviceSnapTimeoutRef.current = null;
                 maybeSnapNearestServiceCard();
-            }, 300);
+            }, 220);
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
