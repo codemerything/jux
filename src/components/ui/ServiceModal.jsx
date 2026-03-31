@@ -222,6 +222,7 @@ export default function ServiceModal({ service, onClose }) {
     const touchStartYRef = useRef(0);
     const isOpen = Boolean(service);
     const data = processData[renderedService?.name];
+    const modalPrice = renderedService?.price?.replace(/^from\s+/i, '') ?? '';
 
     useEffect(() => {
         if (!service) {
@@ -369,7 +370,7 @@ export default function ServiceModal({ service, onClose }) {
                     <motion.div
                         ref={panelRef}
                         key="modal"
-                        className="w-full max-h-[90vh] overflow-y-auto overscroll-contain
+                        className="relative w-full max-h-[90vh] overflow-y-auto overscroll-contain
                             bg-[#111] border-t border-white/10 rounded-t-3xl shadow-[0_32px_90px_rgba(0,0,0,0.45)]
                             lg:max-w-3xl lg:max-h-[60vh] lg:rounded-3xl lg:border"
                         initial={{ y: '100%', opacity: 0 }}
@@ -382,24 +383,31 @@ export default function ServiceModal({ service, onClose }) {
                             touchAction: 'pan-y',
                         }}
                     >
+                        <button
+                            type="button"
+                            onClick={handleRequestClose}
+                            className="absolute right-4 top-4 z-10 shrink-0 w-9 h-9 rounded-full bg-white/8 hover:bg-white/15
+                                flex items-center justify-center text-white/60 hover:text-white
+                                transition-colors duration-150 lg:right-6 lg:top-6"
+                            aria-label="Close"
+                        >
+                            <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none">
+                                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                            </svg>
+                        </button>
+
                         {/* Handle bar (mobile) */}
                         <div className="lg:hidden flex justify-center pt-3 pb-1">
                             <div className="w-10 h-1 rounded-full bg-white/20" />
                         </div>
 
-                        <div className="p-8 lg:p-10">
+                        <div className="relative p-8 lg:p-10">
                             {/* Header */}
-                            <div className="flex items-start justify-between mb-8">
+                            <div className="mb-8 pr-12 lg:pr-16">
                                 <div>
-                                    <p
-                                        className="text-white/30 uppercase tracking-widest font-semibold mb-2"
-                                        style={{ fontSize: 'var(--text-xs)' }}
-                                    >
-                                        {renderedService.category} · {data.timeline}
-                                    </p>
                                     <h3
                                         className="font-bold text-white leading-tight"
-                                        style={{ fontSize: 'var(--text-h3)' }}
+                                        style={{ fontSize: 'clamp(calc(var(--text-h4) * 0.95), 6.5vw, var(--text-h3))' }}
                                     >
                                         {renderedService.name}
                                     </h3>
@@ -410,18 +418,6 @@ export default function ServiceModal({ service, onClose }) {
                                         {data.tagline}
                                     </p>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={handleRequestClose}
-                                    className="ml-4 mt-1 shrink-0 w-9 h-9 rounded-full bg-white/8 hover:bg-white/15
-                                        flex items-center justify-center text-white/60 hover:text-white
-                                        transition-colors duration-150"
-                                    aria-label="Close"
-                                >
-                                    <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none">
-                                        <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                    </svg>
-                                </button>
                             </div>
 
                             {/* Divider */}
@@ -435,7 +431,7 @@ export default function ServiceModal({ service, onClose }) {
                             </p>
 
                             {/* 2×2 grid so steps fit in a shorter modal */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-4">
                                 {data.steps.map((step, i) => (
                                     <motion.div
                                         key={step.num}
@@ -486,7 +482,7 @@ export default function ServiceModal({ service, onClose }) {
                                         className="font-extrabold text-white"
                                         style={{ fontSize: 'var(--text-h4)' }}
                                     >
-                                        {renderedService.price}
+                                        {modalPrice}
                                     </p>
                                 </div>
                                 <SmartLink

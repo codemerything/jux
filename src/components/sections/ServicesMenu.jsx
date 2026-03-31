@@ -185,7 +185,7 @@ export default function ServicesMenu() {
 
                                     <h3
                                         className="font-bold text-white mb-3 group-hover:text-accent transition-colors duration-200 leading-snug"
-                                        style={{ fontSize: 'var(--text-h4)' }}
+                                        style={{ fontSize: 'clamp(calc(var(--text-h5) * 0.94), 6.6vw, var(--text-h4))' }}
                                     >
                                         {service.name}
                                     </h3>
