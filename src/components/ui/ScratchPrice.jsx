@@ -23,7 +23,7 @@ export default function ScratchPrice({ price }) {
             const wrapperRect = wrapperElement.getBoundingClientRect();
             setOverlaySize({
                 width: Math.ceil(wrapperRect.width),
-                height: Math.ceil(textRect.height + 16),
+                height: Math.ceil(textRect.height + 42),
             });
         };
 
@@ -138,7 +138,7 @@ export default function ScratchPrice({ price }) {
         >
             <span
                 ref={textRef}
-                className="block w-full text-center font-extrabold text-gray-900 shadow-sm"
+                className="block w-full text-center font-extrabold text-gray-900"
                 style={{ fontSize: 'var(--text-h5)' }}
             >
                 {price}

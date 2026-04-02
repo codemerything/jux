@@ -176,11 +176,11 @@ export default function ServicesMenu() {
                                     initial={{ opacity: 0, y: 12 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.32, delay: index * 0.06, ease: 'easeOut' }}
-                                    className="flex flex-col text-left group relative h-full w-full bg-white border border-gray-200 hover:border-gray-300 rounded-3xl hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 transition-all duration-500 min-h-[300px] lg:min-h-[420px]"
+                                    className="flex flex-col text-left group relative h-full w-full bg-white border border-gray-200 hover:border-gray-300 rounded-3xl hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 transition-all duration-500 min-h-[250px] lg:min-h-[320px]"
                                     style={{ padding: 'clamp(1.5rem, 4vw, 2.5rem)' }}
                                 >
                                     {/* Tech Status Header - Light Mode Version */}
-                                    <div className="w-full block mb-6">
+                                    <div className="w-full block mb-2">
                                         <div className="flex items-center gap-3">
                                             <div className="w-2 h-2 rounded-full bg-gray-300 group-hover:bg-gray-900 transition-all duration-500"></div>
                                             <span className="font-mono text-gray-400 group-hover:text-gray-900 tracking-widest uppercase text-[10px] md:text-xs transition-colors duration-500">
@@ -199,7 +199,7 @@ export default function ServicesMenu() {
                                     </div>
 
                                     {/* Footer Content bridging to ScratchPrice */}
-                                    <div className="mt-auto w-full border-t border-gray-100 pt-6 group-hover:border-gray-200 transition-colors duration-500">
+                                    <div className="mt-auto w-full border-t border-gray-100 pt-5 group-hover:border-gray-200 transition-colors duration-500">
                                         <ScratchPrice price={service.price} />
                                     </div>
                                 </motion.button>
