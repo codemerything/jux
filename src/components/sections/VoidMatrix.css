@@ -296,7 +296,7 @@
 .card-title {
   font-size: 2rem;
   font-weight: 400;
-  line-height: 0.75;
+  line-height: 0.95;
   margin-bottom: 1rem;
   color: var(--on-surface);
   padding-right: 15%; /* Force right-hand negative space */
