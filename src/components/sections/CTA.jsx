@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const faqItems = [
     {
@@ -39,47 +40,83 @@ export default function CTA() {
     const [openIndex, setOpenIndex] = useState(null);
 
     return (
-        <section id="faq" className="relative bg-[#fafafa] py-24" aria-labelledby="cta-heading">
-            <div className="max-w-[1400px] mx-auto px-8">
-                <div className="max-w-2xl mx-auto text-left">
-                    <h2
-                        id="cta-heading"
-                        className="font-bold text-gray-900 leading-tight mb-12"
-                        style={{ fontSize: 'clamp(2rem, 7.5vw, var(--text-h2))' }}
-                    >
-                        Questions we hear
-                        <span
-                            className="block font-bold text-gray-900 leading-tight"
-                            style={{ fontSize: 'clamp(2rem, 7.5vw, var(--text-h2))' }}
+        <section id="faq" className="relative bg-[#fafafa] py-32" aria-labelledby="cta-heading">
+            <div className="max-w-[1280px] mx-auto px-6 md:px-12 lg:px-16">
+                
+                {/* 2-Column Editorial Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-16 lg:gap-24 relative">
+                    
+                    {/* Left Column: Sticky Title */}
+                    <div className="lg:sticky lg:top-32 h-fit">
+                        <h2
+                            id="cta-heading"
+                            className="font-bold text-gray-900 leading-tight mb-6"
+                            style={{ fontSize: 'clamp(2rem, 4vw, 2.75rem)', letterSpacing: '-0.02em' }}
                         >
-                            most often.
-                        </span>
-                    </h2>
-
-                    <div className="space-y-4 mb-16 text-left">
-                        {faqItems.map((item, index) => (
-                            <div
-                                key={index}
-                                className="pb-4 border-b border-gray-200 last:border-0"
-                            >
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setOpenIndex(openIndex === index ? null : index)
-                                    }
-                                    className={`w-full text-left font-medium md:font-semibold leading-[1.32] transition-colors ${openIndex === index ? 'text-gray-900' : 'text-gray-800 hover:text-gray-900'}`}
-                                    style={{ fontSize: 'clamp(1.05rem, 4.6vw, var(--text-h6))' }}
-                                >
-                                    {item.question}
-                                </button>
-                                {openIndex === index && (
-                                    <p className="text-gray-600 leading-relaxed mt-3" style={{ fontSize: 'var(--text-sm)' }}>
-                                        {item.answer}
-                                    </p>
-                                )}
-                            </div>
-                        ))}
+                            Questions we hear <br /> most often.
+                        </h2>
+                        <p className="text-gray-500 max-w-sm leading-relaxed text-lg lg:text-xl">
+                            Everything you need to know about how we work, what we charge, and what we deliver.
+                        </p>
                     </div>
+
+                    {/* Right Column: Accordion List */}
+                    <div className="flex flex-col border-t border-gray-200">
+                        {faqItems.map((item, index) => {
+                            const isOpen = openIndex === index;
+                            
+                            return (
+                                <div
+                                    key={index}
+                                    className="border-b border-gray-200 overflow-hidden"
+                                >
+                                    {/* Question Toggle Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setOpenIndex(isOpen ? null : index)}
+                                        className="w-full text-left py-8 flex items-center justify-between group focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 transition-colors duration-300"
+                                    >
+                                        <span
+                                            className={`font-semibold pr-8 transition-colors duration-300 ${isOpen ? 'text-black' : 'text-gray-500 group-hover:text-black'}`}
+                                            style={{ fontSize: 'clamp(1.25rem, 2.8vw, 1.75rem)', letterSpacing: '-0.01em', lineHeight: 1.3 }}
+                                        >
+                                            {item.question}
+                                        </span>
+                                        
+                                        {/* Animated + / x Icon */}
+                                        <span className={`shrink-0 w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center transition-all duration-300 ${isOpen ? 'border-gray-900 bg-gray-900 shadow-md' : 'group-hover:border-gray-400 group-hover:bg-gray-50'}`}>
+                                            <motion.span
+                                                animate={{ rotate: isOpen ? 45 : 0 }}
+                                                transition={{ duration: 0.3, ease: 'backOut' }}
+                                                className={`block font-light text-2xl leading-none origin-center ${isOpen ? 'text-white' : 'text-gray-400 group-hover:text-gray-900'}`}
+                                            >
+                                                +
+                                            </motion.span>
+                                        </span>
+                                    </button>
+
+                                    {/* Silky Animated Answer Container */}
+                                    <AnimatePresence initial={false}>
+                                        {isOpen && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.35, ease: [0.19, 1.0, 0.22, 1.0] }}
+                                            >
+                                                <div className="pb-10 pr-4 md:pr-16">
+                                                    <p className="text-gray-600 leading-relaxed text-lg lg:text-xl">
+                                                        {item.answer}
+                                                    </p>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            );
+                        })}
+                    </div>
+
                 </div>
             </div>
         </section>

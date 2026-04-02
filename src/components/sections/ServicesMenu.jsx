@@ -96,36 +96,45 @@ export default function ServicesMenu() {
 
             <section
                 id="pricing"
-                className="bg-[#0d0d0d] py-24"
+                className="bg-[#fafafa] pt-[200px] md:pt-[320px] pb-32 relative"
                 aria-labelledby="services-menu-heading"
             >
-                <div className="max-w-[1400px] mx-auto px-8">
+                {/* Seamless Black-to-White Seamless Entrance Fade */}
+                <div 
+                    className="pointer-events-none absolute left-0 top-0 z-[1] w-full h-[180px] md:h-[260px]"
+                    style={{ 
+                        background: 'linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 15%, rgba(0, 0, 0, 0.65) 30%, rgba(0, 0, 0, 0.45) 45%, rgba(0, 0, 0, 0.28) 60%, rgba(0, 0, 0, 0.15) 75%, rgba(0, 0, 0, 0.05) 88%, rgba(0, 0, 0, 0) 100%)' 
+                    }}
+                    aria-hidden="true"
+                />
+
+                <div className="relative z-10 max-w-[1280px] mx-auto px-6 md:px-12 lg:px-16">
                     {/* Header + Tab switcher */}
                     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-8 mb-14">
                         <div>
                             <p
-                                className="text-white/30 uppercase tracking-[0.2em] font-semibold mb-3"
+                                className="text-gray-400 uppercase tracking-[0.2em] font-semibold mb-3"
                                 style={{ fontSize: 'var(--text-xs)' }}
                             >
                                 What we build
                             </p>
                             <h2
                                 id="services-menu-heading"
-                                className="font-bold text-white leading-tight mb-6"
+                                className="font-bold text-gray-900 leading-tight mb-6"
                                 style={{ fontSize: 'var(--text-h2)' }}
                             >
                                 Services
                             </h2>
 
-                            <div className="inline-flex gap-1 bg-white/6 rounded-xl p-1">
+                            <div className="inline-flex gap-1 bg-gray-100 rounded-xl p-1">
                                 {['Visual', 'Digital'].map((tab) => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
                                         className={`px-5 py-2 rounded-lg font-semibold transition-all duration-200 ${
                                             activeTab === tab
-                                                ? 'bg-white text-black shadow-sm'
-                                                : 'text-white/50 hover:text-white'
+                                                ? 'bg-white text-gray-900 shadow-sm'
+                                                : 'text-gray-500 hover:text-gray-900'
                                         }`}
                                         style={{ fontSize: 'var(--text-sm)' }}
                                     >
@@ -136,7 +145,7 @@ export default function ServicesMenu() {
                         </div>
 
                         <p
-                            className="text-white/40 max-w-xs leading-relaxed sm:text-right"
+                            className="text-gray-500 max-w-xs leading-relaxed sm:text-right"
                             style={{ fontSize: 'var(--text-sm)' }}
                         >
                             Most projects combine services. Prices are starting points, and scope shapes the final number.
@@ -146,7 +155,7 @@ export default function ServicesMenu() {
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}
-                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+                            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6"
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
@@ -167,57 +176,36 @@ export default function ServicesMenu() {
                                     initial={{ opacity: 0, y: 12 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.32, delay: index * 0.06, ease: 'easeOut' }}
-                                    className="group relative flex flex-col text-left
-                                        bg-white/4 hover:bg-white/8
-                                        border border-white/6 hover:border-white/15
-                                        rounded-2xl p-7
-                                        transition-all duration-200
-                                        cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                                    className="flex flex-col text-left group relative h-full w-full bg-white border border-gray-200 hover:border-gray-300 rounded-3xl hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)] hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 transition-all duration-500 min-h-[300px] lg:min-h-[420px]"
+                                    style={{ padding: 'clamp(1.5rem, 4vw, 2.5rem)' }}
                                 >
-                                    {service.tag && (
-                                        <span
-                                            className="absolute top-5 right-5 bg-accent/15 text-accent font-semibold px-2.5 py-0.5 rounded-full"
-                                            style={{ fontSize: 'var(--text-xs)' }}
+                                    {/* Tech Status Header - Light Mode Version */}
+                                    <div className="w-full block mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-gray-300 group-hover:bg-gray-900 transition-all duration-500"></div>
+                                            <span className="font-mono text-gray-400 group-hover:text-gray-900 tracking-widest uppercase text-[10px] md:text-xs transition-colors duration-500">
+                                                MOD_{index + 1}.0 / {service.category}
+                                            </span>
+                                        </div>
+                                        <h3 
+                                            className="font-bold text-gray-900 mt-5 block group-hover:text-black transition-colors duration-300"
+                                            style={{ fontSize: 'clamp(1.25rem, 2vw, 1.5rem)', letterSpacing: '-0.02em', lineHeight: 1.15 }}
                                         >
-                                            {service.tag}
-                                        </span>
-                                    )}
+                                            {service.name}
+                                        </h3>
+                                        <p className="mt-3 block text-gray-500 leading-relaxed max-w-sm">
+                                            {service.description}
+                                        </p>
+                                    </div>
 
-                                    <h3
-                                        className="font-bold text-white mb-3 group-hover:text-accent transition-colors duration-200 leading-snug"
-                                        style={{ fontSize: 'clamp(calc(var(--text-h5) * 0.94), 6.6vw, var(--text-h4))' }}
-                                    >
-                                        {service.name}
-                                    </h3>
-
-                                    <p
-                                        className="text-white/50 leading-relaxed mb-8 flex-1"
-                                        style={{ fontSize: 'var(--text-sm)' }}
-                                    >
-                                        {service.description}
-                                    </p>
-
-                                    <div className="border-t border-white/6 pt-5 mb-4">
+                                    {/* Footer Content bridging to ScratchPrice */}
+                                    <div className="mt-auto w-full border-t border-gray-100 pt-6 group-hover:border-gray-200 transition-colors duration-500">
                                         <ScratchPrice price={service.price} />
                                     </div>
                                 </motion.button>
                             ))}
                         </motion.div>
                     </AnimatePresence>
-
-                    <div className="mt-10 flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="text-white/40 leading-relaxed" style={{ fontSize: 'var(--text-sm)' }}>
-                            Tell us what you're building, and we'll tell you what it takes.
-                        </p>
-                        <SmartLink
-                            href="/contact"
-                            className="shrink-0 inline-flex items-center gap-2 self-center bg-white text-black px-5 py-2.5 rounded-full font-semibold
-                            transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-white/10"
-                            style={{ fontSize: 'var(--text-sm)' }}
-                        >
-                            Start a Project
-                        </SmartLink>
-                    </div>
                 </div>
             </section>
         </>

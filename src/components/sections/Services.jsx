@@ -581,6 +581,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
             className="relative overflow-x-clip bg-[#ffffff] text-gray-900 py-24"
             aria-labelledby="services-heading"
         >
+
             <div
                 className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[8.5rem] md:hidden"
                 aria-hidden="true"
@@ -597,7 +598,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 style={{ transformOrigin: 'center top' }}
             >
                 <div className="mx-auto max-w-[1600px] px-6 md:px-8 lg:px-12">
-                    <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-start gap-8 lg:grid-cols-[460px_minmax(0,1fr)] lg:gap-12 lg:translate-x-10 xl:translate-x-16">
+                    <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-start gap-8 lg:grid-cols-[460px_minmax(0,1fr)] lg:gap-12 lg:pl-[90px] xl:pl-[114px]">
                         <div className="hidden lg:block sticky top-24">
                             <div className="relative flex flex-col items-center">
                                 <PhoneMockup
@@ -732,6 +733,15 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 trapScroll
                 overlayBackgroundColor="rgba(255, 255, 255, 0.53125)"
                 chromeTone="dark"
+            />
+
+            {/* Darkness Creep Upwards Overlay */}
+            <div 
+                className="pointer-events-none absolute bottom-[-1px] left-0 z-30 w-full h-[180px] md:h-[260px]"
+                style={{ 
+                    background: 'linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 15%, rgba(0, 0, 0, 0.65) 30%, rgba(0, 0, 0, 0.45) 45%, rgba(0, 0, 0, 0.28) 60%, rgba(0, 0, 0, 0.15) 75%, rgba(0, 0, 0, 0.05) 88%, rgba(0, 0, 0, 0) 100%)' 
+                }}
+                aria-hidden="true"
             />
         </section>
     );

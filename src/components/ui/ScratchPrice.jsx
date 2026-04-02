@@ -120,7 +120,7 @@ export default function ScratchPrice({ price }) {
     if (isEnquiry) {
         return (
             <span
-                className="block w-full text-center text-white/30 italic font-normal"
+                className="block w-full text-center text-gray-400 italic font-medium"
                 style={{ fontSize: 'var(--text-h6)' }}
             >
                 {price}
@@ -136,10 +136,9 @@ export default function ScratchPrice({ price }) {
                 minHeight: `${overlaySize.height}px`,
             }}
         >
-            {/* Price sits underneath, large and white so it's clearly readable once scratched */}
             <span
                 ref={textRef}
-                className="block w-full text-center font-extrabold text-white"
+                className="block w-full text-center font-extrabold text-gray-900 shadow-sm"
                 style={{ fontSize: 'var(--text-h5)' }}
             >
                 {price}

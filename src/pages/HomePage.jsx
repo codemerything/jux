@@ -5,7 +5,7 @@ import Footer from '../components/layout/Footer';
 import Hero from '../components/sections/Hero';
 import Marquee from '../components/sections/Marquee';
 import Services from '../components/sections/Services';
-import LaptopServices from '../components/sections/LaptopServices';
+import VoidMatrixSection from '../components/sections/VoidMatrixSection';
 import CTA from '../components/sections/CTA';
 import ServicesMenu from '../components/sections/ServicesMenu';
 import UnicornHeroBackground from '../components/ui/UnicornHeroBackground';
@@ -47,6 +47,14 @@ export default function HomePage() {
                             isPreviewOpen={isHeroPreviewOpen}
                             onClosePreview={() => setIsHeroPreviewOpen(false)}
                         />
+                        {/* Physical gradient bridging the Void-to-White transition outside of the child container */}
+                        <div 
+                            className="absolute bottom-0 inset-x-0 z-20 w-full h-[140px] md:h-[220px]"
+                            style={{ 
+                                background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.45) 40%, rgba(255, 255, 255, 0.75) 60%, #ffffff 100%)' 
+                            }}
+                            aria-hidden="true"
+                        />
                     </div>
 
                     <Services
@@ -57,7 +65,7 @@ export default function HomePage() {
                         }}
                         onClosePreview={() => setIsPhonePreviewOpen(false)}
                     />
-                    <LaptopServices />
+                    <VoidMatrixSection />
                     <ServicesMenu />
                     <CTA />
                 </main>
