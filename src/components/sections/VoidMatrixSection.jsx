@@ -109,8 +109,11 @@ export default function VoidMatrixSection() {
                                     <path className="network-path secondary-path" d="M100,250 Q300,350 500,250 T700,150" fill="none" />
                                     <path className="network-path tertiary-path" d="M200,100 L600,300" fill="none" />
                                     <path className="network-path main-path" d="M100,200 Q250,100 400,200 T700,200" fill="none" />
-                                    {/* Dropped Data packet animation block here. Standard React CSS handles it mostly, or we write a component. For now let's just make it a static glow dot since we stripped the JS. */}
-                                    <circle id="data-packet" cx="400" cy="200" r="3" fill="#ff0000" filter="url(#glow)" style={{opacity: 0.8}} />
+                                    {/* Data Packet Core SVG Native Animation */}
+                                    <circle r="4" fill="#ff0000" filter="url(#glow)">
+                                        <animateMotion dur="4s" repeatCount="indefinite" path="M100,200 Q250,100 400,200 T700,200" />
+                                        <animate attributeName="opacity" values="0; 0.8; 0.8; 0" keyTimes="0; 0.15; 0.85; 1" dur="4s" repeatCount="indefinite" />
+                                    </circle>
                                     
                                     <g className="nodes">
                                         <circle cx="100" cy="200" r="3" className="node" />
