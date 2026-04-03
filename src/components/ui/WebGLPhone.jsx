@@ -65,8 +65,6 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         pmremGenerator.compileEquirectangularShader();
         
         const envScene = new THREE.Scene();
-        // Fills the HDRI void with bright studio white so metals reflect silver instead of void black
-        envScene.background = new THREE.Color(0xfbfbfb); 
         
         function createSoftSoftbox(colorHex) {
             const c = document.createElement("canvas");
@@ -106,19 +104,14 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         const renderTarget = pmremGenerator.fromScene(envScene);
         scene.environment = renderTarget.texture;
 
-        // Apply Math.PI physical irradiance conversion from legacy values (0.8 -> 2.5, 1.5 -> 4.5)
-        const fillLight = new THREE.DirectionalLight(0xffffff, 2.5);
+        // Restore blind photometric match to the prototype lighting ratios
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
         fillLight.position.set(5, 5, 5);
         scene.add(fillLight);
-        
-        const rimLight = new THREE.DirectionalLight(0x00f0ff, 4.5);
+
+        const rimLight = new THREE.DirectionalLight(0x00f0ff, 1.5);
         rimLight.position.set(-5, 0, -5);
         scene.add(rimLight);
-
-        // Explicitly ordered left-ambient physical key light to drastically brighten metallic siding
-        const leftLight = new THREE.DirectionalLight(0xffffff, 3.5);
-        leftLight.position.set(-8, 3, 5);
-        scene.add(leftLight);
 
         // --- 3. High-Fidelity Geometry Builders ---
         const phoneGroup = new THREE.Group();
@@ -357,17 +350,16 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             const mat = new THREE.MeshPhysicalMaterial({
                 emissiveMap: tex,
                 emissive: 0xffffff,
-                emissiveIntensity: 1.0, 
-                color: 0x000000, // Blacked out diffuse to prevent ambient lights washing out the screen pixels
-                metalness: 0.0,
-                roughness: 0.0,
-                envMapIntensity: 0.0,
-                clearcoat: 0.0,
-                clearcoatRoughness: 0.0,
+                emissiveIntensity: 0.8, 
+                color: 0xffffff, 
+                metalness: 0.1,
+                roughness: 0.2,
+                envMapIntensity: 0.8,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1,
                 transparent: true,
                 opacity: index === 0 ? 1 : 0,
-                depthWrite: false,
-                toneMapped: false // Critical bypass for modern ACESFilmic blowout
+                depthWrite: false
             });
             
             const mesh = new THREE.Mesh(screenGeo, mat);
