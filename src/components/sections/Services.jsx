@@ -1145,7 +1145,7 @@ const ServiceCard = React.forwardRef(({ service, activeServiceId, isActive, isFi
                 }
             }}
             data-service={service.id}
-            className={`service-card transition-opacity duration-300 ease-out ${isFirst ? 'pt-8 md:pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
+            className={`service-card transition-opacity duration-300 ease-out select-none md:select-text ${isFirst ? 'pt-8 md:pt-12' : ''} ${isLast ? 'pb-12' : ''}`}
             style={{
                 opacity: opacity,
                 transform: isMobileViewport || isActive ? 'translateY(0)' : 'translateY(5px)',
