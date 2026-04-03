@@ -267,9 +267,11 @@ export default function Navbar({ hidden = false }) {
                     >
                         <motion.div
                             className="pointer-events-none absolute inset-0"
+                            initial={{ opacity: isLightOverlay ? 0 : 1 }}
                             animate={{ opacity: isLightOverlay ? 0 : 1 }}
                             transition={{ duration: 0.28, ease: 'easeOut' }}
                             style={{
+                                opacity: isLightOverlay ? 0 : 1, // Hardware lock against 1-tick initialization mounting flash
                                 backgroundImage:
                                     'linear-gradient(rgba(0,0,0,0.29), rgba(0,0,0,0.29)), linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.09) 22%, rgba(255,255,255,0.03) 46%, rgba(255,255,255,0.018) 68%, rgba(255,255,255,0.05) 100%)',
                                 backgroundOrigin: 'border-box',
@@ -278,9 +280,11 @@ export default function Navbar({ hidden = false }) {
                         />
                         <motion.div
                             className="pointer-events-none absolute inset-0"
+                            initial={{ opacity: isLightOverlay ? 1 : 0 }}
                             animate={{ opacity: isLightOverlay ? 1 : 0 }}
                             transition={{ duration: 0.28, ease: 'easeOut' }}
                             style={{
+                                opacity: isLightOverlay ? 1 : 0, // Hardware lock against 1-tick initialization mounting flash
                                 backgroundImage:
                                     'linear-gradient(180deg, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.24) 100%)',
                             }}
