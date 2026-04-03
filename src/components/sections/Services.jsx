@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { phoneServices } from '../../data/services';
 import MediaLightbox from '../ui/MediaLightbox';
+import WebGLPhone from '../ui/WebGLPhone';
 
 const phoneSlideEntries = Object.entries(
     import.meta.glob('../../../heroImages/phoneslides/*.{jpg,jpeg,png,webp,avif,mp4,webm,mov}', {
@@ -598,9 +599,9 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                 style={{ transformOrigin: 'center top' }}
             >
                 <div className="mx-auto max-w-[1600px] px-6 md:px-8 lg:px-12">
-                    <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-start gap-8 lg:grid-cols-[460px_minmax(0,1fr)] lg:gap-12 lg:pl-[90px] xl:pl-[114px]">
+                    <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-16">
                         <div className="hidden lg:block sticky top-24">
-                            <div className="relative flex flex-col items-center">
+                            <div className="relative flex flex-col items-center -mt-[50px]">
                                 <PhoneMockup
                                     activeService={activeService}
                                     shouldLoadMedia={shouldLoadPhoneMedia}
@@ -608,12 +609,12 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                                 />
                                 <PhonePreviewButton
                                     onClick={handleOpenPhonePreview}
-                                    className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[6.5rem] -ml-[100px] z-20"
+                                    className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-6 z-20"
                                 />
                             </div>
                         </div>
 
-                        <div className="relative z-0 flex flex-col">
+                        <div className="relative z-0 flex flex-col lg:pr-[40px]">
                             <div ref={headerRef} className="sticky top-0 z-30 -mt-24 bg-[#ffffff] pt-24">
                                 <h2
                                     id="services-heading"
@@ -694,7 +695,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                                 backfaceVisibility: 'hidden',
                             }}
                         >
-                            <div className="absolute left-1/2 top-[90px] -translate-x-[20%]" aria-hidden="true">
+                            <div className="absolute left-1/2 top-[-10px] -translate-x-[35%]" aria-hidden="true">
                                 <div
                                     className="w-[25.8rem] max-w-none"
                                     style={{
@@ -843,62 +844,26 @@ function ProgramMark({ label }) {
 }
 
 function PhoneMockup({ activeService, shouldLoadMedia = false, suspendPlayback = false, className = '' }) {
-    // Screen area within phone.png (1349×2048), measured via pixel scan:
-    // left=18px (1.33%), right margin=521px (38.62%), top=26px (1.27%), bottom margin=372px (18.16%)
-    // Screen dimensions: 810×1650px within 1349×2048 image
+    if (!shouldLoadMedia) {
+        return (
+            <div
+                className={className ? `relative ${className}` : 'relative'}
+                style={className ? { aspectRatio: '523 / 794' } : { width: '523px', height: '794px' }}
+            >
+                {/* Pre-load placeholder for layout stability */}
+                <div className="absolute inset-x-0 bottom-0 top-[60px] rounded-t-[60px] bg-black/5 animate-pulse" />
+            </div>
+        );
+    }
+
     return (
-        <div
+        <WebGLPhone
+            activeService={activeService}
+            screenStyles={serviceScreenStyles}
+            suspendPlayback={suspendPlayback}
             className={className ? `relative ${className}` : 'relative'}
             style={className ? { aspectRatio: '523 / 794' } : { width: '523px', height: '794px' }}
-        >
-            {/* Layer 1 (bottom): Phone body image */}
-            <img
-                src="/phone.png"
-                alt="Phone body"
-                loading="lazy"
-                decoding="async"
-                className="relative z-0 h-full w-full rounded-[60px]"
-            />
-
-            {/* Layer 2 (middle): Screen content - 287x621 gradient */}
-            <div
-                className="absolute overflow-hidden z-10"
-                style={{
-                    width: '54.88%',
-                    height: '78.21%',
-                    top: '2.52%',
-                    left: '4.02%',
-                    borderRadius: 'clamp(1.5rem, 7vw, 2.5rem)',
-                }}
-            >
-                {phoneServices.map((service, index) => (
-                    <PhoneScreen
-                        key={service.id}
-                        service={service}
-                        screenStyle={serviceScreenStyles[index]}
-                        isActive={activeService === service.id}
-                        shouldPrime={Math.abs(activeService - service.id) <= 1}
-                        shouldLoadMedia={shouldLoadMedia}
-                        suspendPlayback={suspendPlayback}
-                    />
-                ))}
-            </div>
-
-            {/* Layer 3 (top): Widget PNG - Dynamic Island at top-center of screen */}
-            <img
-                src="/widget.png"
-                alt="Dynamic Island"
-                loading="lazy"
-                decoding="async"
-                className="absolute z-20 pointer-events-none"
-                style={{
-                    width: '19.69%',
-                    height: '76.45%',
-                    top: '3.4%',
-                    left: '21.61%',
-                }}
-            />
-        </div>
+        />
     );
 }
 
