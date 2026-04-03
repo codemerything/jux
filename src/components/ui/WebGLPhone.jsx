@@ -631,9 +631,18 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         function animate() {
             reqId = requestAnimationFrame(animate);
 
-            controls.update(); 
-            
             const timeSec = performance.now() * 0.001; 
+
+            // Ping-pong rotation on mobile to keep the front face visible (~70 degree sweep)
+            if (window.innerWidth <= 768) {
+                controls.autoRotate = false; 
+                phoneGroup.rotation.y = Math.sin(timeSec * 0.4) * 0.5; // Slower smooth wiggle
+            } else {
+                controls.autoRotate = true; 
+                phoneGroup.rotation.y = 0; // Lock to origin on desktop
+            }
+
+            controls.update();
             rimLight.intensity = 3.5 + Math.sin(timeSec * 2.0) * 1.5;
 
             if (neonSlitMat.uniforms) {
