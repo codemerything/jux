@@ -48,7 +48,7 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.outputColorSpace = THREE.SRGBColorSpace; // R152+ syntax
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.3;
+        renderer.toneMappingExposure = 1.0; // Restored to 1.0 baseline for perfect deep black contrast without ACES clipping
 
         renderer.domElement.style.outline = 'none';
         renderer.domElement.style.width = '100%';
@@ -103,8 +103,23 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         panel3.lookAt(0,0,0);
         envScene.add(panel3);
         
-        const renderTarget = pmremGenerator.fromScene(envScene);
-        scene.environment = renderTarget.texture;
+        // 1. Generate BLACK environment map for the Screen/Glass (Zero ambient fog, only sharp softboxes)
+        envScene.background = new THREE.Color(0x000000);
+        const renderTargetBlack = pmremGenerator.fromScene(envScene);
+        const screenEnvMap = renderTargetBlack.texture;
+
+        // 2. Generate TOP-LIT environment map for the Metal Chassis (Aggressive falloff)
+        // Inject a massive overhead softbox explicitly for the chassis to catch a stark top rim flare
+        const overheadMat = new THREE.MeshBasicMaterial({ map: createSoftSoftbox('rgba(255,255,255,1)'), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+        const overheadPanel = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), overheadMat);
+        overheadPanel.position.set(0, 30, 0);
+        overheadPanel.rotation.x = Math.PI / 2; // Flat downward ceiling
+        envScene.add(overheadPanel);
+
+        // A cool bright silver void drops the bottom edge naturally from blinding-white to clean mid-silver, preventing absolute darkness!
+        envScene.background = new THREE.Color(0xd5d5d5);
+        const renderTargetWhite = pmremGenerator.fromScene(envScene);
+        scene.environment = renderTargetWhite.texture;
 
         // Restore blind photometric match to the prototype lighting ratios
         const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -114,10 +129,6 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         const rimLight = new THREE.DirectionalLight(0x00f0ff, 1.5);
         rimLight.position.set(-5, 0, -5);
         scene.add(rimLight);
-
-        const leftLight = new THREE.DirectionalLight(0xffffff, 2.5);
-        leftLight.position.set(-8, 3, 5);
-        scene.add(leftLight);
 
         // --- 3. High-Fidelity Geometry Builders ---
         const phoneGroup = new THREE.Group();
@@ -183,10 +194,10 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         btnGeo.center();
         
         const btnMat = new THREE.MeshStandardMaterial({
-            color: 0x222222,
-            roughness: 0.3,
-            metalness: 0.9,
-            envMapIntensity: 1.0
+            color: 0x444444,
+            roughness: 0.35,
+            metalness: 1.0,
+            envMapIntensity: 2.5
         });
         
         const powerBtn = new THREE.Mesh(btnGeo, btnMat);
@@ -356,17 +367,17 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             const mat = new THREE.MeshPhysicalMaterial({
                 emissiveMap: tex,
                 emissive: 0xffffff,
-                emissiveIntensity: 1.0, 
-                color: 0x000000, // Blacked out ambient diffuse so directional lights cannot wash out the screen
-                metalness: 0.0,
-                roughness: 0.0,
-                envMapIntensity: 0.0, // Decoupled from the pure white HDRI so it doesn't get flooded with glare
-                clearcoat: 0.0,
-                clearcoatRoughness: 0.0,
+                emissiveIntensity: 0.8, 
+                color: 0x000000, 
+                metalness: 0.1,
+                roughness: 0.2, // Restored soft base scatter
+                envMap: screenEnvMap, // Extremely critical: explicitly overrides the white ambient room HDRI with the black one
+                envMapIntensity: 0.8, // Thick softbox reflections
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.1, // Restored 10% spread for the premium thick glass feel
                 transparent: true,
                 opacity: index === 0 ? 1 : 0,
-                depthWrite: false,
-                toneMapped: false // Bypasses ACESFilmic to retain pure CSS-equivalent RGB saturation
+                depthWrite: false
             });
             
             const mesh = new THREE.Mesh(screenGeo, mat);
@@ -402,16 +413,6 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         }
         bx.roundRect(512 - (240 / 2), 40, 240, 70, 35); // Shifted UP and adjusted to perfect rounded proportion
         
-        // Lens reflection mock on the front island
-        bx.fillStyle = "#111111";
-        bx.beginPath();
-        bx.arc(592, 75, 13, 0, Math.PI * 2);
-        bx.fill();
-        bx.fillStyle = "#223355";
-        bx.beginPath();
-        bx.arc(594, 73, 4.5, 0, Math.PI * 2);
-        bx.fill();
-
         const bezelTex = new THREE.CanvasTexture(bezelCanvas);
         bezelTex.colorSpace = THREE.SRGBColorSpace;
         
@@ -419,15 +420,14 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         const bezelMat = new THREE.MeshPhysicalMaterial({ 
             map: bezelTex, 
             transparent: true, 
-            opacity: 1, 
             depthWrite: false, 
+            color: 0x000000, 
             metalness: 0.1, 
             roughness: 0.2, 
+            envMap: screenEnvMap, 
             envMapIntensity: 0.8, 
             clearcoat: 1.0, 
-            clearcoatRoughness: 0.1,
-            // To ensure only the drawn pill reflects and not the fully transparent screen parts, we rely on the alpha threshold
-            alphaTest: 0.01
+            clearcoatRoughness: 0.1  
         });
         const bezelMesh = new THREE.Mesh(bezelGeo, bezelMat);
         bezelMesh.position.set(0, 0, faceZ + 0.007);
@@ -458,7 +458,7 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             alphaMap: alphaTex, alphaTest: 0.5 
         });
 
-        const backPanelGeo = new THREE.PlaneGeometry(innerW, innerH, 128, 256);
+        const backPanelGeo = new THREE.PlaneGeometry(innerW, innerH, 300, 600);
         const posA = backPanelGeo.attributes.position;
         function sdRoundRect(x, y, w, h, r) {
             const dx = Math.abs(x) - (w / 2) + r;
@@ -467,8 +467,10 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             return len + Math.min(Math.max(dx, dy), 0) - r;
         }
 
-        const islandW = 3.1; const islandH = 1.6;
+        const islandW = 3.01; 
+        const islandH = 1.52; // Mathematically bounds the corner arc centers explicitly to +/- 0.40 Y
         const islandR = innerR; 
+        const islandOffsetX = 0.045; // Shifted right to preserve bento screen margins while anchoring left arcs physically to the camera X plane
         const visorY = 2.65; 
         const islandHeight = 0.06;
         const slopeWidth = 0.12;   
@@ -477,7 +479,7 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             const vx = posA.getX(i);
             const vy = posA.getY(i);
             let vz = 0;
-            const distToIsland = Math.max(0, sdRoundRect(vx, vy - visorY, islandW, islandH, islandR));
+            const distToIsland = Math.max(0, sdRoundRect(vx - islandOffsetX, vy - visorY, islandW, islandH, islandR));
             if (distToIsland === 0) { vz = islandHeight; } 
             else if (distToIsland <= slopeWidth) {
                 const t = distToIsland / slopeWidth;
@@ -493,9 +495,9 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         const deckZ = 0.015 + islandHeight;
 
         const lensGlassMat = new THREE.MeshPhysicalMaterial({
-            color: 0x020202, metalness: 0.2, roughness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.0, envMapIntensity: 3.0 
+            color: 0x020202, metalness: 0.2, roughness: 0.0, clearcoat: 1.0, clearcoatRoughness: 0.0, envMapIntensity: 3.0, envMap: screenEnvMap 
         });
-        const lensRimMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.5, metalness: 0.9 });
+        const lensRimMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.5, metalness: 0.9, envMap: screenEnvMap });
 
         const bigLensGeo = new THREE.CylinderGeometry(0.30, 0.30, 0.04, 64);
         const bigLensGlassGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.05, 64);
@@ -577,7 +579,8 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             roughness: 0.1,
             clearcoat: 1.0,   
             clearcoatRoughness: 0.0,
-            envMapIntensity: 2.0
+            envMapIntensity: 2.0,
+            envMap: screenEnvMap
         });
 
         const matrixMesh = new THREE.Mesh(matrixGeo, matrixMat);
