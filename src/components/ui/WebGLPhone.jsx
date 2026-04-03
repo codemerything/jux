@@ -359,10 +359,10 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
                 emissiveIntensity: 1.0, 
                 color: 0x000000, // Blacked out ambient diffuse so directional lights cannot wash out the screen
                 metalness: 0.0,
-                roughness: 0.0,
-                envMapIntensity: 0.0, // Decoupled from the pure white HDRI so it doesn't get flooded with glare
-                clearcoat: 0.0,
-                clearcoatRoughness: 0.0,
+                roughness: 0.1,
+                envMapIntensity: 2.5,
+                clearcoat: 1.0,
+                clearcoatRoughness: 0.02,
                 transparent: true,
                 opacity: index === 0 ? 1 : 0,
                 depthWrite: false,
