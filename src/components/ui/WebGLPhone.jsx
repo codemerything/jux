@@ -81,7 +81,6 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             ctx.fillRect(0, 0, 512, 512);
             
             const tex = new THREE.CanvasTexture(c);
-            tex.colorSpace = THREE.SRGBColorSpace; // CRITICAL: explicit decode for physical env reflection
             return tex;
         }
 
@@ -107,15 +106,24 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         scene.environment = renderTarget.texture;
 
         // Restore blind photometric match to the prototype lighting ratios
-        const fillLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        const fillLight = new THREE.DirectionalLight(0xffffff, 1.2);
         fillLight.position.set(5, 5, 5);
         scene.add(fillLight);
 
-        const rimLight = new THREE.DirectionalLight(0x00f0ff, 1.5);
+        const rimLight = new THREE.DirectionalLight(0x00f0ff, 3.5);
         rimLight.position.set(-5, 0, -5);
         scene.add(rimLight);
-
-        // Removed leftLight blowout to preserve contrast
+        
+        // Dedicated light to bathe the LEFT side of the backplate from the viewer's perspective
+        // Pushing it further negative Z (closer to the camera when viewing the back) and heavily boosting intensity
+        const leftBackLight = new THREE.DirectionalLight(0x77ddee, 4.8);
+        leftBackLight.position.set(10, 2, -10);
+        scene.add(leftBackLight);
+        
+        // New r152+ physically accurate engine drops shadows much harder.
+        // We lift the bottom-end absolute black floor with a soft dark-teal ambient light.
+        const ambientLight = new THREE.AmbientLight(0x061218, 1.5);
+        scene.add(ambientLight);
 
         // --- 3. High-Fidelity Geometry Builders ---
         const phoneGroup = new THREE.Group();
@@ -450,13 +458,16 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         cx.roundRect(0, 0, amapCanvas.width, amapCanvas.height, (innerR / innerW) * 1024);
         cx.fill();
         const alphaTex = new THREE.CanvasTexture(amapCanvas);
+        alphaTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        alphaTex.minFilter = THREE.LinearFilter;
+        alphaTex.magFilter = THREE.LinearFilter;
 
         const backPanelMat = new THREE.MeshStandardMaterial({
-            color: 0x141414, roughness: 0.9, metalness: 0.4, envMapIntensity: 0.5,
+            color: 0x1a1a1a, roughness: 0.7, metalness: 0.5, envMapIntensity: 2.5,
             alphaMap: alphaTex, transparent: true, depthWrite: true 
         });
 
-        const backPanelGeo = new THREE.PlaneGeometry(innerW, innerH, 128, 256);
+        const backPanelGeo = new THREE.PlaneGeometry(innerW, innerH, 256, 512);
         const posA = backPanelGeo.attributes.position;
         function sdRoundRect(x, y, w, h, r) {
             const dx = Math.abs(x) - (w / 2) + r;
