@@ -65,6 +65,9 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         pmremGenerator.compileEquirectangularShader();
         
         const envScene = new THREE.Scene();
+        // Fills the HDRI void with bright studio white so metals reflect silver instead of void black
+        envScene.background = new THREE.Color(0xfbfbfb); 
+        
         function createSoftSoftbox(colorHex) {
             const c = document.createElement("canvas");
             c.width = 512;
@@ -111,6 +114,11 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         const rimLight = new THREE.DirectionalLight(0x00f0ff, 4.5);
         rimLight.position.set(-5, 0, -5);
         scene.add(rimLight);
+
+        // Explicitly ordered left-ambient physical key light to drastically brighten metallic siding
+        const leftLight = new THREE.DirectionalLight(0xffffff, 3.5);
+        leftLight.position.set(-8, 3, 5);
+        scene.add(leftLight);
 
         // --- 3. High-Fidelity Geometry Builders ---
         const phoneGroup = new THREE.Group();
