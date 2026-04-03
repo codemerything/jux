@@ -65,7 +65,7 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         pmremGenerator.compileEquirectangularShader();
         
         const envScene = new THREE.Scene();
-        envScene.background = new THREE.Color(0xfbfbfb); // Explicitly flood the reflection map with white for the aluminum
+        // Removed 0xfbfbfb flood to fix washed out colors
 
         
         function createSoftSoftbox(colorHex) {
@@ -115,9 +115,7 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         rimLight.position.set(-5, 0, -5);
         scene.add(rimLight);
 
-        const leftLight = new THREE.DirectionalLight(0xffffff, 2.5);
-        leftLight.position.set(-8, 3, 5);
-        scene.add(leftLight);
+        // Removed leftLight blowout to preserve contrast
 
         // --- 3. High-Fidelity Geometry Builders ---
         const phoneGroup = new THREE.Group();
@@ -170,7 +168,7 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             color: 0x444444, 
             roughness: 0.35, 
             metalness: 1.0,  
-            envMapIntensity: 2.5 // Extrapolated for physical envMap response
+            envMapIntensity: 1.2
         });
         
         const chassisMesh = new THREE.Mesh(chassisGeo, metalMat);
@@ -455,7 +453,7 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
 
         const backPanelMat = new THREE.MeshStandardMaterial({
             color: 0x141414, roughness: 0.9, metalness: 0.4, envMapIntensity: 0.5,
-            alphaMap: alphaTex, alphaTest: 0.5 
+            alphaMap: alphaTex, transparent: true, depthWrite: true 
         });
 
         const backPanelGeo = new THREE.PlaneGeometry(innerW, innerH, 128, 256);
@@ -468,7 +466,7 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         }
 
         const islandW = 3.1; const islandH = 1.6;
-        const islandR = innerR; 
+        const islandR = 0.2; 
         const visorY = 2.65; 
         const islandHeight = 0.06;
         const slopeWidth = 0.12;   
