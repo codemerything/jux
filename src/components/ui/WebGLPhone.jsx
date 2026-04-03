@@ -65,6 +65,8 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         pmremGenerator.compileEquirectangularShader();
         
         const envScene = new THREE.Scene();
+        envScene.background = new THREE.Color(0xfbfbfb); // Explicitly flood the reflection map with white for the aluminum
+
         
         function createSoftSoftbox(colorHex) {
             const c = document.createElement("canvas");
@@ -112,6 +114,10 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
         const rimLight = new THREE.DirectionalLight(0x00f0ff, 1.5);
         rimLight.position.set(-5, 0, -5);
         scene.add(rimLight);
+
+        const leftLight = new THREE.DirectionalLight(0xffffff, 2.5);
+        leftLight.position.set(-8, 3, 5);
+        scene.add(leftLight);
 
         // --- 3. High-Fidelity Geometry Builders ---
         const phoneGroup = new THREE.Group();
@@ -350,16 +356,17 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             const mat = new THREE.MeshPhysicalMaterial({
                 emissiveMap: tex,
                 emissive: 0xffffff,
-                emissiveIntensity: 0.8, 
-                color: 0xffffff, 
-                metalness: 0.1,
-                roughness: 0.2,
-                envMapIntensity: 0.8,
-                clearcoat: 1.0,
-                clearcoatRoughness: 0.1,
+                emissiveIntensity: 1.0, 
+                color: 0x000000, // Blacked out ambient diffuse so directional lights cannot wash out the screen
+                metalness: 0.0,
+                roughness: 0.0,
+                envMapIntensity: 0.0, // Decoupled from the pure white HDRI so it doesn't get flooded with glare
+                clearcoat: 0.0,
+                clearcoatRoughness: 0.0,
                 transparent: true,
                 opacity: index === 0 ? 1 : 0,
-                depthWrite: false
+                depthWrite: false,
+                toneMapped: false // Bypasses ACESFilmic to retain pure CSS-equivalent RGB saturation
             });
             
             const mesh = new THREE.Mesh(screenGeo, mat);
