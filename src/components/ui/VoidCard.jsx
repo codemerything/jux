@@ -46,9 +46,9 @@ export default function VoidCard({
 
                 {/* Footer Tags */}
                 <div className="tags-container">
-                    {tag1 && <button className="tag dot-matrix">{tag1}</button>}
-                    {tag2 && <button className="tag dot-matrix">{tag2}</button>}
-                    {tag3 && <button className="tag dot-matrix">{tag3}</button>}
+                    {tag1 && <span className="tag dot-matrix">{tag1}</span>}
+                    {tag2 && <span className="tag dot-matrix">{tag2}</span>}
+                    {tag3 && <span className="tag dot-matrix">{tag3}</span>}
                 </div>
 
                 <div className="card-footer">
