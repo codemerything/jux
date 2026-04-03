@@ -69,7 +69,6 @@ export default function UnicornHeroBackground() {
                     autoPlay
                     loop
                     muted
-                    defaultMuted
                     playsInline
                     preload="auto"
                     disablePictureInPicture

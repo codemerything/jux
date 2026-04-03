@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import MediaLightbox from '../ui/MediaLightbox';
 
@@ -236,67 +236,24 @@ function getViewportConfig(width) {
     return VIEWPORTS.desktop;
 }
 
-function OrbitCard({ src, index, total, rotation, config, isDragging }) {
-    const seed = index / total;
-    const baseAngle = rotation + seed * TAU;
-    const angleOffset =
-        Math.sin(seed * TAU * 1.75 + 0.35) * config.angleJitterMain +
-        Math.sin(seed * TAU * 3.1 - 0.8) * config.angleJitterSecondary +
-        Math.cos(seed * TAU * 2.35 + 0.5) * config.angleJitterTertiary;
-    const radiusOffset =
-        Math.sin(seed * TAU * 1.4 - 0.4) * config.radiusJitterMain +
-        Math.cos(seed * TAU * 2.2 + 0.9) * config.radiusJitterSecondary;
-    const liftOffset = Math.sin(seed * TAU * 2.1 + 0.6) * config.liftJitter;
-    const tiltOffset =
-        Math.sin(seed * TAU * 1.8 - 0.2) * config.tiltJitterMain +
-        Math.cos(seed * TAU * 3.2 + 0.4) * config.tiltJitterSecondary;
-    const angle = baseAngle + angleOffset;
-    const depth = (Math.cos(angle) + 1) / 2;
-    const frontFocus = Math.max(0, Math.cos(angle));
-    const frontPullback = Math.pow(frontFocus, 4);
-    const sideSpread = Math.pow(Math.abs(Math.sin(angle)), 1.04) * config.sideSpread;
-    const x = Math.sin(angle) * (config.orbitRadiusX + radiusOffset + sideSpread);
-    const y =
-        -Math.cos(angle) * (config.orbitRadiusY + liftOffset * 0.3) +
-        config.yOffset +
-        depth * config.depthLift +
-        liftOffset * 0.35;
-    const scale = config.scaleBase + depth * config.scaleRange - frontPullback * config.frontPullbackScale;
-    const rotate = Math.sin(angle) * config.rotateAmplitude + Math.cos(angle) * config.rotateBackTilt + tiltOffset;
-    const hoverTilt = Math.max(-1.35, Math.min(1.35, rotate * 0.12));
-    const frontOpacity =
-        depth > config.fullOpacityThreshold
-            ? 1
-            : config.opacityMin + (depth / config.fullOpacityThreshold) * (1 - config.opacityMin);
-    const opacity = Math.min(1, frontOpacity);
-    const blur = (1 - depth) * config.blurMax;
-    const shadowOpacity = config.shadowBase + depth * config.shadowRange - frontPullback * config.shadowPullback;
-    const zIndex = Math.round(depth * 100);
-
+const OrbitCard = forwardRef(({ src, config, isDragging }, ref) => {
     return (
         <div
+            ref={ref}
             className="pointer-events-none absolute left-1/2"
             style={{
                 top: config.cardTop,
                 width: `${config.cardWidth}px`,
                 height: `${config.cardHeight}px`,
-                zIndex,
-                opacity,
-                filter: `blur(${blur}px)`,
-                transform: `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${rotate}deg)`,
+                opacity: 0,
                 transformOrigin: 'center center',
+                willChange: 'transform, opacity, filter'
             }}
         >
             <motion.div
-                className="relative isolate h-full w-full rounded-[1.45rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.12)_18%,rgba(255,255,255,0.06)_52%,rgba(255,255,255,0.16)_100%)] p-px"
+                className="orbit-card-shadow relative isolate h-full w-full rounded-[1.45rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.12)_18%,rgba(255,255,255,0.06)_52%,rgba(255,255,255,0.16)_100%)] p-px transition-shadow duration-75"
                 animate={isDragging ? { scale: 1.002 } : { scale: 1 }}
                 transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                style={{
-                    boxShadow: `0 36px 96px rgba(0,0,0,${Math.min(0.52, shadowOpacity + 0.08)}), 0 14px 34px rgba(0,0,0,${Math.max(
-                        0.16,
-                        shadowOpacity * 0.62
-                    )})`,
-                }}
             >
                 <div
                     className="relative h-full w-full overflow-hidden bg-black"
@@ -320,15 +277,15 @@ function OrbitCard({ src, index, total, rotation, config, isDragging }) {
             </motion.div>
         </div>
     );
-}
+});
 
 export default function Marquee({ className = '', isPreviewOpen = false, onClosePreview }) {
-    const [rotation, setRotation] = useState(0);
     const [viewportWidth, setViewportWidth] = useState(() => (typeof window === 'undefined' ? 1440 : window.innerWidth));
     const stageRef = useRef(null);
     const frameRef = useRef(null);
     const lastTimeRef = useRef(null);
     const rotationRef = useRef(0);
+    const cardRefs = useRef([]);
     const dragStateRef = useRef({
         active: false,
         pointerId: null,
@@ -371,34 +328,85 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
                 lastTimeRef.current = now;
             }
 
+            let currentRotation = rotationRef.current;
+
             if (dragStateRef.current.active || now < pauseAutoRotateUntilRef.current) {
                 const delta = Math.min(now - lastTimeRef.current, 32);
                 lastTimeRef.current = now;
 
                 if (!dragStateRef.current.active && Math.abs(inertiaVelocityRef.current) > MOBILE_INERTIA_MIN_VELOCITY) {
-                    const nextRotation = normalizeRotation(
-                        rotationRef.current + inertiaVelocityRef.current * delta
+                    currentRotation = normalizeRotation(
+                        currentRotation + inertiaVelocityRef.current * delta
                     );
-
                     inertiaVelocityRef.current *= Math.pow(MOBILE_INERTIA_DAMPING, delta / 16);
-                    rotationRef.current = nextRotation;
-                    setRotation(nextRotation);
                 } else if (!dragStateRef.current.active) {
                     inertiaVelocityRef.current = 0;
                 }
-
-                frameRef.current = window.requestAnimationFrame(animate);
-                return;
+            } else {
+                const delta = Math.min(now - lastTimeRef.current, 32);
+                lastTimeRef.current = now;
+                currentRotation = normalizeRotation(currentRotation + delta * config.speed);
             }
 
-            const delta = Math.min(now - lastTimeRef.current, 32);
-            lastTimeRef.current = now;
+            rotationRef.current = currentRotation;
 
-            setRotation(previous => {
-                const nextRotation = normalizeRotation(previous + delta * config.speed);
-                rotationRef.current = nextRotation;
-                return nextRotation;
+            // --- IMPERATIVE UPDATES BYPASSING REACT DOM DIFFING ---
+            const total = cards.length;
+            cards.forEach((_, index) => {
+                const el = cardRefs.current[index];
+                if (!el) return;
+                const shadowEl = el.querySelector('.orbit-card-shadow');
+                
+                const seed = index / total;
+                const baseAngle = currentRotation + seed * TAU;
+                const angleOffset =
+                    Math.sin(seed * TAU * 1.75 + 0.35) * config.angleJitterMain +
+                    Math.sin(seed * TAU * 3.1 - 0.8) * config.angleJitterSecondary +
+                    Math.cos(seed * TAU * 2.35 + 0.5) * config.angleJitterTertiary;
+                const radiusOffset =
+                    Math.sin(seed * TAU * 1.4 - 0.4) * config.radiusJitterMain +
+                    Math.cos(seed * TAU * 2.2 + 0.9) * config.radiusJitterSecondary;
+                const liftOffset = Math.sin(seed * TAU * 2.1 + 0.6) * config.liftJitter;
+                const tiltOffset =
+                    Math.sin(seed * TAU * 1.8 - 0.2) * config.tiltJitterMain +
+                    Math.cos(seed * TAU * 3.2 + 0.4) * config.tiltJitterSecondary;
+                
+                const angle = baseAngle + angleOffset;
+                const depth = (Math.cos(angle) + 1) / 2;
+                const frontFocus = Math.max(0, Math.cos(angle));
+                const frontPullback = Math.pow(frontFocus, 4);
+                const sideSpread = Math.pow(Math.abs(Math.sin(angle)), 1.04) * config.sideSpread;
+                
+                const x = Math.sin(angle) * (config.orbitRadiusX + radiusOffset + sideSpread);
+                const y =
+                    -Math.cos(angle) * (config.orbitRadiusY + liftOffset * 0.3) +
+                    config.yOffset +
+                    depth * config.depthLift +
+                    liftOffset * 0.35;
+                    
+                const scale = config.scaleBase + depth * config.scaleRange - frontPullback * config.frontPullbackScale;
+                const rotate = Math.sin(angle) * config.rotateAmplitude + Math.cos(angle) * config.rotateBackTilt + tiltOffset;
+                
+                const frontOpacity = depth > config.fullOpacityThreshold ? 1 : config.opacityMin + (depth / config.fullOpacityThreshold) * (1 - config.opacityMin);
+                const opacity = Math.min(1, frontOpacity);
+                const blur = isTouchCarousel ? 0 : (1 - depth) * config.blurMax; // MOBILE OPTIMIZATION
+                const shadowOpacity = config.shadowBase + depth * config.shadowRange - frontPullback * config.shadowPullback;
+                const zIndex = Math.round(depth * 100);
+
+                el.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, 0) scale(${scale}) rotate(${rotate}deg)`;
+                el.style.zIndex = zIndex;
+                el.style.opacity = opacity;
+                if (blur > 0) {
+                    el.style.filter = `blur(${blur}px)`;
+                } else {
+                    el.style.filter = 'none';
+                }
+
+                if (shadowEl) {
+                    shadowEl.style.boxShadow = `0 36px 96px rgba(0,0,0,${Math.min(0.52, shadowOpacity + 0.08)}), 0 14px 34px rgba(0,0,0,${Math.max(0.16, shadowOpacity * 0.62)})`;
+                }
             });
+
             frameRef.current = window.requestAnimationFrame(animate);
         };
 
@@ -409,7 +417,7 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
                 window.cancelAnimationFrame(frameRef.current);
             }
         };
-    }, [config.speed]);
+    }, [config, cards, isTouchCarousel]);
 
     const handlePointerDown = event => {
         if (event.pointerType === 'mouse' && event.button !== 0) {
@@ -449,7 +457,6 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
         dragState.lastX = event.clientX;
         dragState.lastTime = now;
         rotationRef.current = nextRotation;
-        setRotation(nextRotation);
     };
 
     const handlePointerRelease = event => {
@@ -513,10 +520,8 @@ export default function Marquee({ className = '', isPreviewOpen = false, onClose
                     {cards.map((src, index) => (
                         <OrbitCard
                             key={src}
+                            ref={(el) => (cardRefs.current[index] = el)}
                             src={src}
-                            index={index}
-                            total={cards.length}
-                            rotation={rotation}
                             config={config}
                             isDragging={isOrbitDragging}
                         />

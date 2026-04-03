@@ -131,8 +131,9 @@ const useMobileRevealProgress = (targetRef, { start = 0.72, end = 0.42 } = {}) =
                 (startLine - element.getBoundingClientRect().top) / (startLine - endLine)
             );
 
+            // Throttle rendering
             setProgress((current) => (
-                Math.abs(current - nextProgress) < 0.01 ? current : nextProgress
+                Math.abs(current - nextProgress) < 0.05 ? current : nextProgress
             ));
         };
 
@@ -159,6 +160,59 @@ const useMobileRevealProgress = (targetRef, { start = 0.72, end = 0.42 } = {}) =
     }, [end, start, targetRef]);
 
     return progress;
+};
+
+const useMobileRevealEffects = (targetRef, lineRefs, { start = 0.72, end = 0.42 } = {}) => {
+    useEffect(() => {
+        let frameId = null;
+
+        const applyStyle = (el, progress, distance) => {
+            if (!el) return;
+            el.style.opacity = progress.toString();
+            el.style.transform = `translateY(${(1 - progress) * distance}px)`;
+        };
+
+        const syncProgress = () => {
+            frameId = null;
+
+            let nextProgress = 1;
+            if (typeof window !== 'undefined' && window.innerWidth < 768 && targetRef.current) {
+                const element = targetRef.current;
+                const viewportHeight = getViewportHeight();
+                const startLine = viewportHeight * start;
+                const endLine = viewportHeight * end;
+                nextProgress = clamp(
+                    (startLine - element.getBoundingClientRect().top) / (startLine - endLine)
+                );
+            }
+
+            const p1 = getStaggeredProgress(nextProgress, 0);
+            const p2 = getStaggeredProgress(nextProgress, 0.18);
+            const p3 = getStaggeredProgress(nextProgress, 0.32);
+
+            applyStyle(lineRefs.lineOne.current, p1, 32);
+            applyStyle(lineRefs.lineTwo.current, p2, 32);
+            applyStyle(lineRefs.rule.current, p3, 20);
+        };
+
+        const requestSync = () => {
+            if (frameId !== null) return;
+            frameId = window.requestAnimationFrame(syncProgress);
+        };
+
+        requestSync();
+        window.addEventListener('scroll', requestSync, { passive: true });
+        const unsubscribeViewportChanges = subscribeViewportChanges(requestSync);
+
+        return () => {
+            window.removeEventListener('scroll', requestSync);
+            unsubscribeViewportChanges();
+
+            if (frameId !== null) {
+                window.cancelAnimationFrame(frameId);
+            }
+        };
+    }, [end, start, targetRef, lineRefs]);
 };
 
 function EyeIcon() {
@@ -212,10 +266,11 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
         lastSnapTimestamp: 0,
     });
     const lastServiceId = phoneServices[phoneServices.length - 1]?.id ?? 1;
-    const headerRevealProgress = useMobileRevealProgress(headerRef, { start: 0.58, end: 0.18 });
-    const headerLineOneProgress = getStaggeredProgress(headerRevealProgress, 0);
-    const headerLineTwoProgress = getStaggeredProgress(headerRevealProgress, 0.18);
-    const headerRuleProgress = getStaggeredProgress(headerRevealProgress, 0.32);
+    const headerLineOneRef = useRef(null);
+    const headerLineTwoRef = useRef(null);
+    const lineRefs = useRef({ lineOne: headerLineOneRef, lineTwo: headerLineTwoRef, rule: ruleRef });
+
+    useMobileRevealEffects(headerRef, lineRefs.current, { start: 0.58, end: 0.18 });
 
     const lockSectionSnap = (duration = 760) => {
         sectionSnapStateRef.current.isProgrammaticScroll = true;
@@ -622,14 +677,16 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                                     style={{ fontSize: 'clamp(1.25rem, 2.5vw, var(--text-h2))' }}
                                 >
                                     <span
+                                        ref={headerLineOneRef}
                                         className="block transition-none md:transition-[opacity,transform] md:duration-300 md:ease-out"
-                                        style={getRevealStyle(headerLineOneProgress, 32)}
+                                        style={{ opacity: typeof window === 'undefined' || window.innerWidth >= 768 ? 1 : 0 }}
                                     >
                                         Our services extend the
                                     </span>
                                     <span
+                                        ref={headerLineTwoRef}
                                         className="block transition-none md:transition-[opacity,transform] md:duration-300 md:ease-out"
-                                        style={getRevealStyle(headerLineTwoProgress, 32)}
+                                        style={{ opacity: typeof window === 'undefined' || window.innerWidth >= 768 ? 1 : 0 }}
                                     >
                                         entire customer journey.
                                     </span>
@@ -639,7 +696,7 @@ export default function Services({ isPreviewOpen = false, onOpenPreview, onClose
                                         ref={ruleRef}
                                         className="relative z-10 h-px w-full transition-none md:transition-[opacity,transform] md:duration-300 md:ease-out"
                                         style={{
-                                            ...getRevealStyle(headerRuleProgress, 20),
+                                            opacity: typeof window === 'undefined' || window.innerWidth >= 768 ? 1 : 0,
                                             background: 'linear-gradient(90deg, rgba(156,163,175,0.9) 0%, rgba(156,163,175,0.5) 45%, rgba(156,163,175,0.15) 75%, rgba(156,163,175,0) 100%)',
                                         }}
                                     />

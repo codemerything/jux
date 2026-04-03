@@ -626,9 +626,28 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             ["........", ".XX..XX.", "X..XX..X", "X......X", ".X....X.", "..X..X..", "...XX...", "........"]
         ];
 
-        // --- 10. Render Loop ---
-        let reqId;
+        // --- 10. Render Loop & Visibility Culling ---
+        let reqId = null;
+        let isVisible = false;
+
+        const visibilityObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                const wasVisible = isVisible;
+                isVisible = entry.isIntersecting;
+                
+                if (isVisible && !wasVisible) {
+                    animate(); 
+                } else if (!isVisible && reqId !== null) {
+                    cancelAnimationFrame(reqId); 
+                    reqId = null;
+                }
+            });
+        }, { rootMargin: '400px' }); 
+        
+        visibilityObserver.observe(container);
+
         function animate() {
+            if (!isVisible) return;
             reqId = requestAnimationFrame(animate);
 
             const timeSec = performance.now() * 0.001; 
@@ -684,10 +703,9 @@ export default function WebGLPhone({ activeService, screenStyles, suspendPlaybac
             renderer.render(scene, camera);
         }
 
-        animate();
-
         return () => {
-            cancelAnimationFrame(reqId);
+            if (reqId !== null) cancelAnimationFrame(reqId);
+            visibilityObserver.disconnect();
             resizeObserver.disconnect();
             renderer.dispose();
             if (container && renderer.domElement && container.contains(renderer.domElement)) {
