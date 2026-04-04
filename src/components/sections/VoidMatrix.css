@@ -64,10 +64,10 @@
 
 @media (min-width: 1024px) {
   .layout-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.15fr;
+    display: flex;
+    justify-content: center;
     gap: 5rem;
-    align-items: start;
+    align-items: flex-start;
     max-width: 1300px;
     margin: 0 auto;
     padding: 0 1rem;
@@ -75,7 +75,7 @@
 
   .cards-stack {
     max-width: 460px;
-    margin-left: auto;
+    margin-left: 0;
   }
 }
 
@@ -92,6 +92,8 @@
     height: auto;
     z-index: 20;
     margin-top: 2rem;
+    width: 100%;
+    max-width: 660px;
   }
 }
 
